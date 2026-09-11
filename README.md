@@ -13,6 +13,8 @@
 
 Ghost RDP is a Windows-first desktop application for managing Remote Desktop connections to computers the user controls. The project is intentionally designed around explicit user actions, Windows security boundaries, accessibility, and a no-telemetry privacy baseline.
 
+Current development version: **0.8.0**.
+
 ## Implemented
 
 - .NET 8 solution with separate Core, App, Host, and test projects;
@@ -40,7 +42,7 @@ Ghost RDP is a Windows-first desktop application for managing Remote Desktop con
 - SHA-256 manifest plus CI validation and real silent install/uninstall smoke testing of the generated setup;
 - shared input validation and log-secret sanitization primitives;
 - CI for formatting, Release builds, tests, security regression checks, development publish output, release packaging, package validation, and installer smoke testing;
-- architecture, security, privacy, accessibility, packaging, Windows, host, remote-access, build, and roadmap documentation.
+- architecture, security, privacy, accessibility, packaging, release-validation, Windows, host, remote-access, build, and roadmap documentation.
 
 ## Security baseline
 
@@ -52,9 +54,11 @@ Ghost RDP does not silently expose Remote Desktop to the Internet or weaken Wind
 
 The current architecture has no telemetry, analytics, ads, fingerprinting, or central Ghost RDP server carrying RDP traffic. Saved computers and UI preferences remain under the current Windows user's local application-data directory. Temporary `.rdp` files are created only for a user-initiated connection, contain no password, and are cleaned after use. Host readiness diagnostics are read locally and are not uploaded. Uninstall leaves user-owned profile/settings data in place unless the user removes it separately. See [PRIVACY.md](docs/PRIVACY.md).
 
-## Planned next
+## Release status
 
-Authentic Windows screenshots, final release polish, and later session-history work remain planned. Code signing is not claimed until an authorized Authenticode certificate or signing service is actually configured.
+Version 0.8.0 is the release-polish milestone. Automated Windows CI covers restore, formatting, Release build, tests, security regression checks, development publishing, self-contained Setup/Portable packaging, SHA-256 verification, archive validation, and real silent installer install/uninstall smoke testing.
+
+Authentic Windows runtime screenshots remain intentionally pending until they can be captured from a real validated Windows build. Generated mockups are not presented as application evidence. Current development packages are unsigned; Authenticode signing is not claimed until an authorized certificate or signing service exists. See [RELEASE.md](docs/RELEASE.md) and [CHANGELOG.md](CHANGELOG.md).
 
 ## Build
 
@@ -76,15 +80,17 @@ See [BUILD.md](docs/BUILD.md) for full instructions and [PACKAGING.md](docs/PACK
 - [Privacy](docs/PRIVACY.md)
 - [Accessibility](docs/ACCESSIBILITY.md)
 - [Windows packaging](docs/PACKAGING.md)
+- [Release validation](docs/RELEASE.md)
 - [Windows behavior](docs/WINDOWS.md)
 - [Ghost RDP Host](docs/HOST.md)
 - [Remote access model](docs/REMOTE-ACCESS.md)
 - [Build](docs/BUILD.md)
 - [Roadmap](docs/ROADMAP.md)
+- [Changelog](CHANGELOG.md)
 
 ## Screenshots
 
-Authentic runtime screenshots will be added only after the relevant UI milestones are implemented and validated on Windows. Mockups are not presented as real application screenshots.
+Authentic runtime screenshots will be added only from a real validated Windows build. The required capture set and privacy rules are documented in [RELEASE.md](docs/RELEASE.md). Mockups or generated UI are not presented as real application screenshots.
 
 ## License
 
