@@ -1,2 +1,2 @@
-global using Microsoft.VisualStudio.TestTools.UnitTesting;
 global using GhostRdp.App;
+global using Microsoft.VisualStudio.TestTools.UnitTesting;
