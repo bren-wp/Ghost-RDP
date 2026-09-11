@@ -15,6 +15,8 @@ Saved computers are stored locally for the current Windows user under the user's
 
 Profile/store schema v2 adds route and gateway-host metadata. Known schema-v1 data is migrated in memory when read and is not rewritten merely because the application loaded it.
 
+Ghost RDP UI settings are stored separately in `settings.json` under the current user's local application-data directory. The settings schema contains only UI preferences: startup view, default saved-computer sort, whether the last view should be remembered, and the last eligible view. It does not contain hostnames, usernames, domains, passwords, gateway hosts, tokens, or credential data. Loading a missing settings file creates defaults in memory only; loading invalid or unsupported settings does not silently rewrite the source file.
+
 Quick Connect validation is memory-only and does not silently create a saved profile. Saving occurs only when the user explicitly chooses `Save as computer`.
 
 When the user explicitly starts a connection, Ghost RDP creates a random temporary `.rdp` file containing validated connection metadata needed by Microsoft Remote Desktop. For RD Gateway connections this can include the gateway hostname and gateway-routing settings. The file does not contain a password or gateway access token. It is deleted after the Microsoft RDP process exits, with stale cleanup available for files left after an abnormal application termination.
@@ -25,4 +27,4 @@ Private VPN/overlay mode stores only the user's selected route intent. Ghost RDP
 
 Ghost RDP Host reads readiness information locally from Windows registry, service, firewall, DNS, and network-interface sources. These diagnostics can include the local computer/host name, Windows edition/build, current user name, RDP configuration, active firewall/network profiles, local IP addresses, and adapter names/descriptions. The diagnostic data is displayed locally and is not transmitted to Ghost RDP infrastructure.
 
-A future relay, account system, synchronization service, or persistent credential feature would be a separate architecture decision and would require an updated threat model, privacy review, and documentation before release.
+A future relay, account system, synchronization service, session-history service, or persistent credential feature would be a separate architecture decision and would require an updated threat model, privacy review, and documentation before release.

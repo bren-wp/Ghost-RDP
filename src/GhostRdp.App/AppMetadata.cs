@@ -9,6 +9,8 @@ public static class AppMetadata
 
     public static string BuildAboutText() =>
         $"{ProductInfo.ProductName} {Version}\n" +
+        $"{ProductInfo.Tagline}\n\n" +
         $"Platform: {Environment.OSVersion.VersionString}\n" +
+        "Runtime: Microsoft Remote Desktop (mstsc.exe) is launched only after an explicit user action.\n" +
         $"Privacy: {ProductInfo.PrivacySummary}";
 }

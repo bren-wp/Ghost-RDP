@@ -11,7 +11,7 @@
 [![CI](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml/badge.svg)](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml)
 [![Privacy](https://img.shields.io/badge/telemetry-none-4AD79B)](docs/PRIVACY.md)
 
-Ghost RDP is a Windows-first desktop application for managing Remote Desktop connections to computers the user controls. The project is intentionally designed around explicit user actions, Windows security boundaries, and a no-telemetry privacy baseline.
+Ghost RDP is a Windows-first desktop application for managing Remote Desktop connections to computers the user controls. The project is intentionally designed around explicit user actions, Windows security boundaries, accessibility, and a no-telemetry privacy baseline.
 
 ## Implemented
 
@@ -28,27 +28,30 @@ Ghost RDP is a Windows-first desktop application for managing Remote Desktop con
 - random temporary `.rdp` session files containing validated connection metadata but no password field;
 - strict server authentication requirement and CredSSP enabled in generated `.rdp` files;
 - temporary `.rdp` cleanup after Microsoft RDP exits plus stale-session cleanup after abnormal termination;
-- Windows-owned credential entry: Ghost RDP does not pass passwords to `mstsc.exe`, process arguments, profiles, or `.rdp` files;
+- Windows-owned credential entry: Ghost RDP does not pass passwords to `mstsc.exe`, process arguments, profiles, settings, or `.rdp` files;
 - separate, visible Ghost RDP Host application with read-only readiness diagnostics;
 - Host checks for Windows edition, RDP enabled state, `TermService`, RDP port, NLA, firewall/profile state, inbound RDP rule availability, LAN addresses, and VPN/private-overlay adapter indicators;
 - conservative Host readiness evaluation: unknown values never become a green ready state;
+- schema-versioned local UI settings for startup view, default computer sort, and optional last-view memory;
+- Settings and expanded About views that expose local storage/runtime boundaries without revealing secrets;
+- keyboard access keys, visible focus treatment, assistive-technology automation names, polite status announcements, and automatic Windows High Contrast palette handling;
 - shared input validation and log-secret sanitization primitives;
 - CI for formatting, Release builds, tests, security regression checks, publish output, and package validation;
-- architecture, security, privacy, Windows, host, remote-access, build, and roadmap documentation.
+- architecture, security, privacy, accessibility, Windows, host, remote-access, build, and roadmap documentation.
 
 ## Security baseline
 
-Passwords are not part of the saved computer or Quick Connect persistence schema. The Microsoft RDP launch flow deliberately does not accept or transport a password: Windows/Microsoft Remote Desktop owns credential entry when a session starts, including RD Gateway credential prompts. Secrets must not be serialized to profiles, written to logs, included in `.rdp` files, or passed on a process command line. A corrupted or unsupported profile store is not silently overwritten by the app. See [SECURITY.md](docs/SECURITY.md).
+Passwords are not part of the saved computer, Quick Connect, or UI-settings persistence schemas. The Microsoft RDP launch flow deliberately does not accept or transport a password: Windows/Microsoft Remote Desktop owns credential entry when a session starts, including RD Gateway credential prompts. Secrets must not be serialized to profiles or settings, written to logs, included in `.rdp` files, or passed on a process command line. Corrupted or unsupported profile/settings stores are not silently overwritten by loading them. See [SECURITY.md](docs/SECURITY.md).
 
 Ghost RDP does not silently expose Remote Desktop to the Internet or weaken Windows security controls. Private-network mode does not install or configure a VPN/overlay. Ghost RDP Host is diagnostic-only: it does not enable RDP, start services, alter firewall rules, change NLA, or modify network exposure.
 
 ## Privacy baseline
 
-The current architecture has no telemetry, analytics, ads, fingerprinting, or central Ghost RDP server carrying RDP traffic. Saved computers remain under the current Windows user's local application-data directory. Temporary `.rdp` files are created only for a user-initiated connection, contain no password, and are cleaned after use. Host readiness diagnostics are read locally and are not uploaded. See [PRIVACY.md](docs/PRIVACY.md).
+The current architecture has no telemetry, analytics, ads, fingerprinting, or central Ghost RDP server carrying RDP traffic. Saved computers and UI preferences remain under the current Windows user's local application-data directory. Temporary `.rdp` files are created only for a user-initiated connection, contain no password, and are cleaned after use. Host readiness diagnostics are read locally and are not uploaded. See [PRIVACY.md](docs/PRIVACY.md).
 
 ## Planned next
 
-Settings, About expansion, accessibility and UI polish are the next milestone. Session history, Setup/Portable packaging, and authentic screenshots remain planned.
+Windows Setup and Portable packaging are the next milestone. Session history and authentic Windows screenshots/final release polish remain planned.
 
 ## Build
 
@@ -68,6 +71,7 @@ See [BUILD.md](docs/BUILD.md) for full instructions.
 - [Architecture](docs/ARCHITECTURE.md)
 - [Security](docs/SECURITY.md)
 - [Privacy](docs/PRIVACY.md)
+- [Accessibility](docs/ACCESSIBILITY.md)
 - [Windows behavior](docs/WINDOWS.md)
 - [Ghost RDP Host](docs/HOST.md)
 - [Remote access model](docs/REMOTE-ACCESS.md)

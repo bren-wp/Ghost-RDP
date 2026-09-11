@@ -9,7 +9,7 @@
     <Product>Ghost RDP</Product>
     <Title>Ghost RDP</Title>
     <Description>Private remote desktop management for computers you control.</Description>
-    <Version>0.5.0</Version>
+    <Version>0.6.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\GhostRdp.Core\GhostRdp.Core.csproj" />
