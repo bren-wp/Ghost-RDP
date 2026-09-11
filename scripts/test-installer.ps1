@@ -33,6 +33,16 @@ function Invoke-SetupProcess([string]$FilePath, [string[]]$Arguments) {
     }
 }
 
+function ConvertTo-CanonicalPath([string]$Path) {
+    if ([string]::IsNullOrWhiteSpace($Path)) {
+        return $null
+    }
+
+    return [System.IO.Path]::GetFullPath([Environment]::ExpandEnvironmentVariables($Path.Trim())).TrimEnd(
+        [System.IO.Path]::DirectorySeparatorChar,
+        [System.IO.Path]::AltDirectorySeparatorChar)
+}
+
 try {
     $installExitCode = Invoke-SetupProcess $setup @('--install', '--quiet', '--path', $installDirectory)
     if ($installExitCode -ne 0) {
@@ -55,11 +65,16 @@ try {
         throw 'Installer smoke test failed. Windows uninstall registration is missing.'
     }
     $registration = Get-ItemProperty $uninstallKey
-    if ($registration.InstallLocation -ne $installDirectory) {
-        throw 'Installer smoke test failed. InstallLocation is incorrect.'
+    $expectedInstallLocation = ConvertTo-CanonicalPath $installDirectory
+    $registeredInstallLocation = ConvertTo-CanonicalPath ([string]$registration.InstallLocation)
+    if (-not [string]::Equals($registeredInstallLocation, $expectedInstallLocation, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Installer smoke test failed. InstallLocation is incorrect. Expected '$expectedInstallLocation', registered '$registeredInstallLocation'."
     }
-    if ($registration.UninstallString -notmatch 'GhostRDP-Setup\.exe" --uninstall$') {
-        throw 'Installer smoke test failed. Windows uninstall must use the installed Setup executable.'
+
+    $expectedInstalledSetup = Join-Path $expectedInstallLocation 'GhostRDP-Setup.exe'
+    $expectedUninstallString = '"' + $expectedInstalledSetup + '" --uninstall'
+    if (-not [string]::Equals([string]$registration.UninstallString, $expectedUninstallString, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Installer smoke test failed. Windows uninstall must use the installed Setup executable. Registered '$($registration.UninstallString)'."
     }
 
     $installedSetup = Join-Path $installDirectory 'GhostRDP-Setup.exe'
