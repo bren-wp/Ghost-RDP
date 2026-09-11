@@ -22,10 +22,14 @@ public sealed class ComputerProfileViewQueryTests
         var tags = ComputerProfileViewQuery.Apply(profiles, "maintenance", false, ComputerSortPreference.Name);
         var domain = ComputerProfileViewQuery.Apply(profiles, "lab", false, ComputerSortPreference.Name);
 
-        Assert.AreEqual("Beta", Assert.Single(gateway).DisplayName);
-        Assert.AreEqual("Beta", Assert.Single(notes).DisplayName);
-        Assert.AreEqual("Gamma", Assert.Single(tags).DisplayName);
-        Assert.AreEqual("Gamma", Assert.Single(domain).DisplayName);
+        Assert.AreEqual(1, gateway.Count);
+        Assert.AreEqual(1, notes.Count);
+        Assert.AreEqual(1, tags.Count);
+        Assert.AreEqual(1, domain.Count);
+        Assert.AreEqual("Beta", gateway[0].DisplayName);
+        Assert.AreEqual("Beta", notes[0].DisplayName);
+        Assert.AreEqual("Gamma", tags[0].DisplayName);
+        Assert.AreEqual("Gamma", domain[0].DisplayName);
     }
 
     [TestMethod]
