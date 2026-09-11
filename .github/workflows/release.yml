@@ -32,15 +32,9 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Verify release branch and version
+      - name: Release metadata and branch preflight
         shell: pwsh
-        run: |
-          [xml]$project = Get-Content ./src/GhostRdp.App/GhostRdp.App.csproj -Raw
-          $version = [string]($project.Project.PropertyGroup.Version | Select-Object -First 1)
-          $expectedBranch = "release/v$version"
-          if ($env:GITHUB_REF_NAME -ne $expectedBranch) {
-              throw "Release branch must be $expectedBranch; actual branch is $env:GITHUB_REF_NAME"
-          }
+        run: ./scripts/release-preflight.ps1 -RequireReleaseMetadata -RequireReleaseBranch
 
       - name: Restore
         run: dotnet restore GhostRdp.sln
@@ -81,6 +75,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Release metadata and branch preflight
+        shell: pwsh
+        run: ./scripts/release-preflight.ps1 -RequireReleaseMetadata -RequireReleaseBranch
 
       - name: Download architecture packages
         uses: actions/download-artifact@v4

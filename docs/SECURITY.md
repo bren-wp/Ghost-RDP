@@ -81,6 +81,12 @@ Packaging must not create or start a Windows service, create scheduled persisten
 
 Current release artifacts are unsigned. Ghost RDP must not claim Authenticode signing until an authorized certificate or signing service actually signs and verifies the binaries. Uninstall preserves the current user's saved computers and UI settings by default; removing that local data requires an explicit interactive choice.
 
+## Release publication integrity
+
+`scripts/release-preflight.ps1` is a release supply-chain guard. Normal CI requires App, Host, and Setup version alignment. Release-preparation validation additionally requires finalized release metadata, and the publication workflow requires the exact `release/v<version>` branch name. A mismatch stops publication before architecture packages are built.
+
+The preflight contains no credential handling, network discovery, signing bypass, or package-download behavior. It validates repository-owned project and Markdown metadata only. Release publication remains contingent on the existing x86/x64/ARM64 security, integrity, runtime, and install/uninstall gates.
+
 ## Host policy
 
 Ghost RDP Host is not a stealth agent. If a background service is introduced later, it must be clearly named, visible in Windows service/app management, documented, revocable, and uninstallable. The current architecture intentionally has no such service.
@@ -91,7 +97,7 @@ Security-sensitive values must be redacted before logging. The shared `SecretSan
 
 ## Security and dependency regression checks
 
-CI rejects obvious command-line password patterns, RDP password-field patterns, gateway access-token fields, shell-launch patterns, Host mutation patterns, prohibited installer/service/firewall/elevation patterns, third-party runtime `PackageReference`/external assembly references, and missing required documentation.
+CI rejects obvious command-line password patterns, RDP password-field patterns, gateway access-token fields, shell-launch patterns, Host mutation patterns, prohibited installer/service/firewall/elevation patterns, third-party runtime `PackageReference`/external assembly references, missing required documentation, and release-version drift before packaging.
 
 Tests and packaging checks cover input validation, profile/schema persistence, settings corruption handling, saved-computer query behavior, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data, RD Gateway serialization, Host readiness evaluation, firewall-port matching, architecture validation, runtime startup self-tests, release artifact integrity, and Setup install/uninstall behavior.
 

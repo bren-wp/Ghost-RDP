@@ -10,17 +10,40 @@ The exact release commit must pass:
 2. Release build for the complete solution;
 3. automated tests;
 4. security and runtime-dependency regression checks;
-5. framework-dependent App/Host package validation;
-6. self-contained x86, x64, and ARM64 release packaging;
-7. PE-machine architecture validation;
-8. SHA-256 manifest validation;
-9. Portable ZIP content validation;
-10. App, Host, and Setup runtime self-tests;
-11. real Setup install/uninstall smoke testing on x86 and x64-compatible Windows;
-12. real ARM64 runtime and Setup smoke testing on a native Windows ARM64 runner;
-13. documentation synchronization review for README, CHANGELOG, ROADMAP and all affected domain documents.
+5. release-preflight version alignment;
+6. framework-dependent App/Host package validation;
+7. self-contained x86, x64, and ARM64 release packaging;
+8. PE-machine architecture validation;
+9. SHA-256 manifest validation;
+10. Portable ZIP content validation;
+11. App, Host, and Setup runtime self-tests;
+12. real Setup install/uninstall smoke testing on x86 and x64-compatible Windows;
+13. real ARM64 runtime and Setup smoke testing on a native Windows ARM64 runner;
+14. documentation synchronization review for README, CHANGELOG, ROADMAP and all affected domain documents.
 
 A release branch must be named exactly `release/v<project-version>`. The release workflow refuses to publish a mismatched branch/version pair.
+
+## Release preflight
+
+`scripts/release-preflight.ps1` is the repository-owned release metadata guard.
+
+Normal CI runs it without release-only switches to verify that Ghost RDP App, Host, and Setup carry the same version before packaging.
+
+Release-preparation branches run:
+
+```powershell
+./scripts/release-preflight.ps1 -RequireReleaseMetadata
+```
+
+That additionally requires a dated CHANGELOG heading for the project version, an exact `# Ghost RDP <version>` release-notes heading, no development-only release wording, and a README reference to the version.
+
+The publication workflow runs:
+
+```powershell
+./scripts/release-preflight.ps1 -RequireReleaseMetadata -RequireReleaseBranch
+```
+
+This adds the exact `release/v<version>` branch-name requirement. A version mismatch or stale release metadata stops publication before architecture packaging starts.
 
 ## Runtime dependency gate
 
@@ -52,6 +75,8 @@ Saved computers and settings remain user-owned data and are preserved by default
 Before release, review the complete [documentation index](README.md). README, CHANGELOG, ROADMAP, BUILD, PACKAGING, RELEASE, RELEASE-NOTES, SECURITY, PRIVACY and DEPENDENCIES must agree on the version, architecture matrix, dependency policy, signing status, uninstall behavior, and known limitations.
 
 Unchanged documents do not need artificial edits, but contradictions must be resolved before the release branch is created.
+
+Finalizing release notes does not mean the release is already published. README and ROADMAP must continue to report the actual latest GitHub Release until the publication workflow succeeds.
 
 ## Authentic screenshots
 

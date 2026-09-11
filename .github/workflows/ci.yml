@@ -43,6 +43,15 @@ jobs:
         shell: pwsh
         run: ./scripts/security-regression.ps1
 
+      - name: Release preflight baseline
+        shell: pwsh
+        run: ./scripts/release-preflight.ps1
+
+      - name: Release metadata preflight
+        if: startsWith(github.ref_name, 'chore/prepare-') || startsWith(github.head_ref, 'chore/prepare-')
+        shell: pwsh
+        run: ./scripts/release-preflight.ps1 -RequireReleaseMetadata
+
       - name: Publish App x64 framework-dependent
         run: dotnet publish src/GhostRdp.App/GhostRdp.App.csproj -c Release -r win-x64 --self-contained false -o artifacts/app
 
@@ -100,6 +109,10 @@ jobs:
 
       - name: Restore
         run: dotnet restore GhostRdp.sln
+
+      - name: Release preflight baseline
+        shell: pwsh
+        run: ./scripts/release-preflight.ps1
 
       - name: Build ARM64 release package
         shell: pwsh

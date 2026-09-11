@@ -26,6 +26,20 @@ dotnet test GhostRdp.sln -c Release --no-build
 
 The regression script verifies both security boundaries and the production dependency policy. Project files below `src/` must not introduce a third-party `PackageReference` or an external file-based `HintPath` assembly reference. Existing Microsoft test packages live under the test projects and are development-only.
 
+## Release preflight
+
+```powershell
+./scripts/release-preflight.ps1
+```
+
+The baseline preflight verifies that App, Host, and Setup versions match. Release-preparation branches additionally run:
+
+```powershell
+./scripts/release-preflight.ps1 -RequireReleaseMetadata
+```
+
+The publication workflow adds `-RequireReleaseBranch`, which requires the exact `release/v<version>` branch name. See [Release validation](RELEASE.md).
+
 ## Development publish output
 
 ```powershell
@@ -62,4 +76,4 @@ CI additionally runs ARM64 App/Host/Setup self-tests and installer lifecycle val
 
 ## Documentation gate
 
-Build/security validation requires the maintained documentation set, including the documentation index and dependency policy. Functional or release changes should update README, CHANGELOG, ROADMAP, and all affected domain documents in the same pull request. See [Documentation index](README.md).
+Build/security validation requires the maintained documentation set, including the documentation index and dependency policy. Functional or release changes should update README, CHANGELOG, ROADMAP, and all affected domain documents in the same pull request. Release preparation must also review Packaging, Release, Release Notes, Security, Privacy and Dependencies. See [Documentation index](README.md).

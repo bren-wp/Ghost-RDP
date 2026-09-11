@@ -10,7 +10,7 @@
 
 Ghost RDP is a Windows-first desktop application for managing Microsoft Remote Desktop connections to computers the user controls. It is built around explicit user actions, Windows security boundaries, local persistence, accessibility, low background activity, and a no-telemetry privacy baseline.
 
-Latest production release: **0.9.0**. Current development version: **0.9.1**.
+Latest production release: **0.9.0**. Current release-preparation version: **0.9.1**. The repository does not claim 0.9.1 as published until the exact `release/v0.9.1` workflow finishes successfully and the GitHub Release exists.
 
 <p align="center">
   <img src="assets/ghost-rdp-ui-overview.svg" alt="Ghost RDP interface and runtime overview" width="1000" />
@@ -32,10 +32,11 @@ Latest production release: **0.9.0**. Current development version: **0.9.1**.
 - SHA-256 manifests, PE-architecture validation, runtime self-tests, package validation, and real install/uninstall smoke tests.
 - Native ARM64 CI validation on a Windows ARM64 runner.
 - Automated GitHub Release publishing only after all architecture jobs pass for the exact release commit.
+- Repository-owned release preflight that validates production-project version alignment and finalized release metadata before publication.
 
 ## UI and UX
 
-The 0.9.1 development line standardizes the App, Host, and Setup visual system around the same dark palette and Windows-native interaction model. Concrete WPF windows receive the intended application background and foreground deterministically, ordinary text has an explicit readable foreground, text fields and dropdowns use matching dark templates, and the sidebar uses lightweight vector navigation icons.
+The 0.9.1 maintenance line standardizes the App, Host, and Setup visual system around the same dark palette and Windows-native interaction model. Concrete WPF windows receive the intended application background and foreground deterministically, ordinary text has an explicit readable foreground, text fields and dropdowns use matching dark templates, and the sidebar uses lightweight vector navigation icons.
 
 The UI uses vector geometry rather than bitmap-heavy decoration, layout rounding/device-pixel snapping, practical hit targets, visible keyboard focus, and system High Contrast handling. See [UI and UX](docs/UI-UX.md) and [Accessibility](docs/ACCESSIBILITY.md).
 
@@ -83,9 +84,12 @@ dotnet format GhostRdp.sln --verify-no-changes --no-restore
 dotnet build GhostRdp.sln -c Release --no-restore
 dotnet test GhostRdp.sln -c Release --no-build
 ./scripts/security-regression.ps1
+./scripts/release-preflight.ps1
 ./scripts/build-release-packages.ps1 -Architecture all -OutputDirectory ./artifacts/release
 ./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release -Architecture all
 ```
+
+Release-preparation branches additionally run `./scripts/release-preflight.ps1 -RequireReleaseMetadata`; the actual release workflow also requires the exact `release/v<version>` branch name.
 
 See [Build](docs/BUILD.md), [Packaging](docs/PACKAGING.md), and [Release validation](docs/RELEASE.md).
 
