@@ -5,8 +5,9 @@
 - Windows 10 or Windows 11
 - .NET 8 SDK
 - PowerShell 7 or Windows PowerShell for repository scripts
-- Visual Studio 2022 is optional
-- Inno Setup 6 is required only when building Setup/Portable release packages
+- Visual Studio 2022 or later is optional
+
+No third-party installer compiler is required. Ghost RDP Setup is built from the `GhostRdp.Setup` project with the same .NET toolchain as the App and Host.
 
 ## Restore and build
 
@@ -31,14 +32,24 @@ dotnet publish src/GhostRdp.Host/GhostRdp.Host.csproj -c Release -r win-x64 --se
 ./scripts/validate-package.ps1 -AppDirectory ./artifacts/app -HostDirectory ./artifacts/host
 ```
 
-Development output is framework-dependent and remains useful for CI/build inspection.
-
-## Setup and Portable release packages
+## Production multi-architecture packages
 
 ```powershell
-./scripts/build-release-packages.ps1 -OutputDirectory ./artifacts/release
-./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release
+./scripts/build-release-packages.ps1 -Architecture all -OutputDirectory ./artifacts/release
+./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release -Architecture all
+```
+
+Valid architecture values are `x86`, `x64`, `arm64`, and `all`. Each production binary is self-contained, so end users do not need to preinstall the .NET runtime.
+
+## Runtime and installer smoke tests
+
+```powershell
+./scripts/smoke-test-portable.ps1 `
+  -AppPath ./artifacts/release/GhostRDP-Portable-x64.exe `
+  -HostPath ./artifacts/release/GhostRDP-Host-x64.exe `
+  -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
+
 ./scripts/test-installer.ps1 -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
 ```
 
-Release packaging publishes self-contained single-file App/Host executables, creates the Portable ZIP and Inno Setup installer, writes SHA-256 hashes, validates the archive, and smoke-tests install/uninstall behavior. See [PACKAGING.md](PACKAGING.md).
+The release validator checks PE architecture, SHA-256 integrity, expected ZIP content, prohibited static `.rdp` files, and the no-separate-uninstaller contract. The installer smoke test verifies the Windows Installed Apps registration and confirms that uninstall removes the application without installing a distinct `uninstall.exe`.

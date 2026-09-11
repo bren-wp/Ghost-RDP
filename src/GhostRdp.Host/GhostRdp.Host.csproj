@@ -10,7 +10,7 @@
     <Product>Ghost RDP Host</Product>
     <Title>Ghost RDP Host</Title>
     <Description>Read-only Windows Remote Desktop readiness diagnostics for computers you control.</Description>
-    <Version>0.8.0</Version>
+    <Version>0.9.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\GhostRdp.Core\GhostRdp.Core.csproj" />

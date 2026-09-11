@@ -11,67 +11,61 @@
 [![CI](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml/badge.svg)](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml)
 [![Privacy](https://img.shields.io/badge/telemetry-none-4AD79B)](docs/PRIVACY.md)
 
-Ghost RDP is a Windows-first desktop application for managing Remote Desktop connections to computers the user controls. The project is intentionally designed around explicit user actions, Windows security boundaries, accessibility, and a no-telemetry privacy baseline.
+Ghost RDP is a Windows-first desktop application for managing Microsoft Remote Desktop connections to computers the user controls. It is built around explicit user actions, Windows security boundaries, local persistence, accessibility, and a no-telemetry privacy baseline.
 
-Current development version: **0.8.0**.
+Current production version: **0.9.0**.
 
-## Implemented
+## Production features
 
-- .NET 8 solution with separate Core, App, Host, and test projects;
-- native WPF Windows UI using the Ghost RDP dark visual system;
-- saved computers with add, edit, delete, duplicate, favorite, search, favorites filter, and sorting;
-- schema-versioned local JSON profile storage with stable UUIDs, atomic replacement writes, and in-memory migration from v1 to v2;
-- Quick Connect validation with an explicit `Save as computer` action and no hidden profile creation;
-- profile metadata for host/IP, RDP port, username, domain, remote-access route, optional RD Gateway host, notes, favorite state, and tags;
-- Direct/LAN, existing private VPN/overlay, and explicit RD Gateway connection routes;
-- RD Gateway `.rdp` integration using documented Microsoft gateway properties while leaving gateway and target credential entry to Windows;
-- actual Microsoft `mstsc.exe` detection and Connect actions that remain disabled when the runtime is unavailable;
-- safe `mstsc.exe` launch integration using `ProcessStartInfo.ArgumentList` with `UseShellExecute = false`;
-- random temporary `.rdp` session files containing validated connection metadata but no password field;
-- strict server authentication requirement and CredSSP enabled in generated `.rdp` files;
-- temporary `.rdp` cleanup after Microsoft RDP exits plus stale-session cleanup after abnormal termination;
-- Windows-owned credential entry: Ghost RDP does not pass passwords to `mstsc.exe`, process arguments, profiles, settings, or `.rdp` files;
-- separate, visible Ghost RDP Host application with read-only readiness diagnostics;
-- Host checks for Windows edition, RDP enabled state, `TermService`, RDP port, NLA, firewall/profile state, inbound RDP rule availability, LAN addresses, and VPN/private-overlay adapter indicators;
-- conservative Host readiness evaluation: unknown values never become a green ready state;
-- schema-versioned local UI settings for startup view, default computer sort, and optional last-view memory;
-- Settings and expanded About views that expose local storage/runtime boundaries without revealing secrets;
-- keyboard access keys, visible focus treatment, assistive-technology automation names, polite status announcements, and automatic Windows High Contrast palette handling;
-- self-contained x64 Portable client and Host executables plus a Portable ZIP;
-- per-user Inno Setup x64 installer with standard uninstall registration and no firewall/service/network changes;
-- SHA-256 manifest plus CI validation and real silent install/uninstall smoke testing of the generated setup;
-- shared input validation and log-secret sanitization primitives;
-- CI for formatting, Release builds, tests, security regression checks, development publish output, release packaging, package validation, and installer smoke testing;
-- architecture, security, privacy, accessibility, packaging, release-validation, Windows, host, remote-access, build, and roadmap documentation.
+- Native WPF Windows client with saved computers, Quick Connect, search, favorites, sorting, Settings, and About views.
+- Schema-versioned local computer profiles with stable UUIDs and atomic replacement writes.
+- Direct/LAN, existing private VPN/overlay, and Microsoft RD Gateway connection routes.
+- Safe `mstsc.exe` integration using validated temporary `.rdp` files, strict server authentication, CredSSP, structured process arguments, and no password field.
+- Windows-owned credential entry; Ghost RDP does not accept or pass the RDP or RD Gateway password.
+- Separate Ghost RDP Host application with read-only Windows readiness diagnostics.
+- Windows High Contrast support, visible focus states, access keys, UI Automation names, and production-safe WPF exception handling.
+- Self-contained x86, x64, and ARM64 App, Host, Setup, and Portable packages.
+- Canonical `setup.exe` and `portable.exe` 32-bit/x86 compatibility downloads plus native x64 and ARM64 builds.
+- Per-user Ghost RDP Setup with transactional staging/rollback and Windows Installed Apps registration.
+- Windows uninstall through the installed `GhostRDP-Setup.exe --uninstall`; no separate `uninstall.exe` or `unins*.exe` is shipped.
+- SHA-256 manifests, PE-architecture validation, runtime self-tests, package validation, and real install/uninstall smoke tests.
+- Native ARM64 CI validation on a Windows ARM64 runner.
+- Automated GitHub Release publishing only after all architecture jobs pass for the exact release commit.
 
 ## Security baseline
 
-Passwords are not part of the saved computer, Quick Connect, or UI-settings persistence schemas. The Microsoft RDP launch flow deliberately does not accept or transport a password: Windows/Microsoft Remote Desktop owns credential entry when a session starts, including RD Gateway credential prompts. Secrets must not be serialized to profiles or settings, written to logs, included in `.rdp` files, or passed on a process command line. Corrupted or unsupported profile/settings stores are not silently overwritten by loading them. See [SECURITY.md](docs/SECURITY.md).
+Passwords are not part of saved computers, Quick Connect persistence, UI settings, generated `.rdp` files, or process command lines. Windows/Microsoft Remote Desktop owns target and RD Gateway credential prompts.
 
-Ghost RDP does not silently expose Remote Desktop to the Internet or weaken Windows security controls. Private-network mode does not install or configure a VPN/overlay. Ghost RDP Host is diagnostic-only: it does not enable RDP, start services, alter firewall rules, change NLA, or modify network exposure. Setup and Portable packaging do not add a background service, firewall rule, scheduled task, or automatic RDP exposure.
+Ghost RDP does not enable Remote Desktop, open firewall ports, configure UPnP or router forwarding, weaken NLA, install a VPN, create a hidden service, or add stealth persistence. Ghost RDP Host is diagnostic-only and does not change Windows RDP/service/firewall/network state. See [SECURITY.md](docs/SECURITY.md).
 
 ## Privacy baseline
 
-The current architecture has no telemetry, analytics, ads, fingerprinting, or central Ghost RDP server carrying RDP traffic. Saved computers and UI preferences remain under the current Windows user's local application-data directory. Temporary `.rdp` files are created only for a user-initiated connection, contain no password, and are cleaned after use. Host readiness diagnostics are read locally and are not uploaded. Uninstall leaves user-owned profile/settings data in place unless the user removes it separately. See [PRIVACY.md](docs/PRIVACY.md).
+There is no telemetry, analytics, advertising, fingerprinting, or central Ghost RDP relay carrying RDP traffic. Saved computers and UI preferences remain under the current Windows user's local application-data directory. Host diagnostics are read locally and are not uploaded. See [PRIVACY.md](docs/PRIVACY.md).
 
-## Release status
+## Downloads
 
-Version 0.8.0 is the release-polish milestone. Automated Windows CI covers restore, formatting, Release build, tests, security regression checks, development publishing, self-contained Setup/Portable packaging, SHA-256 verification, archive validation, and real silent installer install/uninstall smoke testing.
+Production releases provide:
 
-Authentic Windows runtime screenshots remain intentionally pending until they can be captured from a real validated Windows build. Generated mockups are not presented as application evidence. Current development packages are unsigned; Authenticode signing is not claimed until an authorized certificate or signing service exists. See [RELEASE.md](docs/RELEASE.md) and [CHANGELOG.md](CHANGELOG.md).
+- `setup.exe` — x86/32-bit compatibility Setup;
+- `portable.exe` — x86/32-bit compatibility Portable client;
+- native x64 and ARM64 Setup/Portable executables;
+- architecture-specific Portable ZIP packages and Host diagnostics binaries;
+- `SHA256SUMS.txt` and `RELEASE-MANIFEST.json`.
+
+The x86 compatibility executables also run on x64 Windows through Windows' x86 compatibility layer. Native x64 and ARM64 builds are provided for architecture-matched execution.
 
 ## Build
-
-Windows 10/11 and the .NET 8 SDK are the supported development baseline.
 
 ```powershell
 dotnet restore GhostRdp.sln
 dotnet format GhostRdp.sln --verify-no-changes --no-restore
 dotnet build GhostRdp.sln -c Release --no-restore
 dotnet test GhostRdp.sln -c Release --no-build
+./scripts/build-release-packages.ps1 -Architecture all -OutputDirectory ./artifacts/release
+./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release -Architecture all
 ```
 
-See [BUILD.md](docs/BUILD.md) for full instructions and [PACKAGING.md](docs/PACKAGING.md) for Setup/Portable packaging.
+See [BUILD.md](docs/BUILD.md), [PACKAGING.md](docs/PACKAGING.md), and [RELEASE.md](docs/RELEASE.md).
 
 ## Documentation
 
@@ -90,7 +84,11 @@ See [BUILD.md](docs/BUILD.md) for full instructions and [PACKAGING.md](docs/PACK
 
 ## Screenshots
 
-Authentic runtime screenshots will be added only from a real validated Windows build. The required capture set and privacy rules are documented in [RELEASE.md](docs/RELEASE.md). Mockups or generated UI are not presented as real application screenshots.
+Only authentic screenshots from the real Windows application may be presented as runtime evidence. Generated mockups are not labeled as application screenshots.
+
+## Signing
+
+Current packages are unsigned. Authenticode signing will be added only when an authorized signing certificate or signing service is configured.
 
 ## License
 

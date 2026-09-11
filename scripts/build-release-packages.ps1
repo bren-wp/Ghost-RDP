@@ -1,5 +1,7 @@
 param(
-    [string]$OutputDirectory = 'artifacts/release'
+    [string]$OutputDirectory = 'artifacts/release',
+    [ValidateSet('all', 'x86', 'x64', 'arm64')]
+    [string]$Architecture = 'all'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -12,34 +14,38 @@ else {
     [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot $OutputDirectory))
 }
 $workRoot = Join-Path $repositoryRoot 'artifacts/package-work'
-$appPublish = Join-Path $workRoot 'app'
-$hostPublish = Join-Path $workRoot 'host'
-$portablePayload = Join-Path $workRoot 'portable'
 $appProject = Join-Path $repositoryRoot 'src/GhostRdp.App/GhostRdp.App.csproj'
 $hostProject = Join-Path $repositoryRoot 'src/GhostRdp.Host/GhostRdp.Host.csproj'
-$installerScript = Join-Path $repositoryRoot 'packaging/windows/GhostRDP.iss'
+$setupProject = Join-Path $repositoryRoot 'src/GhostRdp.Setup/GhostRdp.Setup.csproj'
 $licensePath = Join-Path $repositoryRoot 'LICENSE'
 
-[xml]$appProjectXml = Get-Content -Path $appProject -Raw
-[xml]$hostProjectXml = Get-Content -Path $hostProject -Raw
-$version = [string]($appProjectXml.Project.PropertyGroup.Version | Select-Object -First 1)
-$hostVersion = [string]($hostProjectXml.Project.PropertyGroup.Version | Select-Object -First 1)
-if ([string]::IsNullOrWhiteSpace($version)) {
-    throw 'Could not determine Ghost RDP version from the App project.'
-}
-if ([string]::IsNullOrWhiteSpace($hostVersion)) {
-    throw 'Could not determine Ghost RDP Host version from the Host project.'
-}
-if ($hostVersion -ne $version) {
-    throw "Ghost RDP App version $version does not match Host version $hostVersion."
+function Get-ProjectVersion([string]$ProjectPath) {
+    [xml]$projectXml = Get-Content -Path $ProjectPath -Raw
+    $value = [string]($projectXml.Project.PropertyGroup.Version | Select-Object -First 1)
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        throw "Could not determine version from $ProjectPath"
+    }
+
+    return $value
 }
 
-Remove-Item -Path $workRoot,$outputRoot -Recurse -Force -ErrorAction SilentlyContinue
-New-Item -ItemType Directory -Force -Path $appPublish,$hostPublish,$portablePayload,$outputRoot | Out-Null
+$appVersion = Get-ProjectVersion $appProject
+$hostVersion = Get-ProjectVersion $hostProject
+$setupVersion = Get-ProjectVersion $setupProject
+if ($appVersion -ne $hostVersion -or $appVersion -ne $setupVersion) {
+    throw "Ghost RDP App, Host, and Setup versions must match. App=$appVersion Host=$hostVersion Setup=$setupVersion"
+}
+$version = $appVersion
+
+$architectures = if ($Architecture -eq 'all') { @('x86', 'x64', 'arm64') } else { @($Architecture) }
+
+Remove-Item -Path $workRoot -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path $outputRoot -Recurse -Force -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force -Path $workRoot,$outputRoot | Out-Null
+Copy-Item $licensePath (Join-Path $outputRoot 'LICENSE.txt')
 
 $commonPublishArguments = @(
     '-c', 'Release',
-    '-r', 'win-x64',
     '--self-contained', 'true',
     '-p:PublishSingleFile=true',
     '-p:IncludeNativeLibrariesForSelfExtract=true',
@@ -48,65 +54,85 @@ $commonPublishArguments = @(
     '-p:DebugSymbols=false'
 )
 
-Write-Host "Publishing Ghost RDP $version self-contained portable executables..."
-& dotnet publish $appProject @commonPublishArguments '-o' $appPublish
-if ($LASTEXITCODE -ne 0) {
-    throw 'Ghost RDP App self-contained publish failed.'
+foreach ($arch in $architectures) {
+    $rid = "win-$arch"
+    $archWork = Join-Path $workRoot $arch
+    $appPublish = Join-Path $archWork 'app'
+    $hostPublish = Join-Path $archWork 'host'
+    $setupPublish = Join-Path $archWork 'setup'
+    $payloadDirectory = Join-Path $archWork 'payload'
+    New-Item -ItemType Directory -Force -Path $appPublish,$hostPublish,$setupPublish,$payloadDirectory | Out-Null
+
+    Write-Host "Publishing Ghost RDP $version for $rid..."
+    & dotnet publish $appProject @commonPublishArguments '-r' $rid '-o' $appPublish
+    if ($LASTEXITCODE -ne 0) { throw "Ghost RDP App publish failed for $rid." }
+
+    & dotnet publish $hostProject @commonPublishArguments '-r' $rid '-o' $hostPublish
+    if ($LASTEXITCODE -ne 0) { throw "Ghost RDP Host publish failed for $rid." }
+
+    $appExecutable = Join-Path $appPublish 'GhostRdp.App.exe'
+    $hostExecutable = Join-Path $hostPublish 'GhostRdp.Host.exe'
+    if (-not (Test-Path $appExecutable) -or -not (Test-Path $hostExecutable)) {
+        throw "Self-contained publish did not produce expected $rid executables."
+    }
+
+    $portableApp = Join-Path $outputRoot "GhostRDP-Portable-$arch.exe"
+    $portableHost = Join-Path $outputRoot "GhostRDP-Host-$arch.exe"
+    Copy-Item $appExecutable $portableApp
+    Copy-Item $hostExecutable $portableHost
+
+    Copy-Item $appExecutable (Join-Path $payloadDirectory 'GhostRDP.exe')
+    Copy-Item $hostExecutable (Join-Path $payloadDirectory 'GhostRDP-Host.exe')
+    Copy-Item $licensePath (Join-Path $payloadDirectory 'LICENSE.txt')
+
+    $payloadZip = Join-Path $archWork "GhostRDP-Payload-$arch.zip"
+    Compress-Archive -Path (Join-Path $payloadDirectory '*') -DestinationPath $payloadZip -CompressionLevel Optimal
+    Copy-Item $payloadZip (Join-Path $outputRoot "GhostRDP-Portable-$arch.zip")
+
+    $setupArguments = @(
+        '-c', 'Release',
+        '-r', $rid,
+        '--self-contained', 'true',
+        '-p:PublishSingleFile=true',
+        '-p:IncludeNativeLibrariesForSelfExtract=true',
+        '-p:PublishTrimmed=false',
+        '-p:DebugType=None',
+        '-p:DebugSymbols=false',
+        "-p:PayloadZip=$payloadZip",
+        '-o', $setupPublish
+    )
+    & dotnet publish $setupProject @setupArguments
+    if ($LASTEXITCODE -ne 0) { throw "Ghost RDP Setup publish failed for $rid." }
+
+    $setupExecutable = Join-Path $setupPublish 'GhostRdp.Setup.exe'
+    if (-not (Test-Path $setupExecutable)) {
+        throw "Setup publish did not produce the expected executable for $rid."
+    }
+
+    Copy-Item $setupExecutable (Join-Path $outputRoot "GhostRDP-Setup-$arch.exe")
+
+    if ($arch -eq 'x86') {
+        Copy-Item $portableApp (Join-Path $outputRoot 'portable.exe')
+        Copy-Item $setupExecutable (Join-Path $outputRoot 'setup.exe')
+    }
 }
 
-& dotnet publish $hostProject @commonPublishArguments '-o' $hostPublish
-if ($LASTEXITCODE -ne 0) {
-    throw 'Ghost RDP Host self-contained publish failed.'
-}
-
-$appExecutable = Join-Path $appPublish 'GhostRdp.App.exe'
-$hostExecutable = Join-Path $hostPublish 'GhostRdp.Host.exe'
-if (-not (Test-Path $appExecutable) -or -not (Test-Path $hostExecutable)) {
-    throw 'Self-contained publish did not produce the expected executables.'
-}
-
-$portableApp = Join-Path $outputRoot 'GhostRDP-Portable-x64.exe'
-$portableHost = Join-Path $outputRoot 'GhostRDP-Host-x64.exe'
-$portableLicense = Join-Path $outputRoot 'LICENSE.txt'
-Copy-Item $appExecutable $portableApp
-Copy-Item $hostExecutable $portableHost
-Copy-Item $licensePath $portableLicense
-
-Copy-Item $portableApp (Join-Path $portablePayload 'GhostRDP-Portable-x64.exe')
-Copy-Item $portableHost (Join-Path $portablePayload 'GhostRDP-Host-x64.exe')
-Copy-Item $portableLicense (Join-Path $portablePayload 'LICENSE.txt')
-
-$portableZip = Join-Path $outputRoot 'GhostRDP-Portable-x64.zip'
-Compress-Archive -Path (Join-Path $portablePayload '*') -DestinationPath $portableZip -CompressionLevel Optimal
-
-$innoCandidates = @(
-    (Get-Command ISCC.exe -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source -ErrorAction SilentlyContinue),
-    (Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'),
-    (Join-Path $env:ProgramFiles 'Inno Setup 6/ISCC.exe')
-) | Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and (Test-Path $_) } | Select-Object -Unique
-
-$innoCompiler = $innoCandidates | Select-Object -First 1
-if (-not $innoCompiler) {
-    throw 'Inno Setup 6 compiler (ISCC.exe) was not found. Install Inno Setup 6 before building the installer.'
-}
-
-Write-Host "Building installer with $innoCompiler"
-& $innoCompiler "/DAppVersion=$version" "/DSourceDir=$outputRoot" "/O$outputRoot" $installerScript
-if ($LASTEXITCODE -ne 0) {
-    throw 'Inno Setup compilation failed.'
-}
-
-$setupExecutable = Join-Path $outputRoot 'GhostRDP-Setup-x64.exe'
-if (-not (Test-Path $setupExecutable)) {
-    throw 'Installer build did not produce GhostRDP-Setup-x64.exe.'
-}
-
-$hashTargets = @($portableApp, $portableHost, $portableZip, $setupExecutable)
-$hashLines = foreach ($path in $hashTargets) {
-    $hash = Get-FileHash -Path $path -Algorithm SHA256
-    "{0}  {1}" -f $hash.Hash.ToLowerInvariant(), (Split-Path $path -Leaf)
+$deliverables = Get-ChildItem -Path $outputRoot -File | Where-Object { $_.Extension -in @('.exe', '.zip') } | Sort-Object Name
+$hashLines = foreach ($item in $deliverables) {
+    $hash = Get-FileHash -Path $item.FullName -Algorithm SHA256
+    "{0}  {1}" -f $hash.Hash.ToLowerInvariant(), $item.Name
 }
 $hashLines | Set-Content -Path (Join-Path $outputRoot 'SHA256SUMS.txt') -Encoding utf8
 
+$manifest = [ordered]@{
+    product = 'Ghost RDP'
+    version = $version
+    architectures = $architectures
+    canonicalSetup = if ($architectures -contains 'x86') { 'setup.exe' } else { $null }
+    canonicalPortable = if ($architectures -contains 'x86') { 'portable.exe' } else { $null }
+    uninstall = 'Windows Installed Apps uses the installed GhostRDP-Setup.exe; no separate uninstall.exe is shipped.'
+}
+$manifest | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $outputRoot 'RELEASE-MANIFEST.json') -Encoding utf8
+
 Remove-Item -Path $workRoot -Recurse -Force -ErrorAction SilentlyContinue
-Write-Host "Release packages created in $outputRoot" -ForegroundColor Green
+Write-Host "Ghost RDP $version release packages created in $outputRoot" -ForegroundColor Green
