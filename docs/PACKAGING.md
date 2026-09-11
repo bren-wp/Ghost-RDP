@@ -1,54 +1,67 @@
 # Windows Packaging
 
-Ghost RDP produces x64 Setup and Portable artifacts from the same Release source revision.
+Ghost RDP produces self-contained Windows packages for x86 (32-bit), x64, and ARM64 from the same source revision.
 
 ## Release artifacts
 
-`./scripts/build-release-packages.ps1` creates:
+A complete release contains:
 
-- `GhostRDP-Portable-x64.exe` — self-contained single-file Ghost RDP client;
-- `GhostRDP-Host-x64.exe` — self-contained single-file Host readiness tool;
-- `GhostRDP-Portable-x64.zip` — portable client, Host tool, and license in one archive;
-- `GhostRDP-Setup-x64.exe` — per-user Windows installer built with Inno Setup;
+- `setup.exe` — canonical x86/32-bit compatibility Setup;
+- `portable.exe` — canonical x86/32-bit compatibility client;
+- `GhostRDP-Setup-x86.exe`, `GhostRDP-Portable-x86.exe`, `GhostRDP-Host-x86.exe`, and `GhostRDP-Portable-x86.zip`;
+- equivalent native `x64` and `arm64` Setup, Portable, Host, and ZIP artifacts;
 - `LICENSE.txt`;
-- `SHA256SUMS.txt` — SHA-256 hashes for the executable and archive deliverables.
+- `RELEASE-MANIFEST.json`;
+- `SHA256SUMS.txt`.
 
-The self-contained publish includes the .NET runtime needed by the application. Portable mode does not register a service, firewall rule, protocol handler, scheduled task, or startup persistence.
+The x86 compatibility executables are intentionally also exposed under the simple `setup.exe` and `portable.exe` names. Native x64 and ARM64 builds are available for users who want architecture-matched binaries.
 
 ## Setup behavior
 
-The installer is intentionally per-user and defaults to `%LOCALAPPDATA%\Programs\Ghost RDP`, so it does not require elevation for the normal install path. It installs:
+Ghost RDP Setup is a project in the repository, not a third-party generated uninstaller model. It installs per-user under `%LOCALAPPDATA%\Programs\Ghost RDP` by default and therefore does not require elevation for the normal path.
+
+Setup installs:
 
 - `GhostRDP.exe`;
 - `GhostRDP-Host.exe`;
+- `GhostRDP-Setup.exe`;
 - `LICENSE.txt`;
 - Start menu shortcuts for the client and Host tool;
-- an optional desktop shortcut when selected by the user;
-- the standard Inno Setup uninstall registration.
+- a Windows Installed Apps entry under the current user.
 
-Setup does not enable Remote Desktop, open TCP 3389, change Windows Firewall/NLA, configure VPN software, install a background service, or create stealth persistence.
+Installation uses a staging directory. An existing installation is moved to a temporary backup only after the new payload is extracted and validated. If finalization fails, Setup attempts to restore the previous installation instead of leaving a half-written directory.
 
-Uninstall removes installed program files and shortcuts. It deliberately does not delete `%LOCALAPPDATA%\Ghost RDP\computers.json` or `settings.json`; saved computers and UI preferences remain user-owned data unless the user removes them separately.
+## Uninstall behavior
 
-## Build requirements
+Windows Installed Apps invokes the installed `GhostRDP-Setup.exe --uninstall` entry. There is no separate persistent `uninstall.exe`, `unins*.exe`, or standalone uninstaller binary in either Setup or Portable packages.
 
-- Windows;
-- .NET 8 SDK;
-- PowerShell;
-- Inno Setup 6 (`ISCC.exe`).
+During removal, Setup copies the same Setup executable to a temporary location so Windows can delete the installed copy and application directory after the original process exits. The temporary helper schedules its own cleanup and is not an installed product component.
 
-GitHub's Windows 2025 runner image currently includes Inno Setup, so CI uses the installed compiler instead of downloading an installer tool during the build.
+Saved computers and UI settings under `%LOCALAPPDATA%\Ghost RDP` are preserved by default. The interactive uninstall UI has an explicit option to remove that local user data as well.
 
-## Local build
+## Security boundaries
+
+Setup and Portable packaging do not:
+
+- enable Remote Desktop;
+- open TCP 3389 or other firewall ports;
+- change NLA or Windows security policy;
+- install a background service;
+- create a scheduled task or stealth persistence;
+- configure VPN software, UPnP, or router port forwarding;
+- store RDP or RD Gateway passwords.
+
+## Build and validation
 
 ```powershell
-./scripts/build-release-packages.ps1 -OutputDirectory ./artifacts/release
-./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release
+./scripts/build-release-packages.ps1 -Architecture all -OutputDirectory ./artifacts/release
+./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release -Architecture all
+./scripts/smoke-test-portable.ps1 -AppPath ./artifacts/release/GhostRDP-Portable-x64.exe -HostPath ./artifacts/release/GhostRDP-Host-x64.exe -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
 ./scripts/test-installer.ps1 -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
 ```
 
-The installer smoke test performs a silent install into a temporary directory, verifies the expected binaries, runs the generated uninstaller, and verifies that the installed application binaries are removed.
+Validation checks expected files, minimum artifact sizes, SHA-256 hashes, Portable ZIP contents, PE machine architecture, absence of static `.rdp` files, and absence of separate uninstall executables. CI additionally runs the ARM64 package on a native Windows ARM64 runner.
 
 ## Signing
 
-Current development packages are unsigned. Authenticode signing must be added as a release-pipeline concern only when an authorized code-signing certificate is available. The build must never fabricate a signing-success claim when no real certificate/signing service is configured.
+Current packages are unsigned. Authenticode signing must be added only when an authorized signing certificate or signing service exists. The release process must not fabricate a signing-success claim.

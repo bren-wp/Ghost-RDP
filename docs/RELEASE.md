@@ -1,55 +1,48 @@
 # Release Validation
 
-This document defines the release evidence required before Ghost RDP is described as production-ready.
+This document defines the gates required before a Ghost RDP commit can be published as a production Windows release.
 
 ## Required CI gates
 
-A release candidate must pass the repository Windows CI from the exact commit that will be released:
+The exact release commit must pass:
 
-1. restore;
-2. format verification;
-3. Release build;
-4. automated tests;
-5. security regression checks;
-6. framework-dependent App/Host publish validation;
-7. self-contained Setup/Portable packaging;
+1. restore and format verification;
+2. Release build for the complete solution;
+3. automated tests;
+4. security regression checks;
+5. framework-dependent App/Host package validation;
+6. self-contained x86, x64, and ARM64 release packaging;
+7. PE-machine architecture validation;
 8. SHA-256 manifest validation;
-9. Portable ZIP validation;
-10. real silent Setup install/uninstall smoke test.
+9. Portable ZIP content validation;
+10. App, Host, and Setup runtime self-tests;
+11. real Setup install/uninstall smoke testing on x86 and x64-compatible Windows;
+12. real ARM64 runtime and Setup smoke testing on a native Windows ARM64 runner.
 
-Do not merge or publish from a different head SHA than the one that passed these gates.
+A release branch must be named exactly `release/v<project-version>`. The release workflow refuses to publish a mismatched branch/version pair.
 
-## Manual Windows validation
+## Setup and uninstall contract
 
-Before a public release, validate on a real supported Windows machine:
+Every release must contain `setup.exe` and `portable.exe`, plus native architecture-specific artifacts. The canonical files are x86/32-bit compatibility builds, with native x64 and ARM64 builds available separately.
 
-- App launches without crash and all primary navigation works;
-- saved-computer add/edit/delete/duplicate/favorite/search/sort flows work;
-- Quick Connect does not persist unless Save as computer is explicitly used;
-- Direct, private-network, and RD Gateway routes generate the expected Microsoft RDP configuration;
-- Connect remains disabled when `mstsc.exe` is unavailable;
-- Microsoft Remote Desktop owns credential prompts and Ghost RDP never displays or stores a password;
-- Host diagnostics refresh without modifying RDP, service, firewall, NLA, VPN, or router state;
-- keyboard-only navigation, Windows High Contrast, DPI scaling, and Narrator-visible control names are checked;
-- Setup installs and uninstalls cleanly and Portable mode runs without installation.
+Setup must register Ghost RDP in Windows Installed Apps using the installed `GhostRDP-Setup.exe --uninstall` command. A distinct `uninstall.exe` or `unins*.exe` must not be shipped or installed. CI treats such a file as a release validation failure.
+
+Saved computers and settings remain user-owned data and are preserved by default. Interactive uninstall may remove them only after explicit user selection.
+
+## Runtime behavior validation
+
+- App and Host start their production self-test path without crash.
+- Saved-computer and Quick Connect persistence boundaries remain unchanged.
+- Direct, private-network, and RD Gateway routes continue to serialize only validated connection metadata.
+- `mstsc.exe` remains the Windows-owned RDP runtime and credential prompt owner.
+- Host diagnostics stay read-only and do not mutate RDP, services, firewall, NLA, VPN, or router state.
+- Setup does not require elevation for its normal per-user installation path.
+- Setup rollback protects an existing install from partial replacement when finalization fails.
 
 ## Authentic screenshots
 
-Screenshots must come from the exact Windows application build being documented. Do not use design mockups, generated UI, or edited images that could be mistaken for runtime evidence.
+Runtime screenshots are documentation evidence, not a substitute for CI or package validation. Any screenshot added to the repository must come from the real application and must not contain private usernames, internal DNS names, public IP addresses, gateway names, or other infrastructure identifiers. Generated mockups must not be labeled as runtime screenshots.
 
-Capture at minimum:
+## Known release limitation
 
-- Saved computers view;
-- Quick Connect view;
-- saved-computer editor including remote-access route controls;
-- Settings/About view;
-- Ghost RDP Host readiness dashboard.
-
-Before capture, use synthetic/non-sensitive sample computer names and addresses. Do not expose real usernames, internal DNS names, public IP addresses, gateway names, or other private infrastructure details.
-
-## Release limitations that must stay visible
-
-- Current development packages are unsigned.
-- Ghost RDP does not prove that an RDP login/session succeeded merely because `mstsc.exe` started.
-- VPN/private-overlay adapter detection is only an indicator and does not prove route reachability.
-- Session-history UX remains deferred until a reliable runtime source can distinguish process launch from an authenticated/usable RDP session.
+Current packages are unsigned. Authenticode signing remains deferred until an authorized certificate or signing service is available. The release process must never claim a signature that was not actually produced and verified.

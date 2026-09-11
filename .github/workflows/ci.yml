@@ -15,7 +15,7 @@ permissions:
 jobs:
   build-test-security:
     runs-on: windows-latest
-    timeout-minutes: 35
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -52,31 +52,66 @@ jobs:
         shell: pwsh
         run: ./scripts/validate-package.ps1 -AppDirectory ./artifacts/app -HostDirectory ./artifacts/host
 
-      - name: Upload development binaries
-        uses: actions/upload-artifact@v4
-        with:
-          name: ghost-rdp-windows-x64-development
-          path: |
-            artifacts/app/
-            artifacts/host/
-          if-no-files-found: error
-
-      - name: Build Setup and Portable release packages
+      - name: Build x86, x64, and ARM64 release packages
         shell: pwsh
-        run: ./scripts/build-release-packages.ps1 -OutputDirectory ./artifacts/release
+        run: ./scripts/build-release-packages.ps1 -Architecture all -OutputDirectory ./artifacts/release
 
-      - name: Validate release packages and SHA-256 manifest
+      - name: Validate architecture and release integrity
         shell: pwsh
-        run: ./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release
+        run: ./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release -Architecture all
 
-      - name: Smoke test Setup install and uninstall
+      - name: x86 runtime self-tests
+        shell: pwsh
+        run: ./scripts/smoke-test-portable.ps1 -AppPath ./artifacts/release/GhostRDP-Portable-x86.exe -HostPath ./artifacts/release/GhostRDP-Host-x86.exe -SetupPath ./artifacts/release/GhostRDP-Setup-x86.exe
+
+      - name: x64 runtime self-tests
+        shell: pwsh
+        run: ./scripts/smoke-test-portable.ps1 -AppPath ./artifacts/release/GhostRDP-Portable-x64.exe -HostPath ./artifacts/release/GhostRDP-Host-x64.exe -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
+
+      - name: x86 Setup install and uninstall smoke test
+        shell: pwsh
+        run: ./scripts/test-installer.ps1 -SetupPath ./artifacts/release/GhostRDP-Setup-x86.exe
+
+      - name: x64 Setup install and uninstall smoke test
         shell: pwsh
         run: ./scripts/test-installer.ps1 -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
 
-      - name: Upload Setup and Portable release packages
+      - name: Upload production release packages
         uses: actions/upload-artifact@v4
         with:
-          name: ghost-rdp-windows-x64-release
+          name: ghost-rdp-windows-production
           path: artifacts/release/
           if-no-files-found: error
           compression-level: 0
+
+  arm64-runtime-smoke:
+    runs-on: windows-11-arm
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore GhostRdp.sln
+
+      - name: Build ARM64 release package
+        shell: pwsh
+        run: ./scripts/build-release-packages.ps1 -Architecture arm64 -OutputDirectory ./artifacts/release-arm64
+
+      - name: Validate ARM64 release package
+        shell: pwsh
+        run: ./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release-arm64 -Architecture arm64
+
+      - name: ARM64 runtime self-tests
+        shell: pwsh
+        run: ./scripts/smoke-test-portable.ps1 -AppPath ./artifacts/release-arm64/GhostRDP-Portable-arm64.exe -HostPath ./artifacts/release-arm64/GhostRDP-Host-arm64.exe -SetupPath ./artifacts/release-arm64/GhostRDP-Setup-arm64.exe
+
+      - name: ARM64 Setup install and uninstall smoke test
+        shell: pwsh
+        run: ./scripts/test-installer.ps1 -SetupPath ./artifacts/release-arm64/GhostRDP-Setup-arm64.exe

@@ -2,7 +2,7 @@
 
 ## Credential policy
 
-The default credential policy is **password memory-only**. Passwords and equivalent secrets must not be persisted in JSON, XML, SQLite plaintext, registry plaintext, logs, process arguments, `.rdp` files, settings, or crash reports.
+The default credential policy is **password memory-only**. Passwords and equivalent secrets must not be persisted in JSON, XML, SQLite plaintext, registry plaintext, logs, process arguments, `.rdp` files, settings, installer metadata, or crash reports.
 
 The current `mstsc.exe` integration uses an even narrower boundary: Ghost RDP does not ask for or transport a password at all. Microsoft Remote Desktop/Windows owns credential entry after the user explicitly starts a connection, including credentials requested by an RD Gateway.
 
@@ -45,43 +45,31 @@ RD Gateway mode configures only the Microsoft RDP client-side gateway properties
 
 Ghost RDP Host is a visible, read-only diagnostic application. It reads local Windows state from the registry, Service Control Manager, Windows Firewall policy, DNS, and network-interface APIs.
 
-The Host does not request a configuration change and does not:
-
-- enable or disable Remote Desktop;
-- start or stop `TermService`;
-- create, delete, enable, or disable firewall rules;
-- change the Windows Firewall profile state;
-- change NLA;
-- change the RDP listening port;
-- change network profiles;
-- configure VPN software, port forwarding, or UPnP.
+The Host does not request a configuration change and does not enable or disable Remote Desktop, start or stop `TermService`, create or modify firewall rules, change NLA, change the RDP listening port, change network profiles, configure VPN software, forward ports, or use UPnP.
 
 Readiness is deliberately conservative. Unknown or unavailable diagnostics are shown as unknown and cannot produce a green `Ready for Remote Desktop` result. VPN/private-overlay adapter detection is an indicator only and is not treated as proof that a secure route exists.
 
 ## Remote exposure policy
 
-Ghost RDP must not automatically:
+Ghost RDP must not automatically forward TCP 3389 on a router, use UPnP to expose RDP, disable Windows Firewall, disable Network Level Authentication, bypass certificate/security checks, weaken UAC, or weaken endpoint security. Remote access from another network should use a private VPN/overlay network or an administrator-managed RD Gateway.
 
-- forward TCP 3389 on a router;
-- use UPnP to expose RDP;
-- disable Windows Firewall;
-- disable Network Level Authentication;
-- bypass certificate or security checks;
-- weaken UAC or endpoint security.
-
-Remote access from another network should use a private VPN/overlay network or an administrator-managed RD Gateway.
-
-## Accessibility boundary
+## Accessibility and stability boundary
 
 Accessibility features may change presentation and navigation behavior but never weaken authentication, firewall, NLA, process-launch, or credential boundaries. Windows High Contrast is read as a system setting and only changes application brush resources.
 
+Production App and Host builds catch unexpected WPF dispatcher failures at the application boundary, show a generic user-safe error, and terminate rather than continuing in an unknown UI state. Unobserved background-task exceptions are marked observed; secrets are not included in these user-visible failure messages.
+
 ## Packaging boundary
 
-Release packaging publishes self-contained x64 App and Host executables and wraps them in a per-user Inno Setup installer. The installer defaults to the current user's local application-data Programs directory and does not require administrator privileges for the normal install path.
+Release packaging produces self-contained x86, x64, and ARM64 App, Host, and Setup binaries. The normal Setup path is per-user under `%LOCALAPPDATA%\Programs\Ghost RDP` and runs as the current user without an elevation request.
 
-Packaging must not create or start a Windows service, create scheduled persistence, change Windows Firewall, expose an RDP port, change NLA, configure a VPN, or change host readiness state. CI scans both installer source and release-package scripts for prohibited firewall/service/elevation patterns, validates the generated artifacts and SHA-256 manifest, and performs a silent install/uninstall smoke test.
+Ghost RDP Setup uses an embedded, architecture-matched payload and transactional staging. Existing program files are moved to a temporary backup only after the replacement payload is extracted and validated; if finalization fails, Setup attempts to restore the prior installation.
 
-Current development artifacts are unsigned. Ghost RDP must not claim Authenticode signing until an authorized certificate or signing service actually signs the binaries. Uninstall removes installed program files and shortcuts but intentionally leaves the current user's saved-computer and UI-settings data untouched.
+Windows Installed Apps invokes the installed `GhostRDP-Setup.exe --uninstall` entry. A separate persistent `uninstall.exe`, `unins*.exe`, service, scheduled task, or hidden uninstaller is not shipped or installed. During removal, the same Setup executable is temporarily copied outside the installation directory so Windows can delete the installed copy after it exits; that temporary helper is not an installed product component and schedules its own cleanup.
+
+Packaging must not create or start a Windows service, create scheduled persistence, change Windows Firewall, expose an RDP port, change NLA, configure a VPN, or change host-readiness state. CI validates PE architecture, hashes, archive content, the absence of static `.rdp` files and separate uninstall executables, runtime self-tests, and real install/uninstall behavior. ARM64 packages are additionally executed on a native Windows ARM64 CI runner.
+
+Current release artifacts are unsigned. Ghost RDP must not claim Authenticode signing until an authorized certificate or signing service actually signs and verifies the binaries. Uninstall preserves the current user's saved computers and UI settings by default; removing that local data requires an explicit interactive choice.
 
 ## Host policy
 
@@ -93,4 +81,4 @@ Security-sensitive values must be redacted before logging. The shared `SecretSan
 
 ## Security regression checks
 
-CI rejects obvious command-line password patterns, RDP password-field patterns, gateway access-token fields, shell-launch patterns, Host mutation patterns, prohibited installer/service/firewall/elevation patterns, and missing security documentation. Tests cover input validation, profile persistence and schema migration, settings persistence and corrupt/future-schema handling, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data from generated `.rdp` content, RD Gateway serialization, Host readiness evaluation, firewall-port matching, release artifact validation, and installer install/uninstall behavior.
+CI rejects obvious command-line password patterns, RDP password-field patterns, gateway access-token fields, shell-launch patterns, Host mutation patterns, prohibited installer/service/firewall/elevation patterns, and missing security documentation. Tests and packaging checks cover input validation, profile/schema persistence, settings corruption handling, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data, RD Gateway serialization, Host readiness evaluation, firewall-port matching, architecture validation, runtime startup self-tests, release artifact integrity, and Setup install/uninstall behavior.

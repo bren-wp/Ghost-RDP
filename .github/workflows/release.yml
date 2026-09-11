@@ -1,0 +1,119 @@
+name: Publish Release
+
+on:
+  push:
+    branches:
+      - release/**
+
+permissions:
+  contents: write
+
+jobs:
+  build-architecture:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: x86
+            runner: windows-latest
+          - architecture: x64
+            runner: windows-latest
+          - architecture: arm64
+            runner: windows-11-arm
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 50
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Verify release branch and version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content ./src/GhostRdp.App/GhostRdp.App.csproj -Raw
+          $version = [string]($project.Project.PropertyGroup.Version | Select-Object -First 1)
+          $expectedBranch = "release/v$version"
+          if ($env:GITHUB_REF_NAME -ne $expectedBranch) {
+              throw "Release branch must be $expectedBranch; actual branch is $env:GITHUB_REF_NAME"
+          }
+
+      - name: Restore
+        run: dotnet restore GhostRdp.sln
+
+      - name: Build release package
+        shell: pwsh
+        run: ./scripts/build-release-packages.ps1 -Architecture ${{ matrix.architecture }} -OutputDirectory ./artifacts/release-${{ matrix.architecture }}
+
+      - name: Validate release package
+        shell: pwsh
+        run: ./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release-${{ matrix.architecture }} -Architecture ${{ matrix.architecture }}
+
+      - name: Runtime self-tests
+        shell: pwsh
+        run: ./scripts/smoke-test-portable.ps1 -AppPath ./artifacts/release-${{ matrix.architecture }}/GhostRDP-Portable-${{ matrix.architecture }}.exe -HostPath ./artifacts/release-${{ matrix.architecture }}/GhostRDP-Host-${{ matrix.architecture }}.exe -SetupPath ./artifacts/release-${{ matrix.architecture }}/GhostRDP-Setup-${{ matrix.architecture }}.exe
+
+      - name: Setup install and uninstall smoke test
+        shell: pwsh
+        run: ./scripts/test-installer.ps1 -SetupPath ./artifacts/release-${{ matrix.architecture }}/GhostRDP-Setup-${{ matrix.architecture }}.exe
+
+      - name: Upload architecture package
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghost-rdp-release-${{ matrix.architecture }}
+          path: artifacts/release-${{ matrix.architecture }}/
+          if-no-files-found: error
+          compression-level: 0
+
+  publish:
+    needs: build-architecture
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download architecture packages
+        uses: actions/download-artifact@v4
+        with:
+          pattern: ghost-rdp-release-*
+          path: artifacts/components
+          merge-multiple: false
+
+      - name: Assemble multi-architecture release
+        shell: pwsh
+        run: ./scripts/assemble-release.ps1 -InputRoot ./artifacts/components -OutputDirectory ./artifacts/release
+
+      - name: Validate final release
+        shell: pwsh
+        run: ./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release -Architecture all
+
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          [xml]$project = Get-Content ./src/GhostRdp.App/GhostRdp.App.csproj -Raw
+          $version = [string]($project.Project.PropertyGroup.Version | Select-Object -First 1)
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Publish GitHub Release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          $tag = "v$env:VERSION"
+          $assets = Get-ChildItem ./artifacts/release -File | ForEach-Object { $_.FullName }
+          gh release view $tag --repo $env:GITHUB_REPOSITORY *> $null
+          if ($LASTEXITCODE -eq 0) {
+              gh release upload $tag @assets --clobber --repo $env:GITHUB_REPOSITORY
+              gh release edit $tag --title "Ghost RDP $tag" --notes-file ./docs/RELEASE-NOTES.md --repo $env:GITHUB_REPOSITORY
+          }
+          else {
+              gh release create $tag @assets --target $env:GITHUB_SHA --title "Ghost RDP $tag" --notes-file ./docs/RELEASE-NOTES.md --repo $env:GITHUB_REPOSITORY
+          }
