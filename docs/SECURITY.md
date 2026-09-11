@@ -75,6 +75,14 @@ Remote access from another network should use a private VPN/overlay network or a
 
 Accessibility features may change presentation and navigation behavior but never weaken authentication, firewall, NLA, process-launch, or credential boundaries. Windows High Contrast is read as a system setting and only changes application brush resources.
 
+## Packaging boundary
+
+Release packaging publishes self-contained x64 App and Host executables and wraps them in a per-user Inno Setup installer. The installer defaults to the current user's local application-data Programs directory and does not require administrator privileges for the normal install path.
+
+Packaging must not create or start a Windows service, create scheduled persistence, change Windows Firewall, expose an RDP port, change NLA, configure a VPN, or change host readiness state. CI scans both installer source and release-package scripts for prohibited firewall/service/elevation patterns, validates the generated artifacts and SHA-256 manifest, and performs a silent install/uninstall smoke test.
+
+Current development artifacts are unsigned. Ghost RDP must not claim Authenticode signing until an authorized certificate or signing service actually signs the binaries. Uninstall removes installed program files and shortcuts but intentionally leaves the current user's saved-computer and UI-settings data untouched.
+
 ## Host policy
 
 Ghost RDP Host is not a stealth agent. If a background service is introduced later, it must be clearly named, visible in Windows service/app management, documented, revocable, and uninstallable.
@@ -85,4 +93,4 @@ Security-sensitive values must be redacted before logging. The shared `SecretSan
 
 ## Security regression checks
 
-CI rejects obvious command-line password patterns, RDP password-field patterns, gateway access-token fields, shell-launch patterns, and missing security documentation. Tests cover input validation, profile persistence and schema migration, settings persistence and corrupt/future-schema handling, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data from generated `.rdp` content, RD Gateway serialization, Host readiness evaluation, and firewall-port matching.
+CI rejects obvious command-line password patterns, RDP password-field patterns, gateway access-token fields, shell-launch patterns, Host mutation patterns, prohibited installer/service/firewall/elevation patterns, and missing security documentation. Tests cover input validation, profile persistence and schema migration, settings persistence and corrupt/future-schema handling, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data from generated `.rdp` content, RD Gateway serialization, Host readiness evaluation, firewall-port matching, release artifact validation, and installer install/uninstall behavior.

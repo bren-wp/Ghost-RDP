@@ -35,23 +35,26 @@ Ghost RDP is a Windows-first desktop application for managing Remote Desktop con
 - schema-versioned local UI settings for startup view, default computer sort, and optional last-view memory;
 - Settings and expanded About views that expose local storage/runtime boundaries without revealing secrets;
 - keyboard access keys, visible focus treatment, assistive-technology automation names, polite status announcements, and automatic Windows High Contrast palette handling;
+- self-contained x64 Portable client and Host executables plus a Portable ZIP;
+- per-user Inno Setup x64 installer with standard uninstall registration and no firewall/service/network changes;
+- SHA-256 manifest plus CI validation and real silent install/uninstall smoke testing of the generated setup;
 - shared input validation and log-secret sanitization primitives;
-- CI for formatting, Release builds, tests, security regression checks, publish output, and package validation;
-- architecture, security, privacy, accessibility, Windows, host, remote-access, build, and roadmap documentation.
+- CI for formatting, Release builds, tests, security regression checks, development publish output, release packaging, package validation, and installer smoke testing;
+- architecture, security, privacy, accessibility, packaging, Windows, host, remote-access, build, and roadmap documentation.
 
 ## Security baseline
 
 Passwords are not part of the saved computer, Quick Connect, or UI-settings persistence schemas. The Microsoft RDP launch flow deliberately does not accept or transport a password: Windows/Microsoft Remote Desktop owns credential entry when a session starts, including RD Gateway credential prompts. Secrets must not be serialized to profiles or settings, written to logs, included in `.rdp` files, or passed on a process command line. Corrupted or unsupported profile/settings stores are not silently overwritten by loading them. See [SECURITY.md](docs/SECURITY.md).
 
-Ghost RDP does not silently expose Remote Desktop to the Internet or weaken Windows security controls. Private-network mode does not install or configure a VPN/overlay. Ghost RDP Host is diagnostic-only: it does not enable RDP, start services, alter firewall rules, change NLA, or modify network exposure.
+Ghost RDP does not silently expose Remote Desktop to the Internet or weaken Windows security controls. Private-network mode does not install or configure a VPN/overlay. Ghost RDP Host is diagnostic-only: it does not enable RDP, start services, alter firewall rules, change NLA, or modify network exposure. Setup and Portable packaging do not add a background service, firewall rule, scheduled task, or automatic RDP exposure.
 
 ## Privacy baseline
 
-The current architecture has no telemetry, analytics, ads, fingerprinting, or central Ghost RDP server carrying RDP traffic. Saved computers and UI preferences remain under the current Windows user's local application-data directory. Temporary `.rdp` files are created only for a user-initiated connection, contain no password, and are cleaned after use. Host readiness diagnostics are read locally and are not uploaded. See [PRIVACY.md](docs/PRIVACY.md).
+The current architecture has no telemetry, analytics, ads, fingerprinting, or central Ghost RDP server carrying RDP traffic. Saved computers and UI preferences remain under the current Windows user's local application-data directory. Temporary `.rdp` files are created only for a user-initiated connection, contain no password, and are cleaned after use. Host readiness diagnostics are read locally and are not uploaded. Uninstall leaves user-owned profile/settings data in place unless the user removes it separately. See [PRIVACY.md](docs/PRIVACY.md).
 
 ## Planned next
 
-Windows Setup and Portable packaging are the next milestone. Session history and authentic Windows screenshots/final release polish remain planned.
+Authentic Windows screenshots, final release polish, and later session-history work remain planned. Code signing is not claimed until an authorized Authenticode certificate or signing service is actually configured.
 
 ## Build
 
@@ -64,7 +67,7 @@ dotnet build GhostRdp.sln -c Release --no-restore
 dotnet test GhostRdp.sln -c Release --no-build
 ```
 
-See [BUILD.md](docs/BUILD.md) for full instructions.
+See [BUILD.md](docs/BUILD.md) for full instructions and [PACKAGING.md](docs/PACKAGING.md) for Setup/Portable packaging.
 
 ## Documentation
 
@@ -72,6 +75,7 @@ See [BUILD.md](docs/BUILD.md) for full instructions.
 - [Security](docs/SECURITY.md)
 - [Privacy](docs/PRIVACY.md)
 - [Accessibility](docs/ACCESSIBILITY.md)
+- [Windows packaging](docs/PACKAGING.md)
 - [Windows behavior](docs/WINDOWS.md)
 - [Ghost RDP Host](docs/HOST.md)
 - [Remote access model](docs/REMOTE-ACCESS.md)
