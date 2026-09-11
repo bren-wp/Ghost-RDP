@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/**
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-test-security:
+    runs-on: windows-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore GhostRdp.sln
+
+      - name: Format check
+        run: dotnet format GhostRdp.sln --verify-no-changes --no-restore
+
+      - name: Build Release
+        run: dotnet build GhostRdp.sln -c Release --no-restore
+
+      - name: Tests
+        run: dotnet test GhostRdp.sln -c Release --no-build --logger "trx;LogFileName=tests.trx"
+
+      - name: Security regression checks
+        shell: pwsh
+        run: ./scripts/security-regression.ps1
+
+      - name: Publish App x64 framework-dependent
+        run: dotnet publish src/GhostRdp.App/GhostRdp.App.csproj -c Release -r win-x64 --self-contained false -o artifacts/app
+
+      - name: Publish Host x64 framework-dependent
+        run: dotnet publish src/GhostRdp.Host/GhostRdp.Host.csproj -c Release -r win-x64 --self-contained false -o artifacts/host
+
+      - name: Validate package output
+        shell: pwsh
+        run: ./scripts/validate-package.ps1 -AppDirectory ./artifacts/app -HostDirectory ./artifacts/host
+
+      - name: Upload development binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghost-rdp-windows-x64-development
+          path: artifacts/
+          if-no-files-found: error
