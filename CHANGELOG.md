@@ -2,6 +2,26 @@
 
 All notable user-facing changes to Ghost RDP are recorded here.
 
+## 0.9.1 - development
+
+UI/UX consistency, accessibility hardening, and lower visual-tree overhead after the first production multi-architecture release.
+
+### Changed
+
+- App, Host, and Setup now apply the Ghost RDP window theme directly to their concrete WPF window classes instead of depending on an implicit base `Window` style.
+- Standard text receives an explicit readable foreground so dark cards cannot inherit black Windows default text.
+- Text fields use a rounded Ghost RDP dark template with explicit focus and disabled states.
+- Combo boxes use a project-owned dark template and popup instead of falling back to a white Windows theme surface.
+- Sidebar navigation now includes lightweight vector icons.
+- Saved-computer lists explicitly enable WPF virtualization and recycling to reduce visual-container overhead for larger profile collections.
+- WPF title/taskbar windows use a vector Ghost RDP application mark.
+- README now includes the project logo, release/status badges, a technical UI/runtime overview, and explicit UI/performance documentation.
+
+### Documentation
+
+- Added `docs/UI-UX.md` covering visual hierarchy, control behavior, memory/performance decisions, accessibility, and screenshot policy.
+- Runtime screenshots remain restricted to authentic validated Windows builds; no generated mockups are presented as application screenshots.
+
 ## 0.9.0 - 2026-09-11
 
 Production packaging, stability hardening, and multi-architecture Windows support.
