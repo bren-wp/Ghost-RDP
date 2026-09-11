@@ -27,4 +27,6 @@ Private VPN/overlay mode stores only the user's selected route intent. Ghost RDP
 
 Ghost RDP Host reads readiness information locally from Windows registry, service, firewall, DNS, and network-interface sources. These diagnostics can include the local computer/host name, Windows edition/build, current user name, RDP configuration, active firewall/network profiles, local IP addresses, and adapter names/descriptions. The diagnostic data is displayed locally and is not transmitted to Ghost RDP infrastructure.
 
+Setup and Portable packaging do not add telemetry or a Ghost RDP network service. The Setup installer installs program files and shortcuts only. Uninstall deliberately leaves `%LOCALAPPDATA%\Ghost RDP\computers.json` and `settings.json` in place so removing the program does not silently destroy user-owned connection metadata or UI preferences. Users can remove that local data separately when they want a complete local-data deletion.
+
 A future relay, account system, synchronization service, session-history service, or persistent credential feature would be a separate architecture decision and would require an updated threat model, privacy review, and documentation before release.

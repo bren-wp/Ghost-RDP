@@ -33,9 +33,31 @@ $hostViolations = foreach ($pattern in $forbiddenHostMutationPatterns) {
     $hostSourceFiles | Select-String -Pattern $pattern
 }
 
-if ($violations -or $hostViolations) {
+$packagingFiles = @(
+    Get-ChildItem -Path "$PSScriptRoot/../packaging" -Recurse -File -Include *.iss,*.ps1 -ErrorAction SilentlyContinue
+    Get-Item -Path @(
+        "$PSScriptRoot/build-release-packages.ps1",
+        "$PSScriptRoot/test-installer.ps1",
+        "$PSScriptRoot/validate-release-package.ps1"
+    ) -ErrorAction SilentlyContinue
+)
+$forbiddenPackagingPatterns = @(
+    '(?i)\bnetsh\b',
+    '(?i)Set-NetFirewall',
+    '(?i)Enable-NetFirewall',
+    '(?i)Disable-NetFirewall',
+    '(?i)\bsc(?:\.exe)?\s+(?:create|config|start)\b',
+    '(?i)\bNew-Service\b',
+    '(?im)^\s*PrivilegesRequired\s*=\s*admin\s*$'
+)
+
+$packagingViolations = foreach ($pattern in $forbiddenPackagingPatterns) {
+    $packagingFiles | Select-String -Pattern $pattern
+}
+
+if ($violations -or $hostViolations -or $packagingViolations) {
     Write-Host 'Security regression check failed:' -ForegroundColor Red
-    @($violations) + @($hostViolations) | ForEach-Object {
+    @($violations) + @($hostViolations) + @($packagingViolations) | ForEach-Object {
         Write-Host "$($_.Path):$($_.LineNumber): $($_.Line.Trim())"
     }
     exit 1
@@ -45,9 +67,11 @@ $requiredDocs = @(
     'ARCHITECTURE.md',
     'SECURITY.md',
     'PRIVACY.md',
+    'ACCESSIBILITY.md',
     'WINDOWS.md',
     'HOST.md',
     'REMOTE-ACCESS.md',
+    'PACKAGING.md',
     'ROADMAP.md',
     'BUILD.md'
 )

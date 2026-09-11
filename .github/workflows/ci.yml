@@ -15,7 +15,7 @@ permissions:
 jobs:
   build-test-security:
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 35
 
     steps:
       - name: Checkout
@@ -48,7 +48,7 @@ jobs:
       - name: Publish Host x64 framework-dependent
         run: dotnet publish src/GhostRdp.Host/GhostRdp.Host.csproj -c Release -r win-x64 --self-contained false -o artifacts/host
 
-      - name: Validate package output
+      - name: Validate development package output
         shell: pwsh
         run: ./scripts/validate-package.ps1 -AppDirectory ./artifacts/app -HostDirectory ./artifacts/host
 
@@ -56,5 +56,27 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ghost-rdp-windows-x64-development
-          path: artifacts/
+          path: |
+            artifacts/app/
+            artifacts/host/
           if-no-files-found: error
+
+      - name: Build Setup and Portable release packages
+        shell: pwsh
+        run: ./scripts/build-release-packages.ps1 -OutputDirectory ./artifacts/release
+
+      - name: Validate release packages and SHA-256 manifest
+        shell: pwsh
+        run: ./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release
+
+      - name: Smoke test Setup install and uninstall
+        shell: pwsh
+        run: ./scripts/test-installer.ps1 -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
+
+      - name: Upload Setup and Portable release packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: ghost-rdp-windows-x64-release
+          path: artifacts/release/
+          if-no-files-found: error
+          compression-level: 0
