@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <AssemblyName>GhostRdp.App</AssemblyName>
+    <RootNamespace>GhostRdp.App</RootNamespace>
+    <Product>Ghost RDP</Product>
+    <Title>Ghost RDP</Title>
+    <Description>Private remote desktop management for computers you control.</Description>
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GhostRdp.Core\GhostRdp.Core.csproj" />
+  </ItemGroup>
+</Project>
