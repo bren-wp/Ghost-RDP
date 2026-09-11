@@ -15,7 +15,6 @@
         <SolidColorBrush x:Key="WarningBrush" Color="#F2BA55" />
         <SolidColorBrush x:Key="DangerBrush" Color="#FF6878" />
         <SolidColorBrush x:Key="SelectionBrush" Color="#202F50" />
-        <SolidColorBrush x:Key="HoverBrush" Color="#1A2231" />
 
         <DrawingImage x:Key="GhostRdpWindowIcon">
             <DrawingImage.Drawing>
@@ -101,7 +100,7 @@
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsHighlighted" Value="True">
-                                <Setter TargetName="ItemChrome" Property="Background" Value="{DynamicResource HoverBrush}" />
+                                <Setter TargetName="ItemChrome" Property="Background" Value="{DynamicResource SelectionBrush}" />
                             </Trigger>
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter TargetName="ItemChrome" Property="Background" Value="{DynamicResource SelectionBrush}" />
@@ -246,7 +245,7 @@
                                 <Setter TargetName="NavIcon" Property="Data" Value="M8,1 A7,7 0 1 1 7.99,1 M8,7 V12 M8,4 V4.5" />
                             </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource HoverBrush}" />
+                                <Setter TargetName="Chrome" Property="Background" Value="{DynamicResource SelectionBrush}" />
                                 <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
                             </Trigger>
                             <Trigger Property="IsKeyboardFocused" Value="True">
@@ -297,7 +296,7 @@
         </Style>
 
         <Style x:Key="DangerButtonStyle" TargetType="Button" BasedOn="{StaticResource PrimaryButtonStyle}">
-            <Setter Property="Background" Value="#4A2028" />
+            <Setter Property="Background" Value="{DynamicResource PanelAltBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource DangerBrush}" />
         </Style>
     </Application.Resources>
