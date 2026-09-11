@@ -9,11 +9,16 @@
 [![Windows](https://img.shields.io/badge/Windows-10%2F11-5B7CFA)](docs/WINDOWS.md)
 [![.NET](https://img.shields.io/badge/.NET-8.0-7A98FF)](docs/BUILD.md)
 [![CI](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml/badge.svg)](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/badge/release-v0.9.0-4AD79B)](https://github.com/bren-wp/Ghost-RDP/releases/tag/v0.9.0)
 [![Privacy](https://img.shields.io/badge/telemetry-none-4AD79B)](docs/PRIVACY.md)
 
-Ghost RDP is a Windows-first desktop application for managing Microsoft Remote Desktop connections to computers the user controls. It is built around explicit user actions, Windows security boundaries, local persistence, accessibility, and a no-telemetry privacy baseline.
+Ghost RDP is a Windows-first desktop application for managing Microsoft Remote Desktop connections to computers the user controls. It is built around explicit user actions, Windows security boundaries, local persistence, accessibility, low background activity, and a no-telemetry privacy baseline.
 
-Current production version: **0.9.0**.
+Latest production release: **0.9.0**. Current development version: **0.9.1**.
+
+<p align="center">
+  <img src="assets/ghost-rdp-ui-overview.svg" alt="Ghost RDP interface and runtime overview" width="1000" />
+</p>
 
 ## Production features
 
@@ -31,6 +36,18 @@ Current production version: **0.9.0**.
 - SHA-256 manifests, PE-architecture validation, runtime self-tests, package validation, and real install/uninstall smoke tests.
 - Native ARM64 CI validation on a Windows ARM64 runner.
 - Automated GitHub Release publishing only after all architecture jobs pass for the exact release commit.
+
+## UI and UX
+
+The 0.9.1 development pass standardizes the App, Host, and Setup visual system around the same dark palette and Windows-native interaction model. Derived WPF windows now receive the intended application background and foreground deterministically, all ordinary text receives an explicit readable foreground, text fields and dropdowns use matching dark templates, and the sidebar includes lightweight vector navigation icons.
+
+The UI uses vector geometry rather than bitmap-heavy decoration, layout rounding/device-pixel snapping, practical hit targets, visible keyboard focus, and system High Contrast handling. See [UI and UX](docs/UI-UX.md) and [Accessibility](docs/ACCESSIBILITY.md).
+
+## Performance and memory behavior
+
+Ghost RDP does not run telemetry, analytics, advertising, a central relay, background polling loops, or an always-on Windows service. Saved-computer lists use WPF UI virtualization with recycling so off-screen rows are not retained as a full visual tree. Icons are vector-based and do not require large bitmap assets in memory.
+
+Actual working-set memory varies by Windows version, DPI, architecture, .NET runtime state, and the number of profiles displayed, so the project does not publish an artificial RAM guarantee. Performance work focuses on avoiding unnecessary background activity, keeping the visual tree compact, and releasing temporary RDP files/process resources promptly.
 
 ## Security baseline
 
@@ -70,6 +87,7 @@ See [BUILD.md](docs/BUILD.md), [PACKAGING.md](docs/PACKAGING.md), and [RELEASE.m
 ## Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
+- [UI and UX](docs/UI-UX.md)
 - [Security](docs/SECURITY.md)
 - [Privacy](docs/PRIVACY.md)
 - [Accessibility](docs/ACCESSIBILITY.md)
@@ -84,7 +102,7 @@ See [BUILD.md](docs/BUILD.md), [PACKAGING.md](docs/PACKAGING.md), and [RELEASE.m
 
 ## Screenshots
 
-Only authentic screenshots from the real Windows application may be presented as runtime evidence. Generated mockups are not labeled as application screenshots.
+Runtime screenshots are accepted only when captured from a real validated Windows build. Generated mockups are not presented as application screenshots. The Windows capture device is currently unavailable, so this branch intentionally uses the project logo and the technical UI overview above rather than fabricating screenshots.
 
 ## Signing
 
