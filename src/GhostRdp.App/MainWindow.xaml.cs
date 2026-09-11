@@ -17,6 +17,7 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _profileStore = new ComputerProfileStore(ComputerProfileStore.GetDefaultFilePath());
+        MstscLauncher.CleanupStaleTemporaryFiles();
         AboutText.Text = AppMetadata.BuildAboutText();
         LoadProfiles();
         RefreshRuntimeStatus();
@@ -68,6 +69,8 @@ public partial class MainWindow : Window
         RuntimeDetailText.Text = status.IsAvailable && status.ExecutablePath is not null
             ? $"{status.Message} Path: {status.ExecutablePath}"
             : status.Message;
+        ConnectSelectedComputerButton.IsEnabled = status.IsAvailable;
+        QuickConnectConnectButton.IsEnabled = status.IsAvailable;
     }
 
     private void RefreshProfileViews()
@@ -141,6 +144,21 @@ public partial class MainWindow : Window
             var candidate = _profiles.Select(profile => profile.Clone()).ToList();
             candidate.Add(editor.SavedProfile);
             CommitProfiles(candidate, "Computer saved.");
+        }
+    }
+
+    private void ConnectSelectedComputerButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryGetSelectedProfile(out var selected))
+        {
+            return;
+        }
+
+        var result = MstscLauncher.Launch(RdpConnectionRequest.FromProfile(selected));
+        SetProfileStatus(result.Message, !result.Success);
+        if (!result.Success)
+        {
+            RefreshRuntimeStatus();
         }
     }
 
@@ -277,6 +295,29 @@ public partial class MainWindow : Window
 
         var validation = draft.Validate();
         SetQuickConnectStatus(validation.IsValid ? "Connection details are valid. No profile was created." : validation.Error ?? "Connection details are invalid.", !validation.IsValid);
+    }
+
+    private void QuickConnectConnectButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (!TryBuildQuickConnectDraft(out var draft, out var error))
+        {
+            SetQuickConnectStatus(error, true);
+            return;
+        }
+
+        var validation = draft.Validate();
+        if (!validation.IsValid)
+        {
+            SetQuickConnectStatus(validation.Error ?? "Connection details are invalid.", true);
+            return;
+        }
+
+        var result = MstscLauncher.Launch(RdpConnectionRequest.FromQuickConnect(draft));
+        SetQuickConnectStatus(result.Message, !result.Success);
+        if (!result.Success)
+        {
+            RefreshRuntimeStatus();
+        }
     }
 
     private void SaveQuickConnectButton_Click(object sender, RoutedEventArgs e)

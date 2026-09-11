@@ -13,13 +13,21 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Border Grid.Column="0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0"
+                Background="{StaticResource PanelBrush}"
+                BorderBrush="{StaticResource BorderBrush}"
+                BorderThickness="0,0,1,0">
             <DockPanel Margin="16">
                 <StackPanel DockPanel.Dock="Top">
                     <StackPanel Orientation="Horizontal" Margin="6,8,6,28">
-                        <Border Width="36" Height="36" CornerRadius="10" Background="{StaticResource SelectionBrush}" Margin="0,0,10,0">
+                        <Border Width="36"
+                                Height="36"
+                                CornerRadius="10"
+                                Background="{StaticResource SelectionBrush}"
+                                Margin="0,0,10,0">
                             <Viewbox Margin="7">
-                                <Path Fill="{StaticResource AccentStrongBrush}" Data="M2,4 C2,2.9 2.9,2 4,2 H20 C21.1,2 22,2.9 22,4 V16 C22,17.1 21.1,18 20,18 H14 V20 H18 V22 H6 V20 H10 V18 H4 C2.9,18 2,17.1 2,16 Z M5,5 V15 H19 V5 Z M8,8 C8,6.9 8.9,6 10,6 H14 C15.1,6 16,6.9 16,8 V12 H14.5 V10.5 H9.5 V12 H8 Z" />
+                                <Path Fill="{StaticResource AccentStrongBrush}"
+                                      Data="M2,4 C2,2.9 2.9,2 4,2 H20 C21.1,2 22,2.9 22,4 V16 C22,17.1 21.1,18 20,18 H14 V20 H18 V22 H6 V20 H10 V18 H4 C2.9,18 2,17.1 2,16 Z M5,5 V15 H19 V5 Z M8,8 C8,6.9 8.9,6 10,6 H14 C15.1,6 16,6.9 16,8 V12 H14.5 V10.5 H9.5 V12 H8 Z" />
                             </Viewbox>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
@@ -28,17 +36,29 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <TextBlock Text="NAVIGATION" Foreground="{StaticResource MutedBrush}" FontSize="10" FontWeight="SemiBold" Margin="12,0,0,8" />
+                    <TextBlock Text="NAVIGATION"
+                               Foreground="{StaticResource MutedBrush}"
+                               FontSize="10"
+                               FontWeight="SemiBold"
+                               Margin="12,0,0,8" />
                     <Button Style="{StaticResource SidebarButtonStyle}" Click="HomeNavButton_Click" Content="Home" />
                     <Button Style="{StaticResource SidebarButtonStyle}" Click="ComputersNavButton_Click" Content="Computers" />
                     <Button Style="{StaticResource SidebarButtonStyle}" Click="QuickConnectNavButton_Click" Content="Quick Connect" />
                     <Button Style="{StaticResource SidebarButtonStyle}" Click="AboutNavButton_Click" Content="About" />
                 </StackPanel>
 
-                <Border DockPanel.Dock="Bottom" Background="{StaticResource PanelAltBrush}" CornerRadius="10" Padding="12" Margin="0,16,0,0">
+                <Border DockPanel.Dock="Bottom"
+                        Background="{StaticResource PanelAltBrush}"
+                        CornerRadius="10"
+                        Padding="12"
+                        Margin="0,16,0,0">
                     <StackPanel>
-                        <TextBlock Text="Local profile storage" FontWeight="SemiBold" />
-                        <TextBlock Text="Passwords are never serialized." Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+                        <TextBlock Text="Windows-owned credentials" FontWeight="SemiBold" />
+                        <TextBlock Text="Ghost RDP never places passwords in profiles, .rdp files, or process arguments."
+                                   Foreground="{StaticResource MutedBrush}"
+                                   FontSize="12"
+                                   Margin="0,4,0,0"
+                                   TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
             </DockPanel>
@@ -55,7 +75,10 @@
 
                 <StackPanel>
                     <TextBlock Text="Home" FontSize="30" FontWeight="SemiBold" />
-                    <TextBlock Text="Private remote desktop management for computers you control." Foreground="{StaticResource MutedBrush}" FontSize="15" Margin="0,6,0,0" />
+                    <TextBlock Text="Private remote desktop management for computers you control."
+                               Foreground="{StaticResource MutedBrush}"
+                               FontSize="15"
+                               Margin="0,6,0,0" />
                 </StackPanel>
 
                 <Grid Grid.Row="1" Margin="0,30,0,0">
@@ -67,21 +90,36 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Border Grid.Column="0" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="20">
+                    <Border Grid.Column="0"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="20">
                         <StackPanel>
                             <TextBlock Text="Saved computers" Foreground="{StaticResource MutedBrush}" FontSize="12" />
                             <TextBlock x:Name="SavedComputerCountText" Text="0" FontSize="28" FontWeight="SemiBold" Margin="0,8,0,0" />
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="2" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="20">
+                    <Border Grid.Column="2"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="20">
                         <StackPanel>
                             <TextBlock Text="Favorites" Foreground="{StaticResource MutedBrush}" FontSize="12" />
                             <TextBlock x:Name="FavoriteCountText" Text="0" FontSize="28" FontWeight="SemiBold" Margin="0,8,0,0" />
                         </StackPanel>
                     </Border>
 
-                    <Border Grid.Column="4" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="20">
+                    <Border Grid.Column="4"
+                            Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="20">
                         <StackPanel>
                             <TextBlock Text="Microsoft RDP runtime" Foreground="{StaticResource MutedBrush}" FontSize="12" />
                             <TextBlock x:Name="RuntimeStatusText" Text="Checking..." FontSize="20" FontWeight="SemiBold" Margin="0,8,0,0" />
@@ -95,23 +133,51 @@
                         <ColumnDefinition Width="20" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0" Background="{StaticResource PanelAltBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="22">
+                    <Border Grid.Column="0"
+                            Background="{StaticResource PanelAltBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="22">
                         <StackPanel>
                             <TextBlock Text="Quick Connect" FontSize="18" FontWeight="SemiBold" />
-                            <TextBlock Text="Validate one-off connection details without silently creating a saved computer." Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,8,0,0" />
-                            <Button Style="{StaticResource PrimaryButtonStyle}" Content="Open Quick Connect" HorizontalAlignment="Left" Margin="0,18,0,0" Click="OpenQuickConnectButton_Click" />
+                            <TextBlock Text="Open a one-off Microsoft Remote Desktop session without silently saving a profile."
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,8,0,0" />
+                            <Button Style="{StaticResource PrimaryButtonStyle}"
+                                    Content="Open Quick Connect"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,18,0,0"
+                                    Click="OpenQuickConnectButton_Click" />
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="2" Background="{StaticResource PanelAltBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="22">
+                    <Border Grid.Column="2"
+                            Background="{StaticResource PanelAltBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="22">
                         <StackPanel>
                             <TextBlock Text="Runtime status" FontSize="18" FontWeight="SemiBold" />
-                            <TextBlock x:Name="RuntimeDetailText" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,8,0,0" />
-                            <Button Style="{StaticResource SecondaryButtonStyle}" Content="Refresh status" HorizontalAlignment="Left" Margin="0,18,0,0" Click="RefreshStatusButton_Click" />
+                            <TextBlock x:Name="RuntimeDetailText"
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,8,0,0" />
+                            <Button Style="{StaticResource SecondaryButtonStyle}"
+                                    Content="Refresh status"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,18,0,0"
+                                    Click="RefreshStatusButton_Click" />
                         </StackPanel>
                     </Border>
                 </Grid>
 
-                <TextBlock Grid.Row="3" x:Name="ProfileStoreHomeStatusText" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,20,0,0" />
+                <TextBlock Grid.Row="3"
+                           x:Name="ProfileStoreHomeStatusText"
+                           Foreground="{StaticResource MutedBrush}"
+                           TextWrapping="Wrap"
+                           Margin="0,20,0,0" />
             </Grid>
 
             <Grid x:Name="ComputersView" Visibility="Collapsed">
@@ -129,9 +195,16 @@
                     </Grid.ColumnDefinitions>
                     <StackPanel>
                         <TextBlock Text="Computers" FontSize="30" FontWeight="SemiBold" />
-                        <TextBlock x:Name="ComputerSummaryText" Text="0 saved computers" Foreground="{StaticResource MutedBrush}" Margin="0,6,0,0" />
+                        <TextBlock x:Name="ComputerSummaryText"
+                                   Text="0 saved computers"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   Margin="0,6,0,0" />
                     </StackPanel>
-                    <Button Grid.Column="1" Style="{StaticResource PrimaryButtonStyle}" Content="Add computer" Click="AddComputerButton_Click" VerticalAlignment="Center" />
+                    <Button Grid.Column="1"
+                            Style="{StaticResource PrimaryButtonStyle}"
+                            Content="Add computer"
+                            Click="AddComputerButton_Click"
+                            VerticalAlignment="Center" />
                 </Grid>
 
                 <Grid Grid.Row="1" Margin="0,22,0,16">
@@ -142,17 +215,35 @@
                         <ColumnDefinition Width="14" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBox x:Name="ComputerSearchTextBox" TextChanged="ComputerSearchTextBox_TextChanged" ToolTip="Search name, host, user, tags, or notes" />
-                    <ComboBox x:Name="ComputerSortComboBox" Grid.Column="2" SelectionChanged="ComputerSortComboBox_SelectionChanged" SelectedIndex="0">
+                    <TextBox x:Name="ComputerSearchTextBox"
+                             TextChanged="ComputerSearchTextBox_TextChanged"
+                             ToolTip="Search name, host, user, tags, or notes" />
+                    <ComboBox x:Name="ComputerSortComboBox"
+                              Grid.Column="2"
+                              SelectionChanged="ComputerSortComboBox_SelectionChanged"
+                              SelectedIndex="0">
                         <ComboBoxItem Content="Name" Tag="name" />
                         <ComboBoxItem Content="Host" Tag="host" />
                         <ComboBoxItem Content="Favorites first" Tag="favorite" />
                     </ComboBox>
-                    <CheckBox x:Name="FavoritesOnlyCheckBox" Grid.Column="4" Content="Favorites only" Checked="FavoritesOnlyCheckBox_Changed" Unchecked="FavoritesOnlyCheckBox_Changed" />
+                    <CheckBox x:Name="FavoritesOnlyCheckBox"
+                              Grid.Column="4"
+                              Content="Favorites only"
+                              Checked="FavoritesOnlyCheckBox_Changed"
+                              Unchecked="FavoritesOnlyCheckBox_Changed" />
                 </Grid>
 
-                <Border Grid.Row="2" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="8">
-                    <ListBox x:Name="ProfileListBox" Background="Transparent" BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto" MouseDoubleClick="ProfileListBox_MouseDoubleClick">
+                <Border Grid.Row="2"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="8">
+                    <ListBox x:Name="ProfileListBox"
+                             Background="Transparent"
+                             BorderThickness="0"
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             MouseDoubleClick="ProfileListBox_MouseDoubleClick">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -163,7 +254,10 @@
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="ListBoxItem">
-                                            <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" CornerRadius="9" Padding="16,13">
+                                            <Border x:Name="ItemBorder"
+                                                    Background="{TemplateBinding Background}"
+                                                    CornerRadius="9"
+                                                    Padding="16,13">
                                                 <ContentPresenter />
                                             </Border>
                                             <ControlTemplate.Triggers>
@@ -190,18 +284,35 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
                                         <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="16" />
-                                        <TextBlock Text="{Binding Notes}" Foreground="{StaticResource MutedBrush}" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="330" Margin="0,4,0,0" />
+                                        <TextBlock Text="{Binding Notes}"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   FontSize="12"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   MaxWidth="330"
+                                                   Margin="0,4,0,0" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1">
                                         <TextBlock Text="{Binding Host}" />
-                                        <TextBlock Text="{Binding Port, StringFormat=Port {0}}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,4,0,0" />
+                                        <TextBlock Text="{Binding Port, StringFormat=Port {0}}"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   FontSize="12"
+                                                   Margin="0,4,0,0" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
                                         <TextBlock Text="{Binding Username}" />
-                                        <TextBlock Text="{Binding Domain}" Foreground="{StaticResource MutedBrush}" FontSize="12" Margin="0,4,0,0" />
+                                        <TextBlock Text="{Binding Domain}"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   FontSize="12"
+                                                   Margin="0,4,0,0" />
                                     </StackPanel>
-                                    <Border Grid.Column="3" Background="{StaticResource SelectionBrush}" CornerRadius="6" Padding="8,4" VerticalAlignment="Center">
-                                        <TextBlock Text="Favorite" Foreground="{StaticResource AccentStrongBrush}" FontSize="11">
+                                    <Border Grid.Column="3"
+                                            Background="{StaticResource SelectionBrush}"
+                                            CornerRadius="6"
+                                            Padding="8,4"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="Favorite"
+                                                   Foreground="{StaticResource AccentStrongBrush}"
+                                                   FontSize="11">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed" />
@@ -225,11 +336,21 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="ProfileStoreStatusText" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    <TextBlock x:Name="ProfileStoreStatusText"
+                               Foreground="{StaticResource MutedBrush}"
+                               VerticalAlignment="Center"
+                               TextWrapping="Wrap"
+                               Margin="0,0,16,0" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
+                        <Button x:Name="ConnectSelectedComputerButton"
+                                Style="{StaticResource PrimaryButtonStyle}"
+                                Content="Connect"
+                                IsEnabled="False"
+                                Margin="0,0,8,0"
+                                Click="ConnectSelectedComputerButton_Click" />
                         <Button Style="{StaticResource SecondaryButtonStyle}" Content="Edit" Margin="0,0,8,0" Click="EditComputerButton_Click" />
                         <Button Style="{StaticResource SecondaryButtonStyle}" Content="Duplicate" Margin="0,0,8,0" Click="DuplicateComputerButton_Click" />
-                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="Toggle favorite" Margin="0,0,8,0" Click="ToggleFavoriteButton_Click" />
+                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="Favorite" Margin="0,0,8,0" Click="ToggleFavoriteButton_Click" />
                         <Button Style="{StaticResource DangerButtonStyle}" Content="Delete" Click="DeleteComputerButton_Click" />
                     </StackPanel>
                 </Grid>
@@ -244,10 +365,22 @@
 
                 <StackPanel>
                     <TextBlock Text="Quick Connect" FontSize="30" FontWeight="SemiBold" />
-                    <TextBlock Text="Validate one-off connection details. Nothing is saved unless you explicitly choose Save as computer." Foreground="{StaticResource MutedBrush}" FontSize="15" Margin="0,6,0,0" TextWrapping="Wrap" />
+                    <TextBlock Text="Open Microsoft Remote Desktop with one-off connection details. Nothing is saved unless you explicitly choose Save as computer."
+                               Foreground="{StaticResource MutedBrush}"
+                               FontSize="15"
+                               Margin="0,6,0,0"
+                               TextWrapping="Wrap" />
                 </StackPanel>
 
-                <Border Grid.Row="1" Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="24" Margin="0,26,0,0" MaxWidth="760" HorizontalAlignment="Left">
+                <Border Grid.Row="1"
+                        Background="{StaticResource PanelBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="24"
+                        Margin="0,26,0,0"
+                        MaxWidth="760"
+                        HorizontalAlignment="Left">
                     <StackPanel>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -282,29 +415,72 @@
                         </Grid>
 
                         <TextBlock Text="Saved computer name" Foreground="{StaticResource MutedBrush}" Margin="0,20,0,6" />
-                        <TextBox x:Name="QuickSaveNameTextBox" MaxLength="100" ToolTip="Required only when saving this connection as a computer" />
+                        <TextBox x:Name="QuickSaveNameTextBox"
+                                 MaxLength="100"
+                                 ToolTip="Required only when saving this connection as a computer" />
 
                         <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                            <Button Style="{StaticResource SecondaryButtonStyle}" Content="Validate details" Margin="0,0,10,0" Click="ValidateQuickConnectButton_Click" />
-                            <Button Style="{StaticResource PrimaryButtonStyle}" Content="Save as computer" Click="SaveQuickConnectButton_Click" />
+                            <Button Style="{StaticResource SecondaryButtonStyle}"
+                                    Content="Validate details"
+                                    Margin="0,0,10,0"
+                                    Click="ValidateQuickConnectButton_Click" />
+                            <Button x:Name="QuickConnectConnectButton"
+                                    Style="{StaticResource PrimaryButtonStyle}"
+                                    Content="Connect"
+                                    IsEnabled="False"
+                                    Margin="0,0,10,0"
+                                    Click="QuickConnectConnectButton_Click" />
+                            <Button Style="{StaticResource SecondaryButtonStyle}"
+                                    Content="Save as computer"
+                                    Click="SaveQuickConnectButton_Click" />
                         </StackPanel>
-                        <TextBlock x:Name="QuickConnectStatusText" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,16,0,0" />
+                        <TextBlock x:Name="QuickConnectStatusText"
+                                   Foreground="{StaticResource MutedBrush}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,16,0,0" />
                     </StackPanel>
                 </Border>
 
-                <Border Grid.Row="2" Background="{StaticResource PanelAltBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="20" Margin="0,20,0,0" MaxWidth="760" HorizontalAlignment="Left" VerticalAlignment="Top">
-                    <TextBlock Text="Quick Connect details stay in memory. Only the explicit Save as computer action writes connection metadata to the local profile store." Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                <Border Grid.Row="2"
+                        Background="{StaticResource PanelAltBrush}"
+                        BorderBrush="{StaticResource BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="20"
+                        Margin="0,20,0,0"
+                        MaxWidth="760"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top">
+                    <StackPanel>
+                        <TextBlock Text="Credential boundary" FontWeight="SemiBold" />
+                        <TextBlock Text="Ghost RDP passes only the temporary .rdp file path to mstsc.exe. Password entry is owned by Microsoft Remote Desktop and is never placed in the temporary file or process command line."
+                                   Foreground="{StaticResource MutedBrush}"
+                                   TextWrapping="Wrap"
+                                   Margin="0,6,0,0" />
+                    </StackPanel>
                 </Border>
             </Grid>
 
             <Grid x:Name="AboutView" Visibility="Collapsed">
                 <StackPanel MaxWidth="760" HorizontalAlignment="Left">
                     <TextBlock Text="About Ghost RDP" FontSize="30" FontWeight="SemiBold" />
-                    <TextBlock x:Name="AboutText" Foreground="{StaticResource MutedBrush}" FontSize="15" TextWrapping="Wrap" Margin="0,16,0,0" />
-                    <Border Background="{StaticResource PanelBrush}" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="22" Margin="0,28,0,0">
+                    <TextBlock x:Name="AboutText"
+                               Foreground="{StaticResource MutedBrush}"
+                               FontSize="15"
+                               TextWrapping="Wrap"
+                               Margin="0,16,0,0" />
+                    <Border Background="{StaticResource PanelBrush}"
+                            BorderBrush="{StaticResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="12"
+                            Padding="22"
+                            Margin="0,28,0,0">
                         <StackPanel>
                             <TextBlock Text="Security model" FontSize="18" FontWeight="SemiBold" />
-                            <TextBlock Text="Ghost RDP keeps Windows security controls intact. Passwords are not part of the saved-computer schema." Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <TextBlock Text="Ghost RDP keeps Windows security controls intact. Connect uses Microsoft mstsc.exe, structured process arguments, temporary password-free .rdp files, and Windows-owned credential prompts."
+                                       Foreground="{StaticResource MutedBrush}"
+                                       TextWrapping="Wrap"
+                                       Margin="0,8,0,0" />
                         </StackPanel>
                     </Border>
                 </StackPanel>

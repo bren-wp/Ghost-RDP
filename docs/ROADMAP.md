@@ -6,7 +6,7 @@ Status terminology: **implemented** means code exists and has passed the reposit
 | --- | --- | --- |
 | PR 1 | Solution, Core, App, Host, tests, docs, CI, branding, Windows UI foundation | implemented |
 | PR 2 | Saved computers and Quick Connect with schema-versioned profiles | implemented |
-| PR 3 | Safe `mstsc.exe` launch integration and secure temporary `.rdp` handling | planned |
+| PR 3 | Safe `mstsc.exe` launch integration and secure temporary `.rdp` handling | implemented |
 | PR 4 | Ghost RDP Host readiness diagnostics | planned |
 | PR 5 | VPN/private-overlay and RD Gateway-aware remote access UX | planned |
 | PR 6 | Settings, About expansion, accessibility and UI polish | planned |
