@@ -11,7 +11,11 @@ Status terminology: **implemented** means code exists and has passed the reposit
 | PR 5 | VPN/private-overlay and RD Gateway-aware remote access UX | implemented |
 | PR 6 | Settings, About expansion, accessibility and UI polish | implemented |
 | PR 7 | Windows Setup and Portable packaging | implemented |
-| PR 8 | Authentic Windows screenshots and final README/release polish | planned |
+| PR 8 | Final README/release polish and authentic Windows screenshots | development |
+
+## Current release-polish work
+
+Version 0.8.0 aligns the App and Host release versions, adds changelog/release-validation documentation, and tightens release integrity checks. Authentic runtime screenshot evidence remains pending a real validated Windows capture environment and is not replaced with generated or design-mockup imagery.
 
 ## Later work
 

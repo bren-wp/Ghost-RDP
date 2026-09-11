@@ -21,9 +21,17 @@ $installerScript = Join-Path $repositoryRoot 'packaging/windows/GhostRDP.iss'
 $licensePath = Join-Path $repositoryRoot 'LICENSE'
 
 [xml]$appProjectXml = Get-Content -Path $appProject -Raw
+[xml]$hostProjectXml = Get-Content -Path $hostProject -Raw
 $version = [string]($appProjectXml.Project.PropertyGroup.Version | Select-Object -First 1)
+$hostVersion = [string]($hostProjectXml.Project.PropertyGroup.Version | Select-Object -First 1)
 if ([string]::IsNullOrWhiteSpace($version)) {
     throw 'Could not determine Ghost RDP version from the App project.'
+}
+if ([string]::IsNullOrWhiteSpace($hostVersion)) {
+    throw 'Could not determine Ghost RDP Host version from the Host project.'
+}
+if ($hostVersion -ne $version) {
+    throw "Ghost RDP App version $version does not match Host version $hostVersion."
 }
 
 Remove-Item -Path $workRoot,$outputRoot -Recurse -Force -ErrorAction SilentlyContinue
