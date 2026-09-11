@@ -6,11 +6,7 @@
 
 **Private remote desktop management for computers you control.**
 
-[![Windows](https://img.shields.io/badge/Windows-10%2F11-5B7CFA)](docs/WINDOWS.md)
-[![.NET](https://img.shields.io/badge/.NET-8.0-7A98FF)](docs/BUILD.md)
-[![CI](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml/badge.svg)](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/badge/release-v0.9.0-4AD79B)](https://github.com/bren-wp/Ghost-RDP/releases/tag/v0.9.0)
-[![Privacy](https://img.shields.io/badge/telemetry-none-4AD79B)](docs/PRIVACY.md)
+[Windows 10/11](docs/WINDOWS.md) · [.NET 8](docs/BUILD.md) · [CI](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml) · [Latest production release v0.9.0](https://github.com/bren-wp/Ghost-RDP/releases/tag/v0.9.0) · [Privacy: no telemetry](docs/PRIVACY.md)
 
 Ghost RDP is a Windows-first desktop application for managing Microsoft Remote Desktop connections to computers the user controls. It is built around explicit user actions, Windows security boundaries, local persistence, accessibility, low background activity, and a no-telemetry privacy baseline.
 
@@ -39,27 +35,33 @@ Latest production release: **0.9.0**. Current development version: **0.9.1**.
 
 ## UI and UX
 
-The 0.9.1 development pass standardizes the App, Host, and Setup visual system around the same dark palette and Windows-native interaction model. Derived WPF windows now receive the intended application background and foreground deterministically, all ordinary text receives an explicit readable foreground, text fields and dropdowns use matching dark templates, and the sidebar includes lightweight vector navigation icons.
+The 0.9.1 development line standardizes the App, Host, and Setup visual system around the same dark palette and Windows-native interaction model. Concrete WPF windows receive the intended application background and foreground deterministically, ordinary text has an explicit readable foreground, text fields and dropdowns use matching dark templates, and the sidebar uses lightweight vector navigation icons.
 
 The UI uses vector geometry rather than bitmap-heavy decoration, layout rounding/device-pixel snapping, practical hit targets, visible keyboard focus, and system High Contrast handling. See [UI and UX](docs/UI-UX.md) and [Accessibility](docs/ACCESSIBILITY.md).
 
 ## Performance and memory behavior
 
-Ghost RDP does not run telemetry, analytics, advertising, a central relay, background polling loops, or an always-on Windows service. Saved-computer lists use WPF UI virtualization with recycling so off-screen rows are not retained as a full visual tree. Icons are vector-based and do not require large bitmap assets in memory.
+Ghost RDP does not run telemetry, analytics, advertising, a central relay, background polling loops, or an always-on Windows service. Saved-computer lists use WPF UI virtualization with recycling so off-screen rows do not require a full retained visual tree.
 
-Saved-computer text search uses a short debounce before applying filtering and sorting, avoiding a full filter/sort/materialization pass for every intermediate keystroke. Sort and favorites changes remain immediate, current selection is restored when the selected profile remains visible, and the favorites total is cached between profile mutations rather than recomputed on every view refresh. The filtering/sorting component is covered by App tests and uses only existing .NET/WPF functionality.
+Saved-computer text search uses a short debounce before filtering and sorting, avoiding a full filter/sort/materialization pass for every intermediate keystroke. Sort and favorites changes remain immediate, current selection is restored when the selected profile remains visible, and the favorites total is cached between profile mutations.
 
-Actual working-set memory varies by Windows version, DPI, architecture, .NET runtime state, and the number of profiles displayed, so the project does not publish an artificial RAM guarantee. Performance work focuses on avoiding unnecessary background activity, keeping the visual tree compact, limiting transient allocations, and releasing temporary RDP files/process resources promptly.
+Actual working-set memory varies by Windows version, DPI, architecture, .NET runtime state, graphics state, and profile count, so Ghost RDP does not publish an artificial RAM guarantee. The implementation instead avoids unnecessary background activity, keeps the visual tree compact, limits transient allocations, and releases temporary RDP/process resources promptly.
+
+## Runtime dependency policy
+
+Production projects under `src/` intentionally use only the existing .NET 8/WPF/Windows platform stack and Ghost RDP project references. They do not use third-party runtime `PackageReference` dependencies or external file-based assembly references. CI enforces this policy before packaging.
+
+Production releases are self-contained, so end users do not need a separately installed .NET runtime. `mstsc.exe` remains the Windows-owned RDP runtime; Ghost RDP does not bundle another RDP engine. See [Runtime dependencies](docs/DEPENDENCIES.md).
 
 ## Security baseline
 
 Passwords are not part of saved computers, Quick Connect persistence, UI settings, generated `.rdp` files, or process command lines. Windows/Microsoft Remote Desktop owns target and RD Gateway credential prompts.
 
-Ghost RDP does not enable Remote Desktop, open firewall ports, configure UPnP or router forwarding, weaken NLA, install a VPN, create a hidden service, or add stealth persistence. Ghost RDP Host is diagnostic-only and does not change Windows RDP/service/firewall/network state. See [SECURITY.md](docs/SECURITY.md).
+Ghost RDP does not enable Remote Desktop, open firewall ports, configure UPnP or router forwarding, weaken NLA, install a VPN, create a hidden service, or add stealth persistence. Ghost RDP Host is diagnostic-only and does not change Windows RDP/service/firewall/network state. See [Security](docs/SECURITY.md).
 
 ## Privacy baseline
 
-There is no telemetry, analytics, advertising, fingerprinting, or central Ghost RDP relay carrying RDP traffic. Saved computers and UI preferences remain under the current Windows user's local application-data directory. Host diagnostics are read locally and are not uploaded. See [PRIVACY.md](docs/PRIVACY.md).
+There is no telemetry, analytics, advertising, fingerprinting, or central Ghost RDP relay carrying RDP traffic. Saved computers and UI preferences remain under the current Windows user's local application-data directory. Host diagnostics are read locally and are not uploaded. No third-party runtime telemetry/network SDK is included. See [Privacy](docs/PRIVACY.md).
 
 ## Downloads
 
@@ -80,21 +82,25 @@ dotnet restore GhostRdp.sln
 dotnet format GhostRdp.sln --verify-no-changes --no-restore
 dotnet build GhostRdp.sln -c Release --no-restore
 dotnet test GhostRdp.sln -c Release --no-build
+./scripts/security-regression.ps1
 ./scripts/build-release-packages.ps1 -Architecture all -OutputDirectory ./artifacts/release
 ./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release -Architecture all
 ```
 
-See [BUILD.md](docs/BUILD.md), [PACKAGING.md](docs/PACKAGING.md), and [RELEASE.md](docs/RELEASE.md).
+See [Build](docs/BUILD.md), [Packaging](docs/PACKAGING.md), and [Release validation](docs/RELEASE.md).
 
 ## Documentation
 
+- [Documentation index and synchronization policy](docs/README.md)
 - [Architecture](docs/ARCHITECTURE.md)
+- [Runtime dependencies](docs/DEPENDENCIES.md)
 - [UI and UX](docs/UI-UX.md)
 - [Security](docs/SECURITY.md)
 - [Privacy](docs/PRIVACY.md)
 - [Accessibility](docs/ACCESSIBILITY.md)
 - [Windows packaging](docs/PACKAGING.md)
 - [Release validation](docs/RELEASE.md)
+- [Release notes](docs/RELEASE-NOTES.md)
 - [Windows behavior](docs/WINDOWS.md)
 - [Ghost RDP Host](docs/HOST.md)
 - [Remote access model](docs/REMOTE-ACCESS.md)
@@ -102,13 +108,13 @@ See [BUILD.md](docs/BUILD.md), [PACKAGING.md](docs/PACKAGING.md), and [RELEASE.m
 - [Roadmap](docs/ROADMAP.md)
 - [Changelog](CHANGELOG.md)
 
-## Screenshots
+## Screenshot policy
 
-Runtime screenshots are accepted only when captured from a real validated Windows build. Generated mockups are not presented as application screenshots. The Windows capture device is currently unavailable, so this branch intentionally uses the project logo and the technical UI overview above rather than fabricating screenshots.
+Runtime screenshots are accepted only when captured from a real validated Ghost RDP Windows build. Generated mockups are not presented as application screenshots. Until authentic runtime captures are committed, repository-owned branding and technical diagrams are used instead.
 
 ## Signing
 
-Current packages are unsigned. Authenticode signing will be added only when an authorized signing certificate or signing service is configured.
+Current packages are unsigned. Authenticode signing will be added only when an authorized signing certificate or signing service is configured. The project never claims signing that has not been produced and verified.
 
 ## License
 

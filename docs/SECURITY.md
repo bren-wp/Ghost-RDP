@@ -8,6 +8,14 @@ The current `mstsc.exe` integration uses an even narrower boundary: Ghost RDP do
 
 Future credential persistence may use Windows Credential Manager, DPAPI, or an appropriate Windows Hello-backed mechanism only after a dedicated security review.
 
+## Runtime dependency and supply-chain policy
+
+Production projects below `src/` intentionally depend only on .NET 8, WPF/Windows Desktop, Windows platform APIs, and other Ghost RDP projects in this repository. Third-party runtime NuGet packages and file-based external assembly references are prohibited by the current policy.
+
+CI scans `src/` project/props/targets files and fails if a runtime `PackageReference` or external file `HintPath` is introduced. Existing Microsoft test packages remain development-only and are not shipped as App, Core, Host, or Setup dependencies.
+
+Adding any third-party runtime component in the future requires an explicit policy change and a separate security, privacy, licensing, maintenance, and supply-chain review. See [DEPENDENCIES.md](DEPENDENCIES.md).
+
 ## Local UI settings
 
 `settings.json` is a schema-versioned local preference file. It stores startup view, default saved-computer sort, optional last-view memory, and the last eligible view. It does not store hosts, usernames, domains, gateway hosts, passwords, tokens, or credential material.
@@ -37,7 +45,7 @@ The generated file:
 
 ## Remote-access route boundary
 
-Direct/LAN mode makes no network configuration changes. Private VPN/overlay mode also connects directly to the target and assumes an independently configured private route already exists. It does not install, start, reconfigure, authenticate to, or monitor third-party VPN software.
+Direct/LAN mode makes no network configuration changes. Private VPN/overlay mode also connects directly to the target and assumes an independently configured private route already exists. It does not install, start, reconfigure, authenticate to, monitor, or depend on a third-party VPN SDK.
 
 RD Gateway mode configures only the Microsoft RDP client-side gateway properties for the user-initiated session. Ghost RDP does not configure the RD Gateway server, create gateway accounts, bypass gateway policies, or retain gateway secrets.
 
@@ -59,6 +67,8 @@ Accessibility features may change presentation and navigation behavior but never
 
 Production App and Host builds catch unexpected WPF dispatcher failures at the application boundary, show a generic user-safe error, and terminate rather than continuing in an unknown UI state. Unobserved background-task exceptions are marked observed; secrets are not included in these user-visible failure messages.
 
+Saved-computer search debounce is UI-only. It does not create a background service, network worker, or credential cache and is stopped/detached when the main window closes.
+
 ## Packaging boundary
 
 Release packaging produces self-contained x86, x64, and ARM64 App, Host, and Setup binaries. The normal Setup path is per-user under `%LOCALAPPDATA%\Programs\Ghost RDP` and runs as the current user without an elevation request.
@@ -73,12 +83,18 @@ Current release artifacts are unsigned. Ghost RDP must not claim Authenticode si
 
 ## Host policy
 
-Ghost RDP Host is not a stealth agent. If a background service is introduced later, it must be clearly named, visible in Windows service/app management, documented, revocable, and uninstallable.
+Ghost RDP Host is not a stealth agent. If a background service is introduced later, it must be clearly named, visible in Windows service/app management, documented, revocable, and uninstallable. The current architecture intentionally has no such service.
 
 ## Logging
 
 Security-sensitive values must be redacted before logging. The shared `SecretSanitizer` is an initial defensive primitive; future structured logging must classify and exclude secret fields at the source.
 
-## Security regression checks
+## Security and dependency regression checks
 
-CI rejects obvious command-line password patterns, RDP password-field patterns, gateway access-token fields, shell-launch patterns, Host mutation patterns, prohibited installer/service/firewall/elevation patterns, and missing security documentation. Tests and packaging checks cover input validation, profile/schema persistence, settings corruption handling, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data, RD Gateway serialization, Host readiness evaluation, firewall-port matching, architecture validation, runtime startup self-tests, release artifact integrity, and Setup install/uninstall behavior.
+CI rejects obvious command-line password patterns, RDP password-field patterns, gateway access-token fields, shell-launch patterns, Host mutation patterns, prohibited installer/service/firewall/elevation patterns, third-party runtime `PackageReference`/external assembly references, and missing required documentation.
+
+Tests and packaging checks cover input validation, profile/schema persistence, settings corruption handling, saved-computer query behavior, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data, RD Gateway serialization, Host readiness evaluation, firewall-port matching, architecture validation, runtime startup self-tests, release artifact integrity, and Setup install/uninstall behavior.
+
+## Documentation synchronization
+
+Security-affecting changes must update README, CHANGELOG, ROADMAP, this document, and every affected dependency/privacy/packaging/release document in the same review cycle. See [Documentation index](README.md).

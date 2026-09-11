@@ -2,15 +2,16 @@
 
 ## Goals
 
-Ghost RDP is a Windows-first remote desktop management product. The architecture separates reusable domain/security logic from Windows UI and host diagnostics so future platform-specific companions can be added without turning the Core project into a Windows shell wrapper.
+Ghost RDP is a Windows-first remote desktop management product. The architecture separates reusable domain/security logic from Windows UI and host diagnostics while keeping the shipped runtime dependency surface limited to .NET/WPF, Windows platform APIs, and Ghost RDP projects in this repository.
 
 ## Solution boundaries
 
 - `GhostRdp.Core` contains product metadata, validation, profile models/storage, security helpers, Microsoft RDP launch primitives, remote-access route models, Host readiness domain models/evaluation, runtime detection abstractions, and host-neutral helpers.
-- `GhostRdp.App` is the user-facing Windows WPF application and owns non-sensitive UI preference persistence.
+- `GhostRdp.App` is the user-facing Windows WPF application and owns non-sensitive UI preference persistence and saved-computer presentation/query behavior.
 - `GhostRdp.Host` is a separate, visible Windows application for read-only host-side readiness diagnostics.
+- `GhostRdp.Setup` is the repository-owned per-user Windows installer/uninstaller application.
 - `GhostRdp.Core.Tests` covers shared validation, profile persistence/migration, RDP file generation/process launch planning, Host readiness evaluation, and security behavior.
-- `GhostRdp.App.Tests` covers application metadata and UI-settings persistence behavior that can be tested without UI automation.
+- `GhostRdp.App.Tests` covers application metadata, settings persistence, and deterministic saved-computer filtering/sorting behavior that can be tested without UI automation.
 
 ## Saved computer persistence
 
@@ -21,6 +22,12 @@ Schema v2 adds `RemoteAccessMode` and an optional RD Gateway hostname. Schema-v1
 Writes are validated before serialization and use a random temporary file followed by replacement in the same directory. Invalid JSON, unsupported future schema versions, invalid profiles, and duplicate IDs are rejected. A corrupted store is not silently replaced by the app.
 
 Quick Connect is modeled separately from a saved profile. Validation does not persist anything. Conversion to a saved computer happens only through the explicit `Save as computer` action.
+
+## Saved-computer view efficiency
+
+The persistent profile list is distinct from the transient visible view. `ComputerProfileViewQuery` deterministically applies search, favorites filtering, and sort order without mutating stored profiles.
+
+Search text is debounced briefly on the WPF dispatcher so intermediate keystrokes do not trigger repeated full filter/sort/materialization cycles. Explicit sort and favorites changes refresh immediately. The UI caches the favorite count between profile mutations and restores selection after a view refresh when the selected UUID remains visible. The `ListBox` uses WPF virtualization and recycling to limit visual-container overhead.
 
 ## UI settings persistence
 
@@ -36,7 +43,7 @@ The settings store does not contain connection endpoints, usernames, domains, ga
 - `PrivateNetwork`: connect directly while documenting that an already-established VPN/overlay route is expected;
 - `RdGateway`: connect through an explicitly configured RD Gateway hostname.
 
-Private-network mode deliberately has no VPN control-plane integration. Ghost RDP does not install, start, configure, or authenticate to VPN/overlay software.
+Private-network mode deliberately has no VPN control-plane integration. Ghost RDP does not install, start, configure, authenticate to, or depend on a third-party VPN/overlay SDK.
 
 RD Gateway mode is a real Microsoft RDP configuration owner. The generated `.rdp` includes the validated gateway hostname, explicit gateway usage/profile settings, Windows-selected gateway credential source, and separate credential prompting. No gateway password/token is accepted by the profile model.
 
@@ -65,7 +72,7 @@ Windows High Contrast is observed through `SystemParameters.HighContrast`. When 
 - Windows Firewall COM policy: active profiles, firewall enabled state, block-all-inbound state, and inbound allow-rule coverage;
 - DNS/network interfaces: hostname, LAN addresses, and private-network/VPN adapter indicators.
 
-Each probe can return unavailable/unknown data independently. The evaluator refuses to emit a green ready state when a required value is unknown. The Host has no configuration-changing code path.
+Each probe can return unavailable/unknown data independently. The evaluator refuses to emit a green ready state when a required value is unknown. The Host has no configuration-changing code path and requires no third-party diagnostic framework.
 
 ## Trust boundaries
 
@@ -83,4 +90,10 @@ Ghost RDP Host reports `Ready for Remote Desktop` only when its required local W
 
 ## Dependency policy
 
-Prefer the .NET runtime and Windows platform APIs. New third-party runtime dependencies require a concrete feature justification and security review. Host readiness uses Windows registry, Service Control Manager, Firewall COM, and .NET networking APIs rather than adding a diagnostic framework dependency.
+Production projects under `src/` use only .NET 8, WPF/Windows Desktop, Windows platform APIs, and Ghost RDP `ProjectReference` relationships. Third-party runtime `PackageReference` and external file-based assembly `HintPath` references are prohibited by repository policy and checked by CI.
+
+Tests may use the existing Microsoft test tooling because it is development-only and not shipped with App, Core, Host, or Setup. Production x86/x64/ARM64 packages are self-contained, so users do not need to install the .NET runtime separately. See [DEPENDENCIES.md](DEPENDENCIES.md).
+
+## Documentation synchronization
+
+Architecture-affecting changes must update this document together with README, CHANGELOG, ROADMAP, and the relevant domain documents in the same pull-request cycle. See [Documentation index](README.md).

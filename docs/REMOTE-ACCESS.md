@@ -1,6 +1,6 @@
 # Remote Access Model
 
-Ghost RDP is designed to manage Remote Desktop connections to computers the user controls. It does not automatically expose Windows Remote Desktop to the public Internet.
+Ghost RDP is designed to manage Remote Desktop connections to computers the user controls. It does not automatically expose Windows Remote Desktop to the public Internet and does not provision a third-party network path.
 
 ## Connection routes
 
@@ -14,7 +14,7 @@ Microsoft Remote Desktop connects directly to the validated target host/IP and p
 
 The RDP transport is still a direct connection to the target host/IP and port. The label records the user's intended route and makes the security boundary clear: a private VPN or overlay must already be connected and routing the target address before Ghost RDP starts the session.
 
-Ghost RDP does not install, start, sign in to, configure, or modify VPN/overlay software. A detected tunnel adapter on Ghost RDP Host remains an informational indicator rather than proof that a usable route exists.
+Ghost RDP does not install, start, sign in to, configure, modify, or depend on a third-party VPN/overlay SDK. A detected tunnel adapter on Ghost RDP Host remains an informational indicator rather than proof that a usable route exists.
 
 ### RD Gateway
 
@@ -45,7 +45,7 @@ For access from another network, prefer one of these administrator-controlled de
 1. a private VPN or overlay network that places the client and host on a trusted private path;
 2. an administrator-managed Remote Desktop Gateway (RD Gateway).
 
-Ghost RDP now models both choices explicitly but does not provision either network path.
+Ghost RDP models both choices explicitly but does not provision either network path.
 
 ## Intentionally unsupported shortcuts
 
@@ -62,3 +62,11 @@ Ghost RDP does not automatically:
 - configure hidden persistence or a stealth remote-access agent.
 
 Remote-route labels and Host diagnostics describe intent and observable local state. They must not be interpreted as proof of end-to-end authorization, reachability, or successful authentication.
+
+## Runtime dependency policy
+
+Remote-access functionality uses Ghost RDP validation/serialization code plus Windows-owned `mstsc.exe`. No third-party RDP engine, relay client, VPN SDK, gateway SDK, or network-tunneling runtime package is included. See [DEPENDENCIES.md](DEPENDENCIES.md).
+
+## Documentation synchronization
+
+Changes to routes, `.rdp` properties, reachability claims, or network assumptions must update README, CHANGELOG, ROADMAP, Architecture, Security, Privacy, Windows, Release documentation, and this document together. See [Documentation index](README.md).

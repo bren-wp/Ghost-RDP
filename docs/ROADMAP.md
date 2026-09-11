@@ -1,6 +1,6 @@
 # Roadmap
 
-Status terminology: **implemented** means code exists and has passed repository CI; **development** means actively being built; **planned** means not yet exposed as a finished runtime feature; **unsupported** means intentionally excluded.
+Status terminology: **implemented** means code exists and has passed repository CI; **development** means actively being built/validated; **planned** means not yet exposed as a finished runtime feature; **unsupported** means intentionally excluded.
 
 | Milestone | Scope | Status |
 | --- | --- | --- |
@@ -14,25 +14,32 @@ Status terminology: **implemented** means code exists and has passed repository 
 | PR 8 | Release-candidate documentation and integrity checks | implemented |
 | PR 9 | Production stability hardening, x86/x64/ARM64 packaging, integrated Setup/uninstall, and automated GitHub Releases | implemented |
 | PR 10 | Deterministic dark theme, control templates, vector icons, list virtualization, and UI/UX documentation for 0.9.1 | implemented |
-| PR 11 | Saved-computer filtering/sorting performance, debounce, selection preservation, and query tests | development |
+| PR 11 | Saved-computer filtering/sorting performance, debounce, selection preservation, and query tests | implemented |
+| PR 12 | Documentation synchronization and enforced no-third-party-runtime-dependency policy | development |
 
 ## Production release
 
-Version 0.9.0 is the current published production release. It replaces the previous x64-only third-party installer path with the repository-owned Ghost RDP Setup project and provides self-contained x86, x64, and ARM64 App/Host/Setup binaries, canonical `setup.exe` and `portable.exe` compatibility downloads, native ARM64 smoke testing, PE architecture validation, SHA-256 integrity checks, and Windows Installed Apps uninstall without a separate persistent uninstall executable.
+Version 0.9.0 is the current published production release. It provides self-contained x86, x64, and ARM64 App/Host/Setup binaries, canonical `setup.exe` and `portable.exe` compatibility downloads, native ARM64 smoke testing, PE architecture validation, SHA-256 integrity checks, and Windows Installed Apps uninstall without a separate persistent uninstall executable.
 
 ## 0.9.1 development target
 
-The current maintenance milestone focuses on visual correctness and efficiency: ensuring concrete WPF window classes always receive the Ghost RDP palette, preventing Windows default black text/white controls from leaking into dark views, using project-owned text-field/dropdown templates, adding scalable vector UI icons, recycling saved-computer list containers, and reducing unnecessary filter/sort work while users type. No security boundary changes are introduced by this UI/performance pass.
+The 0.9.1 maintenance line focuses on visual correctness, accessibility, responsiveness, and dependency discipline without changing the RDP credential/security boundary.
 
-The saved-computer view keeps search responsive with a short debounce, leaves sort/favorites changes immediate, preserves selection when the selected profile remains visible, and avoids recounting favorites on each refresh. The query logic remains local and deterministic and introduces no additional runtime dependency.
+Implemented work includes deterministic WPF dark theming, project-owned text-field/dropdown templates, vector UI assets, saved-computer list recycling/virtualization, a short search debounce, deterministic query tests, selection preservation, and cached favorite counts.
 
-## Documentation follow-up
+The current dependency/documentation milestone makes the production runtime policy explicit: App/Core/Host/Setup remain on the .NET 8/WPF/Windows platform stack with repository project references and no third-party runtime `PackageReference` or external file-based assembly dependencies. CI validates that contract.
 
-Authentic Windows screenshots remain a documentation follow-up and are never replaced with generated mockups presented as runtime evidence. The README may use project branding and technical diagrams while runtime screenshot evidence still requires a real validated Windows build.
+## Documentation policy
+
+The maintained documentation set has a central index in `docs/README.md`. Functional changes are reviewed against README, CHANGELOG, ROADMAP, and every affected technical document in the same pull-request cycle. Release preparation additionally checks Build, Packaging, Release, Release Notes, Security, Privacy, and Dependencies for consistency.
+
+Authentic Windows screenshots remain a documentation follow-up and are never replaced with generated mockups presented as runtime evidence. Repository-owned branding and technical diagrams may be used while authentic runtime captures are not yet committed.
 
 ## Later work
 
 Session-history UX remains deferred until a reliable runtime source can distinguish process launch from an authenticated/usable RDP session. Authenticode signing remains deferred until a real authorized signing certificate or signing service is available.
+
+A future feature requiring any third-party runtime dependency is not part of the current roadmap by default. It would require an explicit dependency-policy change plus security, privacy, licensing, maintenance, and supply-chain review before implementation.
 
 ## Unsupported security shortcuts
 

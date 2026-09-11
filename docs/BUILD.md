@@ -7,7 +7,7 @@
 - PowerShell 7 or Windows PowerShell for repository scripts
 - Visual Studio 2022 or later is optional
 
-No third-party installer compiler is required. Ghost RDP Setup is built from the `GhostRdp.Setup` project with the same .NET toolchain as the App and Host.
+No third-party installer compiler or runtime package is required. Ghost RDP Setup is built from the `GhostRdp.Setup` project with the same .NET toolchain as the App and Host.
 
 ## Restore and build
 
@@ -18,11 +18,13 @@ dotnet build GhostRdp.sln -c Release --no-restore
 dotnet test GhostRdp.sln -c Release --no-build
 ```
 
-## Security regression script
+## Security and dependency regression
 
 ```powershell
 ./scripts/security-regression.ps1
 ```
+
+The regression script verifies both security boundaries and the production dependency policy. Project files below `src/` must not introduce a third-party `PackageReference` or an external file-based `HintPath` assembly reference. Existing Microsoft test packages live under the test projects and are development-only.
 
 ## Development publish output
 
@@ -31,6 +33,8 @@ dotnet publish src/GhostRdp.App/GhostRdp.App.csproj -c Release -r win-x64 --self
 dotnet publish src/GhostRdp.Host/GhostRdp.Host.csproj -c Release -r win-x64 --self-contained false -o artifacts/host
 ./scripts/validate-package.ps1 -AppDirectory ./artifacts/app -HostDirectory ./artifacts/host
 ```
+
+Framework-dependent output is for development validation only. Production release artifacts use self-contained publishing.
 
 ## Production multi-architecture packages
 
@@ -52,4 +56,10 @@ Valid architecture values are `x86`, `x64`, `arm64`, and `all`. Each production 
 ./scripts/test-installer.ps1 -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
 ```
 
-The release validator checks PE architecture, SHA-256 integrity, expected ZIP content, prohibited static `.rdp` files, and the no-separate-uninstaller contract. The installer smoke test verifies the Windows Installed Apps registration and confirms that uninstall removes the application without installing a distinct `uninstall.exe`.
+The release validator checks PE architecture, SHA-256 integrity, expected ZIP content, prohibited static `.rdp` files, and the no-separate-uninstaller contract. The installer smoke test verifies Windows Installed Apps registration and confirms that uninstall removes the application without installing a distinct `uninstall.exe`.
+
+CI additionally runs ARM64 App/Host/Setup self-tests and installer lifecycle validation on a native Windows ARM64 runner.
+
+## Documentation gate
+
+Build/security validation requires the maintained documentation set, including the documentation index and dependency policy. Functional or release changes should update README, CHANGELOG, ROADMAP, and all affected domain documents in the same pull request. See [Documentation index](README.md).
