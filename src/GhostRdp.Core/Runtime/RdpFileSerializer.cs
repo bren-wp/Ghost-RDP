@@ -1,4 +1,5 @@
 using System.Text;
+using GhostRdp.Core.Profiles;
 
 namespace GhostRdp.Core.Runtime;
 
@@ -21,6 +22,15 @@ public static class RdpFileSerializer
         if (!string.IsNullOrWhiteSpace(username))
         {
             AppendLine(builder, $"username:s:{username}");
+        }
+
+        if (request.RemoteAccessMode == RemoteAccessMode.RdGateway)
+        {
+            AppendLine(builder, $"gatewayhostname:s:{request.GatewayHost}");
+            AppendLine(builder, "gatewayusagemethod:i:1");
+            AppendLine(builder, "gatewayprofileusagemethod:i:1");
+            AppendLine(builder, "gatewaycredentialssource:i:4");
+            AppendLine(builder, "promptcredentialonce:i:0");
         }
 
         AppendLine(builder, "prompt for credentials:i:1");

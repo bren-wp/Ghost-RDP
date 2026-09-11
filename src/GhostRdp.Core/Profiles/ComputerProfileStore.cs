@@ -5,6 +5,8 @@ namespace GhostRdp.Core.Profiles;
 
 public sealed class ComputerProfileStore
 {
+    private const int OldestSupportedStoreSchemaVersion = 1;
+
     private static readonly JsonSerializerOptions SerializerOptions = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -37,12 +39,23 @@ public sealed class ComputerProfileStore
             var document = JsonSerializer.Deserialize<ProfileStoreDocument>(json, SerializerOptions)
                 ?? throw new InvalidDataException("Profile store is empty or invalid.");
 
-            if (document.SchemaVersion != ProfileStoreDocument.CurrentSchemaVersion)
+            if (document.SchemaVersion is < OldestSupportedStoreSchemaVersion or > ProfileStoreDocument.CurrentSchemaVersion)
             {
                 throw new InvalidDataException($"Unsupported profile store schema version: {document.SchemaVersion}.");
             }
 
             document.Computers ??= [];
+            foreach (var profile in document.Computers)
+            {
+                if (profile.SchemaVersion is < 1 or > ComputerProfile.CurrentSchemaVersion)
+                {
+                    throw new InvalidDataException($"Unsupported profile schema version: {profile.SchemaVersion}.");
+                }
+
+                profile.MigrateToCurrentSchema();
+            }
+
+            document.SchemaVersion = ProfileStoreDocument.CurrentSchemaVersion;
             var validation = ComputerProfileValidator.ValidateCollection(document.Computers);
             if (!validation.IsValid)
             {

@@ -82,6 +82,8 @@ public partial class MainWindow : Window
             filtered = filtered.Where(profile =>
                 profile.DisplayName.Contains(search, StringComparison.OrdinalIgnoreCase)
                 || profile.Host.Contains(search, StringComparison.OrdinalIgnoreCase)
+                || profile.GatewayHost.Contains(search, StringComparison.OrdinalIgnoreCase)
+                || profile.RemoteAccessMode.ToString().Contains(search, StringComparison.OrdinalIgnoreCase)
                 || profile.Username.Contains(search, StringComparison.OrdinalIgnoreCase)
                 || profile.Domain.Contains(search, StringComparison.OrdinalIgnoreCase)
                 || profile.Notes.Contains(search, StringComparison.OrdinalIgnoreCase)
@@ -155,7 +157,7 @@ public partial class MainWindow : Window
         }
 
         var result = MstscLauncher.Launch(RdpConnectionRequest.FromProfile(selected));
-        SetProfileStatus(result.Message, !result.Success);
+        SetProfileStatus($"{DescribeRemoteAccessMode(selected.RemoteAccessMode)} {result.Message}", !result.Success);
         if (!result.Success)
         {
             RefreshRuntimeStatus();
@@ -294,7 +296,10 @@ public partial class MainWindow : Window
         }
 
         var validation = draft.Validate();
-        SetQuickConnectStatus(validation.IsValid ? "Connection details are valid. No profile was created." : validation.Error ?? "Connection details are invalid.", !validation.IsValid);
+        var message = validation.IsValid
+            ? $"Connection details are valid. {DescribeRemoteAccessMode(draft.RemoteAccessMode)} No profile was created."
+            : validation.Error ?? "Connection details are invalid.";
+        SetQuickConnectStatus(message, !validation.IsValid);
     }
 
     private void QuickConnectConnectButton_Click(object sender, RoutedEventArgs e)
@@ -313,7 +318,7 @@ public partial class MainWindow : Window
         }
 
         var result = MstscLauncher.Launch(RdpConnectionRequest.FromQuickConnect(draft));
-        SetQuickConnectStatus(result.Message, !result.Success);
+        SetQuickConnectStatus($"{DescribeRemoteAccessMode(draft.RemoteAccessMode)} {result.Message}", !result.Success);
         if (!result.Success)
         {
             RefreshRuntimeStatus();
@@ -363,16 +368,35 @@ public partial class MainWindow : Window
             return false;
         }
 
+        var remoteAccessMode = GetRemoteAccessMode(QuickRemoteAccessModeComboBox.SelectedIndex);
         draft = new QuickConnectDraft
         {
             Host = QuickHostTextBox.Text.Trim(),
             Port = port,
             Username = QuickUsernameTextBox.Text.Trim(),
-            Domain = QuickDomainTextBox.Text.Trim()
+            Domain = QuickDomainTextBox.Text.Trim(),
+            RemoteAccessMode = remoteAccessMode,
+            GatewayHost = remoteAccessMode == RemoteAccessMode.RdGateway
+                ? QuickGatewayHostTextBox.Text.Trim()
+                : string.Empty
         };
         error = string.Empty;
         return true;
     }
+
+    private static RemoteAccessMode GetRemoteAccessMode(int selectedIndex) => selectedIndex switch
+    {
+        1 => RemoteAccessMode.PrivateNetwork,
+        2 => RemoteAccessMode.RdGateway,
+        _ => RemoteAccessMode.Direct
+    };
+
+    private static string DescribeRemoteAccessMode(RemoteAccessMode mode) => mode switch
+    {
+        RemoteAccessMode.PrivateNetwork => "Private-network route selected; Ghost RDP assumes your VPN/overlay route is already active.",
+        RemoteAccessMode.RdGateway => "RD Gateway route selected; Microsoft Remote Desktop owns gateway and target credential prompts.",
+        _ => "Direct route selected."
+    };
 
     private void SetProfileStatus(string message, bool isError)
     {

@@ -4,7 +4,7 @@
 
 The default credential policy is **password memory-only**. Passwords and equivalent secrets must not be persisted in JSON, XML, SQLite plaintext, registry plaintext, logs, process arguments, `.rdp` files, or crash reports.
 
-The current `mstsc.exe` integration uses an even narrower boundary: Ghost RDP does not ask for or transport a password at all. Microsoft Remote Desktop/Windows owns credential entry after the user explicitly starts a connection.
+The current `mstsc.exe` integration uses an even narrower boundary: Ghost RDP does not ask for or transport a password at all. Microsoft Remote Desktop/Windows owns credential entry after the user explicitly starts a connection, including credentials requested by an RD Gateway.
 
 Future credential persistence may use Windows Credential Manager, DPAPI, or an appropriate Windows Hello-backed mechanism only after a dedicated security review.
 
@@ -16,16 +16,24 @@ A password is never sent to `mstsc.exe` on the command line. Ghost RDP does not 
 
 ## Temporary `.rdp` files
 
-A user-initiated connection creates a unique session directory below the current user's temporary directory and a random `.rdp` filename. The file contains only validated connection metadata needed by Microsoft Remote Desktop, such as the full address and optional username/domain metadata.
+A user-initiated connection creates a unique session directory below the current user's temporary directory and a random `.rdp` filename. The file contains only validated connection metadata needed by Microsoft Remote Desktop.
 
 The generated file:
 
-- contains no password or equivalent secret;
+- contains no password, gateway password, access token, or equivalent secret;
 - requires server authentication rather than permitting a failed server-authentication result to continue;
 - keeps CredSSP enabled;
 - requests Windows-owned credential prompting;
+- for RD Gateway, includes only the validated gateway hostname and documented routing/credential-source settings;
+- does not force target and gateway credentials to be shared;
 - is deleted after the Microsoft RDP process exits;
 - is eligible for stale-session cleanup after 24 hours if Ghost RDP terminates before normal cleanup.
+
+## Remote-access route boundary
+
+Direct/LAN mode makes no network configuration changes. Private VPN/overlay mode also connects directly to the target and assumes an independently configured private route already exists. It does not install, start, reconfigure, authenticate to, or monitor third-party VPN software.
+
+RD Gateway mode configures only the Microsoft RDP client-side gateway properties for the user-initiated session. Ghost RDP does not configure the RD Gateway server, create gateway accounts, bypass gateway policies, or retain gateway secrets.
 
 ## Ghost RDP Host diagnostic boundary
 
@@ -67,4 +75,4 @@ Security-sensitive values must be redacted before logging. The shared `SecretSan
 
 ## Security regression checks
 
-CI rejects obvious command-line password patterns, RDP password-field patterns, shell-launch patterns, and missing security documentation. Tests cover input validation, profile persistence, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, the absence of password data from generated `.rdp` content, Host readiness evaluation, and firewall-port matching.
+CI rejects obvious command-line password patterns, RDP password-field patterns, shell-launch patterns, and missing security documentation. Tests cover input validation, profile persistence and schema migration, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data from generated `.rdp` content, RD Gateway serialization, Host readiness evaluation, and firewall-port matching.

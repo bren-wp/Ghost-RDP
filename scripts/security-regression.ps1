@@ -6,6 +6,7 @@ $forbiddenPatterns = @(
     '(?i)--password(?:=|\s)',
     '(?i)password\s*=',
     '(?i)password\s+\d+:[a-z]:',
+    '(?i)gatewayaccesstoken\s*:',
     '(?i)UseShellExecute\s*=\s*true',
     '(?i)ProcessStartInfo\s*\(\s*["''](?:cmd|powershell|pwsh)(?:\.exe)?["'']'
 )

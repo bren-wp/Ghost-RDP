@@ -2,10 +2,10 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Ghost RDP"
-        Width="1220"
-        Height="780"
-        MinWidth="960"
-        MinHeight="640"
+        Width="1280"
+        Height="840"
+        MinWidth="1000"
+        MinHeight="680"
         WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -54,7 +54,7 @@
                         Margin="0,16,0,0">
                     <StackPanel>
                         <TextBlock Text="Windows-owned credentials" FontWeight="SemiBold" />
-                        <TextBlock Text="Ghost RDP never places passwords in profiles, .rdp files, or process arguments."
+                        <TextBlock Text="Passwords never enter saved profiles, temporary .rdp files, or process arguments."
                                    Foreground="{StaticResource MutedBrush}"
                                    FontSize="12"
                                    Margin="0,4,0,0"
@@ -141,7 +141,7 @@
                             Padding="22">
                         <StackPanel>
                             <TextBlock Text="Quick Connect" FontSize="18" FontWeight="SemiBold" />
-                            <TextBlock Text="Open a one-off Microsoft Remote Desktop session without silently saving a profile."
+                            <TextBlock Text="Open a one-off direct, private-network, or RD Gateway session without silently saving a profile."
                                        Foreground="{StaticResource MutedBrush}"
                                        TextWrapping="Wrap"
                                        Margin="0,8,0,0" />
@@ -217,7 +217,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox x:Name="ComputerSearchTextBox"
                              TextChanged="ComputerSearchTextBox_TextChanged"
-                             ToolTip="Search name, host, user, tags, or notes" />
+                             ToolTip="Search name, host, gateway, user, tags, or notes" />
                     <ComboBox x:Name="ComputerSortComboBox"
                               Grid.Column="2"
                               SelectionChanged="ComputerSortComboBox_SelectionChanged"
@@ -278,7 +278,8 @@
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="2*" />
-                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="1.7*" />
+                                        <ColumnDefinition Width="1.5*" />
                                         <ColumnDefinition Width="1.4*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
@@ -288,7 +289,7 @@
                                                    Foreground="{StaticResource MutedBrush}"
                                                    FontSize="12"
                                                    TextTrimming="CharacterEllipsis"
-                                                   MaxWidth="330"
+                                                   MaxWidth="300"
                                                    Margin="0,4,0,0" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1">
@@ -299,13 +300,21 @@
                                                    Margin="0,4,0,0" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
+                                        <TextBlock Text="{Binding RemoteAccessMode}" />
+                                        <TextBlock Text="{Binding GatewayHost}"
+                                                   Foreground="{StaticResource MutedBrush}"
+                                                   FontSize="12"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   Margin="0,4,0,0" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="3">
                                         <TextBlock Text="{Binding Username}" />
                                         <TextBlock Text="{Binding Domain}"
                                                    Foreground="{StaticResource MutedBrush}"
                                                    FontSize="12"
                                                    Margin="0,4,0,0" />
                                     </StackPanel>
-                                    <Border Grid.Column="3"
+                                    <Border Grid.Column="4"
                                             Background="{StaticResource SelectionBrush}"
                                             CornerRadius="6"
                                             Padding="8,4"
@@ -359,7 +368,6 @@
             <Grid x:Name="QuickConnectView" Visibility="Collapsed">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
@@ -372,97 +380,118 @@
                                TextWrapping="Wrap" />
                 </StackPanel>
 
-                <Border Grid.Row="1"
-                        Background="{StaticResource PanelBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="12"
-                        Padding="24"
-                        Margin="0,26,0,0"
-                        MaxWidth="760"
-                        HorizontalAlignment="Left">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="16" />
-                                <ColumnDefinition Width="130" />
-                            </Grid.ColumnDefinitions>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,24,0,0">
+                    <StackPanel MaxWidth="800" HorizontalAlignment="Left">
+                        <Border Background="{StaticResource PanelBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="24">
                             <StackPanel>
-                                <TextBlock Text="Host / IP" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
-                                <TextBox x:Name="QuickHostTextBox" />
-                            </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Port" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
-                                <TextBox x:Name="QuickPortTextBox" Text="3389" />
-                            </StackPanel>
-                        </Grid>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="16" />
+                                        <ColumnDefinition Width="130" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Host / IP" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
+                                        <TextBox x:Name="QuickHostTextBox" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Port" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
+                                        <TextBox x:Name="QuickPortTextBox" Text="3389" />
+                                    </StackPanel>
+                                </Grid>
 
-                        <Grid Margin="0,16,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="16" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
+                                <Grid Margin="0,16,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="16" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="Username" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
+                                        <TextBox x:Name="QuickUsernameTextBox" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Domain" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
+                                        <TextBox x:Name="QuickDomainTextBox" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <TextBlock Text="Remote access route" Foreground="{StaticResource MutedBrush}" Margin="0,18,0,6" />
+                                <ComboBox x:Name="QuickRemoteAccessModeComboBox" SelectedIndex="0">
+                                    <ComboBoxItem Content="Direct / LAN" />
+                                    <ComboBoxItem Content="Private VPN / overlay" />
+                                    <ComboBoxItem Content="RD Gateway" />
+                                </ComboBox>
+
+                                <TextBlock Text="RD Gateway host" Foreground="{StaticResource MutedBrush}" Margin="0,16,0,6" />
+                                <TextBox x:Name="QuickGatewayHostTextBox" ToolTip="Required only when RD Gateway route is selected" />
+
+                                <TextBlock Text="Saved computer name" Foreground="{StaticResource MutedBrush}" Margin="0,20,0,6" />
+                                <TextBox x:Name="QuickSaveNameTextBox"
+                                         MaxLength="100"
+                                         ToolTip="Required only when saving this connection as a computer" />
+
+                                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                                    <Button Style="{StaticResource SecondaryButtonStyle}"
+                                            Content="Validate details"
+                                            Margin="0,0,10,0"
+                                            Click="ValidateQuickConnectButton_Click" />
+                                    <Button x:Name="QuickConnectConnectButton"
+                                            Style="{StaticResource PrimaryButtonStyle}"
+                                            Content="Connect"
+                                            IsEnabled="False"
+                                            Margin="0,0,10,0"
+                                            Click="QuickConnectConnectButton_Click" />
+                                    <Button Style="{StaticResource SecondaryButtonStyle}"
+                                            Content="Save as computer"
+                                            Click="SaveQuickConnectButton_Click" />
+                                </StackPanel>
+                                <TextBlock x:Name="QuickConnectStatusText"
+                                           Foreground="{StaticResource MutedBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,16,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Background="{StaticResource PanelAltBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="20"
+                                Margin="0,18,0,0">
                             <StackPanel>
-                                <TextBlock Text="Username" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
-                                <TextBox x:Name="QuickUsernameTextBox" />
+                                <TextBlock Text="Route behavior" FontWeight="SemiBold" />
+                                <TextBlock Text="Direct / LAN connects to the target as entered. Private VPN / overlay also connects directly and assumes your private network is already active. RD Gateway writes an explicit Microsoft RD Gateway route into the temporary .rdp file. Ghost RDP does not configure VPNs, router forwarding, or firewall exceptions."
+                                           Foreground="{StaticResource MutedBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,6,0,0" />
                             </StackPanel>
-                            <StackPanel Grid.Column="2">
-                                <TextBlock Text="Domain" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
-                                <TextBox x:Name="QuickDomainTextBox" />
+                        </Border>
+
+                        <Border Background="{StaticResource PanelAltBrush}"
+                                BorderBrush="{StaticResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="12"
+                                Padding="20"
+                                Margin="0,14,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Credential boundary" FontWeight="SemiBold" />
+                                <TextBlock Text="Ghost RDP passes only the temporary .rdp file path to mstsc.exe. Password entry for both the remote computer and RD Gateway remains owned by Microsoft Remote Desktop and is never placed in the temporary file or process command line."
+                                           Foreground="{StaticResource MutedBrush}"
+                                           TextWrapping="Wrap"
+                                           Margin="0,6,0,0" />
                             </StackPanel>
-                        </Grid>
-
-                        <TextBlock Text="Saved computer name" Foreground="{StaticResource MutedBrush}" Margin="0,20,0,6" />
-                        <TextBox x:Name="QuickSaveNameTextBox"
-                                 MaxLength="100"
-                                 ToolTip="Required only when saving this connection as a computer" />
-
-                        <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                            <Button Style="{StaticResource SecondaryButtonStyle}"
-                                    Content="Validate details"
-                                    Margin="0,0,10,0"
-                                    Click="ValidateQuickConnectButton_Click" />
-                            <Button x:Name="QuickConnectConnectButton"
-                                    Style="{StaticResource PrimaryButtonStyle}"
-                                    Content="Connect"
-                                    IsEnabled="False"
-                                    Margin="0,0,10,0"
-                                    Click="QuickConnectConnectButton_Click" />
-                            <Button Style="{StaticResource SecondaryButtonStyle}"
-                                    Content="Save as computer"
-                                    Click="SaveQuickConnectButton_Click" />
-                        </StackPanel>
-                        <TextBlock x:Name="QuickConnectStatusText"
-                                   Foreground="{StaticResource MutedBrush}"
-                                   TextWrapping="Wrap"
-                                   Margin="0,16,0,0" />
+                        </Border>
                     </StackPanel>
-                </Border>
-
-                <Border Grid.Row="2"
-                        Background="{StaticResource PanelAltBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="12"
-                        Padding="20"
-                        Margin="0,20,0,0"
-                        MaxWidth="760"
-                        HorizontalAlignment="Left"
-                        VerticalAlignment="Top">
-                    <StackPanel>
-                        <TextBlock Text="Credential boundary" FontWeight="SemiBold" />
-                        <TextBlock Text="Ghost RDP passes only the temporary .rdp file path to mstsc.exe. Password entry is owned by Microsoft Remote Desktop and is never placed in the temporary file or process command line."
-                                   Foreground="{StaticResource MutedBrush}"
-                                   TextWrapping="Wrap"
-                                   Margin="0,6,0,0" />
-                    </StackPanel>
-                </Border>
+                </ScrollViewer>
             </Grid>
 
             <Grid x:Name="AboutView" Visibility="Collapsed">
-                <StackPanel MaxWidth="760" HorizontalAlignment="Left">
+                <StackPanel MaxWidth="780" HorizontalAlignment="Left">
                     <TextBlock Text="About Ghost RDP" FontSize="30" FontWeight="SemiBold" />
                     <TextBlock x:Name="AboutText"
                                Foreground="{StaticResource MutedBrush}"
@@ -477,7 +506,7 @@
                             Margin="0,28,0,0">
                         <StackPanel>
                             <TextBlock Text="Security model" FontSize="18" FontWeight="SemiBold" />
-                            <TextBlock Text="Ghost RDP keeps Windows security controls intact. Connect uses Microsoft mstsc.exe, structured process arguments, temporary password-free .rdp files, and Windows-owned credential prompts."
+                            <TextBlock Text="Ghost RDP keeps Windows security controls intact. Direct/private-network routes never configure the network, while RD Gateway uses explicit Microsoft RDP properties. Credentials remain Windows-owned."
                                        Foreground="{StaticResource MutedBrush}"
                                        TextWrapping="Wrap"
                                        Margin="0,8,0,0" />

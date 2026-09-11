@@ -25,7 +25,7 @@ public sealed class ComputerProfileStoreTests
     }
 
     [TestMethod]
-    public void SaveAndLoad_RoundTripsProfileWithoutPasswordField()
+    public void SaveAndLoad_RoundTripsGatewayProfileWithoutPasswordField()
     {
         var store = new ComputerProfileStore(_filePath);
         var profile = new ComputerProfile
@@ -34,6 +34,8 @@ public sealed class ComputerProfileStoreTests
             Host = "office.internal",
             Username = "marko",
             Domain = "WORK",
+            RemoteAccessMode = RemoteAccessMode.RdGateway,
+            GatewayHost = "gateway.example.test",
             Favorite = true,
             Tags = ["office", "private"]
         };
@@ -45,8 +47,46 @@ public sealed class ComputerProfileStoreTests
         Assert.AreEqual(1, loaded.Count);
         Assert.AreEqual(profile.Id, loaded[0].Id);
         Assert.AreEqual(ComputerProfile.CurrentSchemaVersion, loaded[0].SchemaVersion);
+        Assert.AreEqual(RemoteAccessMode.RdGateway, loaded[0].RemoteAccessMode);
+        Assert.AreEqual("gateway.example.test", loaded[0].GatewayHost);
         Assert.IsFalse(json.Contains("password", StringComparison.OrdinalIgnoreCase));
         Assert.IsFalse(json.Contains("credential", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [TestMethod]
+    public void Load_V1Store_MigratesInMemoryWithoutModifyingSourceFile()
+    {
+        Directory.CreateDirectory(_directory);
+        var id = Guid.NewGuid();
+        var legacy = $$"""
+            {
+              "schemaVersion": 1,
+              "computers": [
+                {
+                  "schemaVersion": 1,
+                  "id": "{{id}}",
+                  "displayName": "Legacy PC",
+                  "host": "legacy.internal",
+                  "port": 3389,
+                  "username": "legacy",
+                  "domain": "WORK",
+                  "notes": "",
+                  "favorite": false,
+                  "tags": []
+                }
+              ]
+            }
+            """;
+        File.WriteAllText(_filePath, legacy);
+        var store = new ComputerProfileStore(_filePath);
+
+        var loaded = store.Load();
+
+        Assert.AreEqual(1, loaded.Count);
+        Assert.AreEqual(ComputerProfile.CurrentSchemaVersion, loaded[0].SchemaVersion);
+        Assert.AreEqual(RemoteAccessMode.Direct, loaded[0].RemoteAccessMode);
+        Assert.AreEqual(string.Empty, loaded[0].GatewayHost);
+        Assert.AreEqual(legacy, File.ReadAllText(_filePath));
     }
 
     [TestMethod]
@@ -66,6 +106,18 @@ public sealed class ComputerProfileStoreTests
     {
         Directory.CreateDirectory(_directory);
         File.WriteAllText(_filePath, "{\"schemaVersion\":99,\"computers\":[]}");
+        var store = new ComputerProfileStore(_filePath);
+
+        Assert.ThrowsException<InvalidDataException>(() => store.Load());
+    }
+
+    [TestMethod]
+    public void Load_UnsupportedProfileSchema_IsRejected()
+    {
+        Directory.CreateDirectory(_directory);
+        File.WriteAllText(
+            _filePath,
+            "{\"schemaVersion\":2,\"computers\":[{\"schemaVersion\":99,\"id\":\"11111111-1111-1111-1111-111111111111\",\"displayName\":\"PC\",\"host\":\"pc\",\"port\":3389,\"username\":\"\",\"domain\":\"\",\"remoteAccessMode\":\"Direct\",\"gatewayHost\":\"\",\"notes\":\"\",\"favorite\":false,\"tags\":[]}]}");
         var store = new ComputerProfileStore(_filePath);
 
         Assert.ThrowsException<InvalidDataException>(() => store.Load());
