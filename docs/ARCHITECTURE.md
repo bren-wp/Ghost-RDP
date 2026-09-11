@@ -6,11 +6,19 @@ Ghost RDP is a Windows-first remote desktop management product. The architecture
 
 ## Solution boundaries
 
-- `GhostRdp.Core` contains product metadata, validation, security helpers, runtime detection abstractions, and host-neutral models.
+- `GhostRdp.Core` contains product metadata, validation, profile models/storage, security helpers, runtime detection abstractions, and host-neutral models.
 - `GhostRdp.App` is the user-facing Windows WPF application.
 - `GhostRdp.Host` is a separate, visible Windows application for host-side readiness and diagnostics.
-- `GhostRdp.Core.Tests` covers shared validation and security behavior.
+- `GhostRdp.Core.Tests` covers shared validation, profile persistence, and security behavior.
 - `GhostRdp.App.Tests` covers application-facing metadata and behavior that can be tested without UI automation.
+
+## Saved computer persistence
+
+Saved computers use a schema-versioned JSON document under the current user's local application-data directory. Each profile also carries its own schema version and stable UUID. The profile schema intentionally has no password property.
+
+Writes are validated before serialization and use a random temporary file followed by replacement in the same directory. Invalid JSON, unsupported schema versions, invalid profiles, and duplicate IDs are rejected. A corrupted store is not silently replaced by the app.
+
+Quick Connect is modeled separately from a saved profile. Validation does not persist anything. Conversion to a saved computer happens only through the explicit `Save as computer` action.
 
 ## Trust boundaries
 
@@ -24,4 +32,4 @@ The UI must not claim a connection, host readiness state, VPN state, firewall st
 
 ## Dependency policy
 
-Prefer the .NET runtime and Windows platform APIs. New third-party runtime dependencies require a concrete feature justification and security review. Test-only packages are kept to Microsoft test tooling in the initial milestone.
+Prefer the .NET runtime and Windows platform APIs. New third-party runtime dependencies require a concrete feature justification and security review. Test-only packages are kept to Microsoft test tooling in the initial milestones.
