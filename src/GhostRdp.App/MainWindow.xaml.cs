@@ -4,6 +4,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
+using GhostRdp.App.Profiles;
 using GhostRdp.App.Settings;
 using GhostRdp.Core.Profiles;
 using GhostRdp.Core.Runtime;
@@ -21,14 +23,20 @@ public partial class MainWindow : Window
     private readonly ComputerProfileStore _profileStore;
     private readonly AppSettingsStore _settingsStore;
     private readonly Dictionary<string, Color> _standardPalette = new(StringComparer.Ordinal);
+    private readonly DispatcherTimer _profileSearchDebounceTimer = new()
+    {
+        Interval = TimeSpan.FromMilliseconds(180)
+    };
     private List<ComputerProfile> _profiles = [];
     private AppSettings _settings = AppSettings.CreateDefault();
+    private int _favoriteProfileCount;
     private bool _profileStoreWritable = true;
     private bool _settingsAutoPersistEnabled = true;
 
     public MainWindow()
     {
         InitializeComponent();
+        _profileSearchDebounceTimer.Tick += ProfileSearchDebounceTimer_Tick;
         CaptureStandardPalette();
         SystemParameters.StaticPropertyChanged += SystemParameters_StaticPropertyChanged;
 
@@ -49,6 +57,8 @@ public partial class MainWindow : Window
 
     protected override void OnClosed(EventArgs e)
     {
+        _profileSearchDebounceTimer.Stop();
+        _profileSearchDebounceTimer.Tick -= ProfileSearchDebounceTimer_Tick;
         SystemParameters.StaticPropertyChanged -= SystemParameters_StaticPropertyChanged;
         base.OnClosed(e);
     }
@@ -238,12 +248,14 @@ public partial class MainWindow : Window
         try
         {
             _profiles = _profileStore.Load().Select(profile => profile.Clone()).ToList();
+            _favoriteProfileCount = _profiles.Count(profile => profile.Favorite);
             _profileStoreWritable = true;
             SetProfileStatus($"Profiles are stored locally at {_profileStore.FilePath}", false);
         }
         catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
         {
             _profiles = [];
+            _favoriteProfileCount = 0;
             _profileStoreWritable = false;
             SetProfileStatus($"Saved computers could not be loaded: {exception.Message} Existing profile data will not be overwritten.", true);
         }
@@ -273,52 +285,55 @@ public partial class MainWindow : Window
 
     private void RefreshProfileViews()
     {
-        var search = ComputerSearchTextBox.Text.Trim();
-        IEnumerable<ComputerProfile> filtered = _profiles;
-        if (!string.IsNullOrWhiteSpace(search))
+        var selectedId = (ProfileListBox.SelectedItem as ComputerProfile)?.Id;
+        var sortPreference = (ComputerSortComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() switch
         {
-            filtered = filtered.Where(profile =>
-                profile.DisplayName.Contains(search, StringComparison.OrdinalIgnoreCase)
-                || profile.Host.Contains(search, StringComparison.OrdinalIgnoreCase)
-                || profile.GatewayHost.Contains(search, StringComparison.OrdinalIgnoreCase)
-                || profile.RemoteAccessMode.ToString().Contains(search, StringComparison.OrdinalIgnoreCase)
-                || profile.Username.Contains(search, StringComparison.OrdinalIgnoreCase)
-                || profile.Domain.Contains(search, StringComparison.OrdinalIgnoreCase)
-                || profile.Notes.Contains(search, StringComparison.OrdinalIgnoreCase)
-                || profile.Tags.Any(tag => tag.Contains(search, StringComparison.OrdinalIgnoreCase)));
-        }
-
-        if (FavoritesOnlyCheckBox.IsChecked == true)
-        {
-            filtered = filtered.Where(profile => profile.Favorite);
-        }
-
-        var sortTag = (ComputerSortComboBox.SelectedItem as ComboBoxItem)?.Tag?.ToString();
-        filtered = sortTag switch
-        {
-            "host" => filtered.OrderBy(profile => profile.Host, StringComparer.OrdinalIgnoreCase).ThenBy(profile => profile.DisplayName, StringComparer.OrdinalIgnoreCase),
-            "favorite" => filtered.OrderByDescending(profile => profile.Favorite).ThenBy(profile => profile.DisplayName, StringComparer.OrdinalIgnoreCase),
-            _ => filtered.OrderBy(profile => profile.DisplayName, StringComparer.OrdinalIgnoreCase)
+            "host" => ComputerSortPreference.Host,
+            "favorite" => ComputerSortPreference.FavoritesFirst,
+            _ => ComputerSortPreference.Name
         };
+        var visibleProfiles = ComputerProfileViewQuery.Apply(
+            _profiles,
+            ComputerSearchTextBox.Text,
+            FavoritesOnlyCheckBox.IsChecked == true,
+            sortPreference);
 
-        ProfileListBox.ItemsSource = filtered.ToList();
-        ComputerSummaryText.Text = $"{_profiles.Count} saved computer{(_profiles.Count == 1 ? string.Empty : "s")}";
+        ProfileListBox.ItemsSource = visibleProfiles;
+        if (selectedId is Guid id)
+        {
+            ProfileListBox.SelectedItem = visibleProfiles.FirstOrDefault(profile => profile.Id == id);
+        }
+
+        var totalText = $"{_profiles.Count} saved computer{(_profiles.Count == 1 ? string.Empty : "s")}";
+        ComputerSummaryText.Text = visibleProfiles.Count == _profiles.Count
+            ? totalText
+            : $"{totalText} · {visibleProfiles.Count} shown";
         SavedComputerCountText.Text = _profiles.Count.ToString(CultureInfo.InvariantCulture);
-        FavoriteCountText.Text = _profiles.Count(profile => profile.Favorite).ToString(CultureInfo.InvariantCulture);
+        FavoriteCountText.Text = _favoriteProfileCount.ToString(CultureInfo.InvariantCulture);
     }
 
     private void ComputerSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
     {
-        if (IsLoaded)
+        if (!IsLoaded)
         {
-            RefreshProfileViews();
+            return;
         }
+
+        _profileSearchDebounceTimer.Stop();
+        _profileSearchDebounceTimer.Start();
+    }
+
+    private void ProfileSearchDebounceTimer_Tick(object? sender, EventArgs e)
+    {
+        _profileSearchDebounceTimer.Stop();
+        RefreshProfileViews();
     }
 
     private void ComputerSortComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (IsLoaded)
         {
+            _profileSearchDebounceTimer.Stop();
             RefreshProfileViews();
         }
     }
@@ -327,6 +342,7 @@ public partial class MainWindow : Window
     {
         if (IsLoaded)
         {
+            _profileSearchDebounceTimer.Stop();
             RefreshProfileViews();
         }
     }
@@ -474,6 +490,7 @@ public partial class MainWindow : Window
         {
             _profileStore.Save(candidate);
             _profiles = candidate;
+            _favoriteProfileCount = _profiles.Count(profile => profile.Favorite);
             SetProfileStatus(successMessage, false);
             RefreshProfileViews();
             return true;

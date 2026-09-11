@@ -14,6 +14,9 @@ UI/UX consistency, accessibility hardening, and lower visual-tree overhead after
 - Combo boxes use a project-owned dark template and popup instead of falling back to a white Windows theme surface.
 - Sidebar navigation now includes lightweight vector icons.
 - Saved-computer lists explicitly enable WPF virtualization and recycling to reduce visual-container overhead for larger profile collections.
+- Saved-computer text search now debounces intermediate keystrokes before filtering/sorting, while sort and favorites changes remain immediate.
+- Saved-computer refresh preserves the current selection when the selected profile remains visible and reuses a cached favorites total instead of recounting the full collection on every refresh.
+- Saved-computer filtering and sorting are isolated in a deterministic App query component with dedicated tests and no new runtime dependencies.
 - WPF title/taskbar windows use a vector Ghost RDP application mark.
 - README now includes the project logo, release/status badges, a technical UI/runtime overview, and explicit UI/performance documentation.
 

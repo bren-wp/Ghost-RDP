@@ -13,7 +13,8 @@ Status terminology: **implemented** means code exists and has passed repository 
 | PR 7 | Initial Windows Setup and Portable packaging | implemented |
 | PR 8 | Release-candidate documentation and integrity checks | implemented |
 | PR 9 | Production stability hardening, x86/x64/ARM64 packaging, integrated Setup/uninstall, and automated GitHub Releases | implemented |
-| PR 10 | Deterministic dark theme, control templates, vector icons, list virtualization, and UI/UX documentation for 0.9.1 | development |
+| PR 10 | Deterministic dark theme, control templates, vector icons, list virtualization, and UI/UX documentation for 0.9.1 | implemented |
+| PR 11 | Saved-computer filtering/sorting performance, debounce, selection preservation, and query tests | development |
 
 ## Production release
 
@@ -21,7 +22,9 @@ Version 0.9.0 is the current published production release. It replaces the previ
 
 ## 0.9.1 development target
 
-The next maintenance milestone focuses on visual correctness and efficiency: ensuring concrete WPF window classes always receive the Ghost RDP palette, preventing Windows default black text/white controls from leaking into dark views, using project-owned text-field/dropdown templates, adding scalable vector UI icons, and recycling saved-computer list containers. No security boundary changes are introduced by this UI pass.
+The current maintenance milestone focuses on visual correctness and efficiency: ensuring concrete WPF window classes always receive the Ghost RDP palette, preventing Windows default black text/white controls from leaking into dark views, using project-owned text-field/dropdown templates, adding scalable vector UI icons, recycling saved-computer list containers, and reducing unnecessary filter/sort work while users type. No security boundary changes are introduced by this UI/performance pass.
+
+The saved-computer view keeps search responsive with a short debounce, leaves sort/favorites changes immediate, preserves selection when the selected profile remains visible, and avoids recounting favorites on each refresh. The query logic remains local and deterministic and introduces no additional runtime dependency.
 
 ## Documentation follow-up
 

@@ -26,6 +26,10 @@ The interface avoids dense decorative chrome. Panels, borders, and spacing are u
 
 Ghost RDP does not use continuous UI polling, telemetry workers, an always-on Windows service, or a central network relay. Saved-computer `ListBox` controls enable WPF virtualization and recycling so off-screen rows can reuse item containers rather than keeping a full rendered row tree for every profile.
 
+Saved-computer text search uses a short UI-thread debounce before applying filtering and sorting. Sort and favorites changes remain immediate. This prevents a full filter/sort/materialization cycle for every intermediate keystroke while keeping search responsive. The view also restores the selected computer after refresh when that profile remains visible and caches the favorites total instead of recounting the full collection on each view refresh.
+
+Filter and sort behavior is isolated in a small deterministic query component covered by App tests. It uses only existing .NET/WPF functionality and introduces no additional runtime package or service dependency.
+
 Vector icons are preferred to bitmap-heavy decoration. Runtime status and Host diagnostics are refreshed on explicit application actions rather than by an aggressive background timer.
 
 Actual process memory depends on Windows, .NET, architecture, DPI, graphics state, and profile count. The project therefore validates behavior and avoids unnecessary allocations rather than claiming a fixed RAM number.

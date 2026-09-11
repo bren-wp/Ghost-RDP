@@ -47,7 +47,9 @@ The UI uses vector geometry rather than bitmap-heavy decoration, layout rounding
 
 Ghost RDP does not run telemetry, analytics, advertising, a central relay, background polling loops, or an always-on Windows service. Saved-computer lists use WPF UI virtualization with recycling so off-screen rows are not retained as a full visual tree. Icons are vector-based and do not require large bitmap assets in memory.
 
-Actual working-set memory varies by Windows version, DPI, architecture, .NET runtime state, and the number of profiles displayed, so the project does not publish an artificial RAM guarantee. Performance work focuses on avoiding unnecessary background activity, keeping the visual tree compact, and releasing temporary RDP files/process resources promptly.
+Saved-computer text search uses a short debounce before applying filtering and sorting, avoiding a full filter/sort/materialization pass for every intermediate keystroke. Sort and favorites changes remain immediate, current selection is restored when the selected profile remains visible, and the favorites total is cached between profile mutations rather than recomputed on every view refresh. The filtering/sorting component is covered by App tests and uses only existing .NET/WPF functionality.
+
+Actual working-set memory varies by Windows version, DPI, architecture, .NET runtime state, and the number of profiles displayed, so the project does not publish an artificial RAM guarantee. Performance work focuses on avoiding unnecessary background activity, keeping the visual tree compact, limiting transient allocations, and releasing temporary RDP files/process resources promptly.
 
 ## Security baseline
 
