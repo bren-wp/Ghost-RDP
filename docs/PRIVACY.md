@@ -11,6 +11,8 @@ The initial architecture includes:
 - no sale of user data;
 - no central Ghost RDP service carrying RDP traffic.
 
-Connection profiles and future credentials are intended to remain local to the user's Windows device unless the user explicitly chooses a reviewed synchronization mechanism in a later release.
+Saved computers are stored locally for the current Windows user under the user's local application-data directory. The JSON profile store contains connection metadata such as display name, host, port, username, domain, notes, favorites, and tags. It does not contain a password field.
 
-A future relay, gateway, account system, or synchronization service would be a separate architecture decision and would require an updated threat model, privacy review, and documentation before release.
+Quick Connect validation is memory-only and does not silently create a saved profile. Saving occurs only when the user explicitly chooses `Save as computer`.
+
+A future relay, gateway, account system, synchronization service, or persistent credential feature would be a separate architecture decision and would require an updated threat model, privacy review, and documentation before release.
