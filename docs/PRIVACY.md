@@ -52,6 +52,12 @@ Production projects under `src/` do not include third-party runtime NuGet packag
 
 Existing Microsoft test tooling is used only for repository development/testing and is not shipped in production App/Host/Setup binaries.
 
+## Release tooling privacy
+
+The repository-owned release preflight reads local project files, CHANGELOG, release notes, README, and the GitHub-provided branch name. It does not read Ghost RDP saved-computer data, UI settings, Windows credentials, host diagnostics, network interfaces, or RDP session data.
+
+Release publication runs in GitHub Actions using repository artifacts and GitHub Release infrastructure. It does not introduce a Ghost RDP telemetry endpoint, account service, runtime analytics SDK, or central RDP relay.
+
 ## Future features
 
 A future relay, account system, synchronization service, session-history service, or persistent credential feature would be a separate architecture decision and would require an updated threat model, privacy review, dependency review, and documentation before release.

@@ -2,9 +2,9 @@
 
 All notable user-facing changes to Ghost RDP are recorded here. Documentation is reviewed and synchronized with every functional change.
 
-## 0.9.1 - development
+## 0.9.1 - 2026-09-12
 
-UI/UX consistency, accessibility hardening, saved-computer responsiveness, stricter dependency policy, and documentation synchronization after the first production multi-architecture release.
+UI/UX consistency, accessibility hardening, saved-computer responsiveness, stricter dependency policy, release-preflight validation, and documentation synchronization after the first production multi-architecture release.
 
 ### Changed
 
@@ -18,8 +18,9 @@ UI/UX consistency, accessibility hardening, saved-computer responsiveness, stric
 - Saved-computer refresh preserves the current selection when the selected profile remains visible and reuses a cached favorites total instead of recounting the full collection on every refresh.
 - Saved-computer filtering and sorting are isolated in a deterministic App query component with dedicated tests.
 - WPF title/taskbar windows use the Ghost RDP vector application mark.
-- Runtime projects under `src/` now have an explicit no-third-party-runtime-dependency policy enforced by the security/dependency regression script.
+- Runtime projects under `src/` have an explicit no-third-party-runtime-dependency policy enforced by the security/dependency regression script.
 - README status presentation no longer relies on external badge-rendering services; product imagery remains repository-owned.
+- Release validation now includes a repository-owned preflight that verifies App/Host/Setup version alignment and blocks release publication when branch/version or release metadata is inconsistent.
 
 ### Documentation
 
@@ -27,13 +28,15 @@ UI/UX consistency, accessibility hardening, saved-computer responsiveness, stric
 - Added `docs/DEPENDENCIES.md` documenting the .NET/WPF/Windows-only runtime dependency surface and CI enforcement.
 - Added `docs/README.md` as the documentation index and synchronization policy.
 - Updated Architecture, Build, Security, Privacy, Accessibility, Windows, Host, Remote Access, Packaging, Release, Release Notes, Roadmap, UI/UX, README, and Changelog for the 0.9.1 behavior and dependency baseline.
+- Finalized the 0.9.1 release metadata and release-note state before creation of the exact `release/v0.9.1` branch.
 - Runtime screenshots remain restricted to authentic validated Windows builds; no generated mockups are presented as application screenshots.
 
 ### Security and supply chain
 
 - Production `src/` projects must not introduce third-party `PackageReference` or external file `HintPath` dependencies.
 - Existing development-only Microsoft test tooling remains outside the shipped runtime dependency surface.
-- Security regression checks continue to reject credential leakage, unsafe shell launch patterns, Host mutation paths, prohibited installer/network changes, and now runtime dependency-policy violations.
+- Security regression checks continue to reject credential leakage, unsafe shell launch patterns, Host mutation paths, prohibited installer/network changes, and runtime dependency-policy violations.
+- Release publication now fails before packaging if App, Host, and Setup versions differ, if the release branch does not match `release/v<version>`, or if CHANGELOG/RELEASE-NOTES still contain development-only metadata.
 
 ## 0.9.0 - 2026-09-11
 

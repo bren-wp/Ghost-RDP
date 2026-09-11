@@ -22,6 +22,12 @@ App, Host, and Setup production projects use the repository's .NET/WPF/Windows s
 
 Release binaries are self-contained, so end users do not need to install a separate .NET runtime. See [DEPENDENCIES.md](DEPENDENCIES.md).
 
+## Release preflight
+
+Before production packaging, normal CI runs `scripts/release-preflight.ps1` to verify that App, Host, and Setup versions match. Release-preparation validation additionally checks finalized CHANGELOG and release-note metadata, while the actual publication workflow also requires the exact `release/v<version>` branch name.
+
+This metadata preflight runs before architecture packaging so an inconsistent release cannot produce or publish mislabeled artifacts.
+
 ## Setup behavior
 
 Ghost RDP Setup is a project in this repository, not a third-party generated installer/uninstaller model. It installs per-user under `%LOCALAPPDATA%\Programs\Ghost RDP` by default and therefore does not require elevation for the normal path.
@@ -62,6 +68,7 @@ Setup and Portable packaging do not:
 
 ```powershell
 ./scripts/security-regression.ps1
+./scripts/release-preflight.ps1
 ./scripts/build-release-packages.ps1 -Architecture all -OutputDirectory ./artifacts/release
 ./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release -Architecture all
 ./scripts/smoke-test-portable.ps1 -AppPath ./artifacts/release/GhostRDP-Portable-x64.exe -HostPath ./artifacts/release/GhostRDP-Host-x64.exe -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe

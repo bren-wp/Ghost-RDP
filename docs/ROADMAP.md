@@ -15,19 +15,22 @@ Status terminology: **implemented** means code exists and has passed repository 
 | PR 9 | Production stability hardening, x86/x64/ARM64 packaging, integrated Setup/uninstall, and automated GitHub Releases | implemented |
 | PR 10 | Deterministic dark theme, control templates, vector icons, list virtualization, and UI/UX documentation for 0.9.1 | implemented |
 | PR 11 | Saved-computer filtering/sorting performance, debounce, selection preservation, and query tests | implemented |
-| PR 12 | Documentation synchronization and enforced no-third-party-runtime-dependency policy | development |
+| PR 12 | Documentation synchronization and enforced no-third-party-runtime-dependency policy | implemented |
+| PR 13 | 0.9.1 release metadata finalization and automated release-preflight validation | development |
 
 ## Production release
 
-Version 0.9.0 is the current published production release. It provides self-contained x86, x64, and ARM64 App/Host/Setup binaries, canonical `setup.exe` and `portable.exe` compatibility downloads, native ARM64 smoke testing, PE architecture validation, SHA-256 integrity checks, and Windows Installed Apps uninstall without a separate persistent uninstall executable.
+Version 0.9.0 remains the latest published production release until the exact `release/v0.9.1` workflow completes successfully and creates or updates the GitHub Release. It provides self-contained x86, x64, and ARM64 App/Host/Setup binaries, canonical `setup.exe` and `portable.exe` compatibility downloads, native ARM64 smoke testing, PE architecture validation, SHA-256 integrity checks, and Windows Installed Apps uninstall without a separate persistent uninstall executable.
 
-## 0.9.1 development target
+## 0.9.1 release preparation
 
-The 0.9.1 maintenance line focuses on visual correctness, accessibility, responsiveness, and dependency discipline without changing the RDP credential/security boundary.
+The 0.9.1 maintenance line focuses on visual correctness, accessibility, responsiveness, dependency discipline, and release-metadata integrity without changing the RDP credential/security boundary.
 
-Implemented work includes deterministic WPF dark theming, project-owned text-field/dropdown templates, vector UI assets, saved-computer list recycling/virtualization, a short search debounce, deterministic query tests, selection preservation, and cached favorite counts.
+Implemented work includes deterministic WPF dark theming, project-owned text-field/dropdown templates, vector UI assets, saved-computer list recycling/virtualization, a short search debounce, deterministic query tests, selection preservation, cached favorite counts, and an enforced no-third-party-runtime-dependency policy.
 
-The current dependency/documentation milestone makes the production runtime policy explicit: App/Core/Host/Setup remain on the .NET 8/WPF/Windows platform stack with repository project references and no third-party runtime `PackageReference` or external file-based assembly dependencies. CI validates that contract.
+Release preparation adds a repository-owned `release-preflight.ps1` gate. It verifies App/Host/Setup version alignment on normal CI and, for release publication, additionally verifies finalized CHANGELOG/RELEASE-NOTES metadata plus the exact `release/v<version>` branch name.
+
+The release is not considered published merely because the source version is 0.9.1 or because release notes are finalized. Publication status changes only after the exact release workflow succeeds and the GitHub Release exists.
 
 ## Documentation policy
 

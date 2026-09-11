@@ -1,8 +1,6 @@
-# Ghost RDP 0.9.1 — development notes
+# Ghost RDP 0.9.1
 
-Ghost RDP 0.9.1 is the current maintenance line following the first production multi-architecture release. It focuses on UI correctness, accessibility, saved-computer responsiveness, runtime dependency discipline, and documentation consistency without changing the RDP credential/security boundary.
-
-This version is **not yet the published production release**. Version 0.9.0 remains the latest GitHub Release until the 0.9.1 exact release commit passes all release gates and is published.
+Ghost RDP 0.9.1 is a maintenance release focused on UI correctness, accessibility, saved-computer responsiveness, runtime dependency discipline, release-metadata integrity, and documentation consistency without changing the RDP credential/security boundary.
 
 ## UI and UX
 
@@ -29,13 +27,21 @@ This version is **not yet the published production release**. Version 0.9.0 rema
 - Existing Microsoft test tooling is development-only and is not shipped with production binaries.
 - Packaging continues to use the repository-owned Ghost RDP Setup project; no third-party installer compiler is required.
 
+## Release integrity
+
+- App, Host, and Setup are aligned at version 0.9.1.
+- Normal CI runs a release-preflight baseline to catch production-project version drift before packaging.
+- Release-preparation CI verifies that CHANGELOG and release notes are finalized rather than left in development state.
+- The publication workflow additionally requires the exact `release/v0.9.1` branch name before any architecture package is built.
+- x86, x64, and native ARM64 release jobs independently run dependency/security checks, package validation, runtime self-tests, and real Setup install/uninstall smoke tests before the final release is assembled.
+
 ## Documentation
 
 - Added a central documentation index/synchronization policy.
 - Added a dedicated runtime dependency policy.
 - Synchronized README, Changelog, Roadmap, Architecture, Build, Security, Privacy, Accessibility, Windows, Host, Remote Access, Packaging, Release, Release Notes, and UI/UX documentation with the 0.9.1 behavior.
-- README product imagery remains repository-owned and no longer depends on external badge-rendering services for core status presentation.
-- Runtime screenshots remain authentic-only evidence.
+- README product imagery remains repository-owned and does not depend on external badge-rendering services for core status presentation.
+- Runtime screenshots remain authentic-only evidence; generated mockups are not presented as application screenshots.
 
 ## Packaging and security baseline
 
@@ -60,7 +66,7 @@ Ghost RDP 0.9.0 is the first production-packaged multi-architecture Windows rele
 
 ## Production hardening
 
-- App, Host, and Setup are aligned at version 0.9.0.
+- App and Host are aligned at version 0.9.0.
 - Added production-safe process-level crash handling for the WPF App and Host.
 - Added deterministic runtime self-test entry points used by CI without exposing development UI.
 - Added native x86, x64, and ARM64 self-contained packaging.

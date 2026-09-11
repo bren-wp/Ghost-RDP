@@ -25,9 +25,13 @@ Repository tests may use the existing Microsoft test SDK/MSTest packages. Those 
 
 GitHub Actions workflows use the repository source, GitHub-hosted runners/actions, the .NET SDK, PowerShell, and the GitHub CLI available on the runner. Packaging does not require a third-party installer compiler.
 
+The repository-owned release preflight uses PowerShell and local project/Markdown files only; it does not download a package, SDK, signing helper, or metadata service.
+
 ## Enforcement
 
-`scripts/security-regression.ps1` scans project files under `src/` and fails CI if a runtime `PackageReference` or external file `HintPath` reference is introduced. This guard runs before production packaging in the normal CI workflow.
+`scripts/security-regression.ps1` scans project files under `src/` and fails CI if a runtime `PackageReference` or external file `HintPath` reference is introduced. This guard runs before production packaging in the normal CI and publication workflows.
+
+`scripts/release-preflight.ps1` independently verifies App/Host/Setup version alignment. During release preparation it also validates finalized release metadata, and during publication it enforces the exact `release/v<version>` branch. This prevents dependency-clean binaries from being published under inconsistent version metadata.
 
 A future request that genuinely requires a third-party runtime component must first change this documented policy explicitly and undergo a separate security, privacy, licensing, maintenance, and supply-chain review. It must not be introduced incidentally as part of another feature.
 
