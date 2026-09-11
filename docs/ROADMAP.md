@@ -9,10 +9,10 @@ Status terminology: **implemented** means code exists and has passed the reposit
 | PR 3 | Safe `mstsc.exe` launch integration and secure temporary `.rdp` handling | implemented |
 | PR 4 | Ghost RDP Host read-only readiness diagnostics | implemented |
 | PR 5 | VPN/private-overlay and RD Gateway-aware remote access UX | implemented |
-| PR 6 | Settings, About expansion, accessibility and UI polish | planned |
+| PR 6 | Settings, About expansion, accessibility and UI polish | implemented |
 | PR 7 | Windows Setup and Portable packaging | planned |
 | PR 8 | Authentic Windows screenshots and final README/release polish | planned |
 
 ## Unsupported security shortcuts
 
-Ghost RDP will not weaken Windows security controls or add hidden/unauthorized remote-access behavior. Private-network mode never configures a VPN or overlay automatically, and RD Gateway support never places a password in Ghost RDP persistence or generated `.rdp` files.
+Ghost RDP will not weaken Windows security controls or add hidden/unauthorized remote-access behavior. Private-network mode never configures a VPN or overlay automatically, RD Gateway support never places a password in Ghost RDP persistence or generated `.rdp` files, and UI settings contain preferences rather than connection or credential data.

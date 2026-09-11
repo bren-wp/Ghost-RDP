@@ -2,11 +2,17 @@
 
 ## Credential policy
 
-The default credential policy is **password memory-only**. Passwords and equivalent secrets must not be persisted in JSON, XML, SQLite plaintext, registry plaintext, logs, process arguments, `.rdp` files, or crash reports.
+The default credential policy is **password memory-only**. Passwords and equivalent secrets must not be persisted in JSON, XML, SQLite plaintext, registry plaintext, logs, process arguments, `.rdp` files, settings, or crash reports.
 
 The current `mstsc.exe` integration uses an even narrower boundary: Ghost RDP does not ask for or transport a password at all. Microsoft Remote Desktop/Windows owns credential entry after the user explicitly starts a connection, including credentials requested by an RD Gateway.
 
 Future credential persistence may use Windows Credential Manager, DPAPI, or an appropriate Windows Hello-backed mechanism only after a dedicated security review.
+
+## Local UI settings
+
+`settings.json` is a schema-versioned local preference file. It stores startup view, default saved-computer sort, optional last-view memory, and the last eligible view. It does not store hosts, usernames, domains, gateway hosts, passwords, tokens, or credential material.
+
+A missing settings file yields in-memory defaults. Invalid JSON and unsupported future schema versions are rejected without rewriting the source during load. Automatic last-view persistence is disabled after a settings-load failure until the user explicitly saves or resets settings.
 
 ## Process launch policy
 
@@ -65,6 +71,10 @@ Ghost RDP must not automatically:
 
 Remote access from another network should use a private VPN/overlay network or an administrator-managed RD Gateway.
 
+## Accessibility boundary
+
+Accessibility features may change presentation and navigation behavior but never weaken authentication, firewall, NLA, process-launch, or credential boundaries. Windows High Contrast is read as a system setting and only changes application brush resources.
+
 ## Host policy
 
 Ghost RDP Host is not a stealth agent. If a background service is introduced later, it must be clearly named, visible in Windows service/app management, documented, revocable, and uninstallable.
@@ -75,4 +85,4 @@ Security-sensitive values must be redacted before logging. The shared `SecretSan
 
 ## Security regression checks
 
-CI rejects obvious command-line password patterns, RDP password-field patterns, shell-launch patterns, and missing security documentation. Tests cover input validation, profile persistence and schema migration, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data from generated `.rdp` content, RD Gateway serialization, Host readiness evaluation, and firewall-port matching.
+CI rejects obvious command-line password patterns, RDP password-field patterns, gateway access-token fields, shell-launch patterns, and missing security documentation. Tests cover input validation, profile persistence and schema migration, settings persistence and corrupt/future-schema handling, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data from generated `.rdp` content, RD Gateway serialization, Host readiness evaluation, and firewall-port matching.

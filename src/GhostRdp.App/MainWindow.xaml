@@ -14,51 +14,37 @@
         </Grid.ColumnDefinitions>
 
         <Border Grid.Column="0"
-                Background="{StaticResource PanelBrush}"
-                BorderBrush="{StaticResource BorderBrush}"
+                Background="{DynamicResource PanelBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
                 BorderThickness="0,0,1,0">
             <DockPanel Margin="16">
                 <StackPanel DockPanel.Dock="Top">
                     <StackPanel Orientation="Horizontal" Margin="6,8,6,28">
-                        <Border Width="36"
-                                Height="36"
-                                CornerRadius="10"
-                                Background="{StaticResource SelectionBrush}"
-                                Margin="0,0,10,0">
+                        <Border Width="36" Height="36" CornerRadius="10" Background="{DynamicResource SelectionBrush}" Margin="0,0,10,0">
                             <Viewbox Margin="7">
-                                <Path Fill="{StaticResource AccentStrongBrush}"
+                                <Path Fill="{DynamicResource AccentStrongBrush}"
                                       Data="M2,4 C2,2.9 2.9,2 4,2 H20 C21.1,2 22,2.9 22,4 V16 C22,17.1 21.1,18 20,18 H14 V20 H18 V22 H6 V20 H10 V18 H4 C2.9,18 2,17.1 2,16 Z M5,5 V15 H19 V5 Z M8,8 C8,6.9 8.9,6 10,6 H14 C15.1,6 16,6.9 16,8 V12 H14.5 V10.5 H9.5 V12 H8 Z" />
                             </Viewbox>
                         </Border>
                         <StackPanel VerticalAlignment="Center">
                             <TextBlock Text="Ghost RDP" FontWeight="SemiBold" FontSize="17" />
-                            <TextBlock Text="Windows MVP" Foreground="{StaticResource MutedBrush}" FontSize="11" />
+                            <TextBlock Text="Windows" Foreground="{DynamicResource MutedBrush}" FontSize="11" />
                         </StackPanel>
                     </StackPanel>
 
-                    <TextBlock Text="NAVIGATION"
-                               Foreground="{StaticResource MutedBrush}"
-                               FontSize="10"
-                               FontWeight="SemiBold"
-                               Margin="12,0,0,8" />
-                    <Button Style="{StaticResource SidebarButtonStyle}" Click="HomeNavButton_Click" Content="Home" />
-                    <Button Style="{StaticResource SidebarButtonStyle}" Click="ComputersNavButton_Click" Content="Computers" />
-                    <Button Style="{StaticResource SidebarButtonStyle}" Click="QuickConnectNavButton_Click" Content="Quick Connect" />
-                    <Button Style="{StaticResource SidebarButtonStyle}" Click="AboutNavButton_Click" Content="About" />
+                    <TextBlock Text="NAVIGATION" Foreground="{DynamicResource MutedBrush}" FontSize="10" FontWeight="SemiBold" Margin="12,0,0,8" />
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="_Home" Click="HomeNavButton_Click" AutomationProperties.Name="Home" />
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="_Computers" Click="ComputersNavButton_Click" AutomationProperties.Name="Computers" />
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="_Quick Connect" Click="QuickConnectNavButton_Click" AutomationProperties.Name="Quick Connect" />
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="_Settings" Click="SettingsNavButton_Click" AutomationProperties.Name="Settings" />
+                    <Button Style="{StaticResource SidebarButtonStyle}" Content="_About" Click="AboutNavButton_Click" AutomationProperties.Name="About Ghost RDP" />
                 </StackPanel>
 
-                <Border DockPanel.Dock="Bottom"
-                        Background="{StaticResource PanelAltBrush}"
-                        CornerRadius="10"
-                        Padding="12"
-                        Margin="0,16,0,0">
+                <Border DockPanel.Dock="Bottom" Background="{DynamicResource PanelAltBrush}" CornerRadius="10" Padding="12" Margin="0,16,0,0">
                     <StackPanel>
                         <TextBlock Text="Windows-owned credentials" FontWeight="SemiBold" />
-                        <TextBlock Text="Passwords never enter saved profiles, temporary .rdp files, or process arguments."
-                                   Foreground="{StaticResource MutedBrush}"
-                                   FontSize="12"
-                                   Margin="0,4,0,0"
-                                   TextWrapping="Wrap" />
+                        <TextBlock Text="Passwords never enter saved profiles, temporary .rdp files, settings, or process arguments."
+                                   Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
                     </StackPanel>
                 </Border>
             </DockPanel>
@@ -72,13 +58,10 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-
                 <StackPanel>
                     <TextBlock Text="Home" FontSize="30" FontWeight="SemiBold" />
                     <TextBlock Text="Private remote desktop management for computers you control."
-                               Foreground="{StaticResource MutedBrush}"
-                               FontSize="15"
-                               Margin="0,6,0,0" />
+                               Foreground="{DynamicResource MutedBrush}" FontSize="15" Margin="0,6,0,0" />
                 </StackPanel>
 
                 <Grid Grid.Row="1" Margin="0,30,0,0">
@@ -89,39 +72,21 @@
                         <ColumnDefinition Width="18" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-
-                    <Border Grid.Column="0"
-                            Background="{StaticResource PanelBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="12"
-                            Padding="20">
+                    <Border Grid.Column="0" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="20">
                         <StackPanel>
-                            <TextBlock Text="Saved computers" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                            <TextBlock Text="Saved computers" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
                             <TextBlock x:Name="SavedComputerCountText" Text="0" FontSize="28" FontWeight="SemiBold" Margin="0,8,0,0" />
                         </StackPanel>
                     </Border>
-
-                    <Border Grid.Column="2"
-                            Background="{StaticResource PanelBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="12"
-                            Padding="20">
+                    <Border Grid.Column="2" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="20">
                         <StackPanel>
-                            <TextBlock Text="Favorites" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                            <TextBlock Text="Favorites" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
                             <TextBlock x:Name="FavoriteCountText" Text="0" FontSize="28" FontWeight="SemiBold" Margin="0,8,0,0" />
                         </StackPanel>
                     </Border>
-
-                    <Border Grid.Column="4"
-                            Background="{StaticResource PanelBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="12"
-                            Padding="20">
+                    <Border Grid.Column="4" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="20">
                         <StackPanel>
-                            <TextBlock Text="Microsoft RDP runtime" Foreground="{StaticResource MutedBrush}" FontSize="12" />
+                            <TextBlock Text="Microsoft RDP runtime" Foreground="{DynamicResource MutedBrush}" FontSize="12" />
                             <TextBlock x:Name="RuntimeStatusText" Text="Checking..." FontSize="20" FontWeight="SemiBold" Margin="0,8,0,0" />
                         </StackPanel>
                     </Border>
@@ -133,51 +98,25 @@
                         <ColumnDefinition Width="20" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Border Grid.Column="0"
-                            Background="{StaticResource PanelAltBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="12"
-                            Padding="22">
+                    <Border Grid.Column="0" Background="{DynamicResource PanelAltBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="22">
                         <StackPanel>
                             <TextBlock Text="Quick Connect" FontSize="18" FontWeight="SemiBold" />
                             <TextBlock Text="Open a one-off direct, private-network, or RD Gateway session without silently saving a profile."
-                                       Foreground="{StaticResource MutedBrush}"
-                                       TextWrapping="Wrap"
-                                       Margin="0,8,0,0" />
-                            <Button Style="{StaticResource PrimaryButtonStyle}"
-                                    Content="Open Quick Connect"
-                                    HorizontalAlignment="Left"
-                                    Margin="0,18,0,0"
-                                    Click="OpenQuickConnectButton_Click" />
+                                       Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <Button Style="{StaticResource PrimaryButtonStyle}" Content="Open _Quick Connect" AutomationProperties.Name="Open Quick Connect"
+                                    HorizontalAlignment="Left" Margin="0,18,0,0" Click="OpenQuickConnectButton_Click" />
                         </StackPanel>
                     </Border>
-                    <Border Grid.Column="2"
-                            Background="{StaticResource PanelAltBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="12"
-                            Padding="22">
+                    <Border Grid.Column="2" Background="{DynamicResource PanelAltBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="22">
                         <StackPanel>
                             <TextBlock Text="Runtime status" FontSize="18" FontWeight="SemiBold" />
-                            <TextBlock x:Name="RuntimeDetailText"
-                                       Foreground="{StaticResource MutedBrush}"
-                                       TextWrapping="Wrap"
-                                       Margin="0,8,0,0" />
-                            <Button Style="{StaticResource SecondaryButtonStyle}"
-                                    Content="Refresh status"
-                                    HorizontalAlignment="Left"
-                                    Margin="0,18,0,0"
-                                    Click="RefreshStatusButton_Click" />
+                            <TextBlock x:Name="RuntimeDetailText" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            <Button Style="{StaticResource SecondaryButtonStyle}" Content="_Refresh status" AutomationProperties.Name="Refresh Microsoft RDP runtime status"
+                                    HorizontalAlignment="Left" Margin="0,18,0,0" Click="RefreshStatusButton_Click" />
                         </StackPanel>
                     </Border>
                 </Grid>
-
-                <TextBlock Grid.Row="3"
-                           x:Name="ProfileStoreHomeStatusText"
-                           Foreground="{StaticResource MutedBrush}"
-                           TextWrapping="Wrap"
-                           Margin="0,20,0,0" />
+                <TextBlock Grid.Row="3" x:Name="ProfileStoreHomeStatusText" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,20,0,0" />
             </Grid>
 
             <Grid x:Name="ComputersView" Visibility="Collapsed">
@@ -187,86 +126,52 @@
                     <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-
                 <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
                     <StackPanel>
                         <TextBlock Text="Computers" FontSize="30" FontWeight="SemiBold" />
-                        <TextBlock x:Name="ComputerSummaryText"
-                                   Text="0 saved computers"
-                                   Foreground="{StaticResource MutedBrush}"
-                                   Margin="0,6,0,0" />
+                        <TextBlock x:Name="ComputerSummaryText" Text="0 saved computers" Foreground="{DynamicResource MutedBrush}" Margin="0,6,0,0" />
                     </StackPanel>
-                    <Button Grid.Column="1"
-                            Style="{StaticResource PrimaryButtonStyle}"
-                            Content="Add computer"
-                            Click="AddComputerButton_Click"
-                            VerticalAlignment="Center" />
+                    <Button Grid.Column="1" Style="{StaticResource PrimaryButtonStyle}" Content="_Add computer" AutomationProperties.Name="Add computer"
+                            Click="AddComputerButton_Click" VerticalAlignment="Center" />
                 </Grid>
 
                 <Grid Grid.Row="1" Margin="0,22,0,16">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="14" />
-                        <ColumnDefinition Width="180" />
-                        <ColumnDefinition Width="14" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" /><ColumnDefinition Width="14" /><ColumnDefinition Width="180" /><ColumnDefinition Width="14" /><ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <TextBox x:Name="ComputerSearchTextBox"
-                             TextChanged="ComputerSearchTextBox_TextChanged"
-                             ToolTip="Search name, host, gateway, user, tags, or notes" />
-                    <ComboBox x:Name="ComputerSortComboBox"
-                              Grid.Column="2"
-                              SelectionChanged="ComputerSortComboBox_SelectionChanged"
-                              SelectedIndex="0">
+                    <TextBox x:Name="ComputerSearchTextBox" TextChanged="ComputerSearchTextBox_TextChanged"
+                             ToolTip="Search name, host, gateway, user, tags, or notes" AutomationProperties.Name="Search saved computers" />
+                    <ComboBox x:Name="ComputerSortComboBox" Grid.Column="2" SelectionChanged="ComputerSortComboBox_SelectionChanged" SelectedIndex="0"
+                              AutomationProperties.Name="Sort saved computers">
                         <ComboBoxItem Content="Name" Tag="name" />
                         <ComboBoxItem Content="Host" Tag="host" />
                         <ComboBoxItem Content="Favorites first" Tag="favorite" />
                     </ComboBox>
-                    <CheckBox x:Name="FavoritesOnlyCheckBox"
-                              Grid.Column="4"
-                              Content="Favorites only"
-                              Checked="FavoritesOnlyCheckBox_Changed"
-                              Unchecked="FavoritesOnlyCheckBox_Changed" />
+                    <CheckBox x:Name="FavoritesOnlyCheckBox" Grid.Column="4" Content="Favorites only" AutomationProperties.Name="Show favorites only"
+                              Checked="FavoritesOnlyCheckBox_Changed" Unchecked="FavoritesOnlyCheckBox_Changed" />
                 </Grid>
 
-                <Border Grid.Row="2"
-                        Background="{StaticResource PanelBrush}"
-                        BorderBrush="{StaticResource BorderBrush}"
-                        BorderThickness="1"
-                        CornerRadius="12"
-                        Padding="8">
-                    <ListBox x:Name="ProfileListBox"
-                             Background="Transparent"
-                             BorderThickness="0"
-                             ScrollViewer.VerticalScrollBarVisibility="Auto"
-                             MouseDoubleClick="ProfileListBox_MouseDoubleClick">
+                <Border Grid.Row="2" Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="8">
+                    <ListBox x:Name="ProfileListBox" Background="Transparent" BorderThickness="0" ScrollViewer.VerticalScrollBarVisibility="Auto"
+                             MouseDoubleClick="ProfileListBox_MouseDoubleClick" AutomationProperties.Name="Saved computers">
                         <ListBox.ItemContainerStyle>
                             <Style TargetType="ListBoxItem">
                                 <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                                 <Setter Property="Padding" Value="0" />
                                 <Setter Property="Margin" Value="0,0,0,6" />
                                 <Setter Property="Background" Value="Transparent" />
-                                <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+                                <Setter Property="FocusVisualStyle" Value="{StaticResource KeyboardFocusVisualStyle}" />
                                 <Setter Property="Template">
                                     <Setter.Value>
                                         <ControlTemplate TargetType="ListBoxItem">
-                                            <Border x:Name="ItemBorder"
-                                                    Background="{TemplateBinding Background}"
-                                                    CornerRadius="9"
-                                                    Padding="16,13">
+                                            <Border x:Name="ItemBorder" Background="{TemplateBinding Background}" CornerRadius="9" Padding="16,13">
                                                 <ContentPresenter />
                                             </Border>
                                             <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource PanelAltBrush}" />
-                                                </Trigger>
-                                                <Trigger Property="IsSelected" Value="True">
-                                                    <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource SelectionBrush}" />
-                                                </Trigger>
+                                                <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource PanelAltBrush}" /></Trigger>
+                                                <Trigger Property="IsSelected" Value="True"><Setter TargetName="ItemBorder" Property="Background" Value="{DynamicResource SelectionBrush}" /></Trigger>
                                             </ControlTemplate.Triggers>
                                         </ControlTemplate>
                                     </Setter.Value>
@@ -277,59 +182,27 @@
                             <DataTemplate>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="2*" />
-                                        <ColumnDefinition Width="1.7*" />
-                                        <ColumnDefinition Width="1.5*" />
-                                        <ColumnDefinition Width="1.4*" />
-                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="2*" /><ColumnDefinition Width="1.7*" /><ColumnDefinition Width="1.5*" /><ColumnDefinition Width="1.4*" /><ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel>
                                         <TextBlock Text="{Binding DisplayName}" FontWeight="SemiBold" FontSize="16" />
-                                        <TextBlock Text="{Binding Notes}"
-                                                   Foreground="{StaticResource MutedBrush}"
-                                                   FontSize="12"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   MaxWidth="300"
-                                                   Margin="0,4,0,0" />
+                                        <TextBlock Text="{Binding Notes}" Foreground="{DynamicResource MutedBrush}" FontSize="12" TextTrimming="CharacterEllipsis" MaxWidth="300" Margin="0,4,0,0" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="1">
-                                        <TextBlock Text="{Binding Host}" />
-                                        <TextBlock Text="{Binding Port, StringFormat=Port {0}}"
-                                                   Foreground="{StaticResource MutedBrush}"
-                                                   FontSize="12"
-                                                   Margin="0,4,0,0" />
+                                        <TextBlock Text="{Binding Host}" /><TextBlock Text="{Binding Port, StringFormat=Port {0}}" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="0,4,0,0" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="2">
-                                        <TextBlock Text="{Binding RemoteAccessMode}" />
-                                        <TextBlock Text="{Binding GatewayHost}"
-                                                   Foreground="{StaticResource MutedBrush}"
-                                                   FontSize="12"
-                                                   TextTrimming="CharacterEllipsis"
-                                                   Margin="0,4,0,0" />
+                                        <TextBlock Text="{Binding RemoteAccessMode}" /><TextBlock Text="{Binding GatewayHost}" Foreground="{DynamicResource MutedBrush}" FontSize="12" TextTrimming="CharacterEllipsis" Margin="0,4,0,0" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="3">
-                                        <TextBlock Text="{Binding Username}" />
-                                        <TextBlock Text="{Binding Domain}"
-                                                   Foreground="{StaticResource MutedBrush}"
-                                                   FontSize="12"
-                                                   Margin="0,4,0,0" />
+                                        <TextBlock Text="{Binding Username}" /><TextBlock Text="{Binding Domain}" Foreground="{DynamicResource MutedBrush}" FontSize="12" Margin="0,4,0,0" />
                                     </StackPanel>
-                                    <Border Grid.Column="4"
-                                            Background="{StaticResource SelectionBrush}"
-                                            CornerRadius="6"
-                                            Padding="8,4"
-                                            VerticalAlignment="Center">
-                                        <TextBlock Text="Favorite"
-                                                   Foreground="{StaticResource AccentStrongBrush}"
-                                                   FontSize="11">
+                                    <Border Grid.Column="4" Background="{DynamicResource SelectionBrush}" CornerRadius="6" Padding="8,4" VerticalAlignment="Center">
+                                        <TextBlock Text="Favorite" Foreground="{DynamicResource AccentStrongBrush}" FontSize="11">
                                             <TextBlock.Style>
                                                 <Style TargetType="TextBlock">
                                                     <Setter Property="Visibility" Value="Collapsed" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding Favorite}" Value="True">
-                                                            <Setter Property="Visibility" Value="Visible" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
+                                                    <Style.Triggers><DataTrigger Binding="{Binding Favorite}" Value="True"><Setter Property="Visibility" Value="Visible" /></DataTrigger></Style.Triggers>
                                                 </Style>
                                             </TextBlock.Style>
                                         </TextBlock>
@@ -341,149 +214,101 @@
                 </Border>
 
                 <Grid Grid.Row="3" Margin="0,14,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock x:Name="ProfileStoreStatusText"
-                               Foreground="{StaticResource MutedBrush}"
-                               VerticalAlignment="Center"
-                               TextWrapping="Wrap"
-                               Margin="0,0,16,0" />
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="Auto" /></Grid.ColumnDefinitions>
+                    <TextBlock x:Name="ProfileStoreStatusText" Foreground="{DynamicResource MutedBrush}" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,16,0" />
                     <StackPanel Grid.Column="1" Orientation="Horizontal">
-                        <Button x:Name="ConnectSelectedComputerButton"
-                                Style="{StaticResource PrimaryButtonStyle}"
-                                Content="Connect"
-                                IsEnabled="False"
-                                Margin="0,0,8,0"
-                                Click="ConnectSelectedComputerButton_Click" />
-                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="Edit" Margin="0,0,8,0" Click="EditComputerButton_Click" />
-                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="Duplicate" Margin="0,0,8,0" Click="DuplicateComputerButton_Click" />
-                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="Favorite" Margin="0,0,8,0" Click="ToggleFavoriteButton_Click" />
-                        <Button Style="{StaticResource DangerButtonStyle}" Content="Delete" Click="DeleteComputerButton_Click" />
+                        <Button x:Name="ConnectSelectedComputerButton" Style="{StaticResource PrimaryButtonStyle}" Content="_Connect" AutomationProperties.Name="Connect selected computer"
+                                IsEnabled="False" Margin="0,0,8,0" Click="ConnectSelectedComputerButton_Click" />
+                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="_Edit" Margin="0,0,8,0" Click="EditComputerButton_Click" AutomationProperties.Name="Edit selected computer" />
+                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="D_uplicate" Margin="0,0,8,0" Click="DuplicateComputerButton_Click" AutomationProperties.Name="Duplicate selected computer" />
+                        <Button Style="{StaticResource SecondaryButtonStyle}" Content="_Favorite" Margin="0,0,8,0" Click="ToggleFavoriteButton_Click" AutomationProperties.Name="Toggle selected computer favorite" />
+                        <Button Style="{StaticResource DangerButtonStyle}" Content="_Delete" Click="DeleteComputerButton_Click" AutomationProperties.Name="Delete selected computer" />
                     </StackPanel>
                 </Grid>
             </Grid>
 
             <Grid x:Name="QuickConnectView" Visibility="Collapsed">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
                 <StackPanel>
                     <TextBlock Text="Quick Connect" FontSize="30" FontWeight="SemiBold" />
-                    <TextBlock Text="Open Microsoft Remote Desktop with one-off connection details. Nothing is saved unless you explicitly choose Save as computer."
-                               Foreground="{StaticResource MutedBrush}"
-                               FontSize="15"
-                               Margin="0,6,0,0"
-                               TextWrapping="Wrap" />
+                    <TextBlock Text="Open Microsoft Remote Desktop without silently creating a saved computer."
+                               Foreground="{DynamicResource MutedBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
                 </StackPanel>
-
                 <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,24,0,0">
                     <StackPanel MaxWidth="800" HorizontalAlignment="Left">
-                        <Border Background="{StaticResource PanelBrush}"
-                                BorderBrush="{StaticResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="12"
-                                Padding="24">
+                        <Border Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="24">
                             <StackPanel>
                                 <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="16" />
-                                        <ColumnDefinition Width="130" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Host / IP" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
-                                        <TextBox x:Name="QuickHostTextBox" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Port" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
-                                        <TextBox x:Name="QuickPortTextBox" Text="3389" />
-                                    </StackPanel>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="130" /></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="Host / IP" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,6" /><TextBox x:Name="QuickHostTextBox" AutomationProperties.Name="Quick Connect host or IP" /></StackPanel>
+                                    <StackPanel Grid.Column="2"><TextBlock Text="Port" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,6" /><TextBox x:Name="QuickPortTextBox" Text="3389" AutomationProperties.Name="Quick Connect RDP port" /></StackPanel>
                                 </Grid>
-
                                 <Grid Margin="0,16,0,0">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="16" />
-                                        <ColumnDefinition Width="*" />
-                                    </Grid.ColumnDefinitions>
-                                    <StackPanel>
-                                        <TextBlock Text="Username" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
-                                        <TextBox x:Name="QuickUsernameTextBox" />
-                                    </StackPanel>
-                                    <StackPanel Grid.Column="2">
-                                        <TextBlock Text="Domain" Foreground="{StaticResource MutedBrush}" Margin="0,0,0,6" />
-                                        <TextBox x:Name="QuickDomainTextBox" />
-                                    </StackPanel>
+                                    <Grid.ColumnDefinitions><ColumnDefinition Width="*" /><ColumnDefinition Width="16" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                                    <StackPanel><TextBlock Text="Username" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,6" /><TextBox x:Name="QuickUsernameTextBox" AutomationProperties.Name="Quick Connect username" /></StackPanel>
+                                    <StackPanel Grid.Column="2"><TextBlock Text="Domain" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,6" /><TextBox x:Name="QuickDomainTextBox" AutomationProperties.Name="Quick Connect domain" /></StackPanel>
                                 </Grid>
-
-                                <TextBlock Text="Remote access route" Foreground="{StaticResource MutedBrush}" Margin="0,18,0,6" />
-                                <ComboBox x:Name="QuickRemoteAccessModeComboBox" SelectedIndex="0">
-                                    <ComboBoxItem Content="Direct / LAN" />
-                                    <ComboBoxItem Content="Private VPN / overlay" />
-                                    <ComboBoxItem Content="RD Gateway" />
+                                <TextBlock Text="Remote access route" Foreground="{DynamicResource MutedBrush}" Margin="0,18,0,6" />
+                                <ComboBox x:Name="QuickRemoteAccessModeComboBox" SelectedIndex="0" AutomationProperties.Name="Quick Connect remote access route">
+                                    <ComboBoxItem Content="Direct / LAN" /><ComboBoxItem Content="Private VPN / overlay" /><ComboBoxItem Content="RD Gateway" />
                                 </ComboBox>
-
-                                <TextBlock Text="RD Gateway host" Foreground="{StaticResource MutedBrush}" Margin="0,16,0,6" />
-                                <TextBox x:Name="QuickGatewayHostTextBox" ToolTip="Required only when RD Gateway route is selected" />
-
-                                <TextBlock Text="Saved computer name" Foreground="{StaticResource MutedBrush}" Margin="0,20,0,6" />
-                                <TextBox x:Name="QuickSaveNameTextBox"
-                                         MaxLength="100"
-                                         ToolTip="Required only when saving this connection as a computer" />
-
+                                <TextBlock Text="RD Gateway host" Foreground="{DynamicResource MutedBrush}" Margin="0,16,0,6" />
+                                <TextBox x:Name="QuickGatewayHostTextBox" ToolTip="Required only when RD Gateway route is selected" AutomationProperties.Name="RD Gateway host" />
+                                <TextBlock Text="Saved computer name" Foreground="{DynamicResource MutedBrush}" Margin="0,20,0,6" />
+                                <TextBox x:Name="QuickSaveNameTextBox" MaxLength="100" ToolTip="Required only when saving this connection as a computer" AutomationProperties.Name="Saved computer name" />
                                 <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                                    <Button Style="{StaticResource SecondaryButtonStyle}"
-                                            Content="Validate details"
-                                            Margin="0,0,10,0"
-                                            Click="ValidateQuickConnectButton_Click" />
-                                    <Button x:Name="QuickConnectConnectButton"
-                                            Style="{StaticResource PrimaryButtonStyle}"
-                                            Content="Connect"
-                                            IsEnabled="False"
-                                            Margin="0,0,10,0"
-                                            Click="QuickConnectConnectButton_Click" />
-                                    <Button Style="{StaticResource SecondaryButtonStyle}"
-                                            Content="Save as computer"
-                                            Click="SaveQuickConnectButton_Click" />
+                                    <Button Style="{StaticResource SecondaryButtonStyle}" Content="_Validate details" Margin="0,0,10,0" Click="ValidateQuickConnectButton_Click" AutomationProperties.Name="Validate Quick Connect details" />
+                                    <Button x:Name="QuickConnectConnectButton" Style="{StaticResource PrimaryButtonStyle}" Content="_Connect" IsEnabled="False" Margin="0,0,10,0" Click="QuickConnectConnectButton_Click" AutomationProperties.Name="Connect with Quick Connect" />
+                                    <Button Style="{StaticResource SecondaryButtonStyle}" Content="_Save as computer" Click="SaveQuickConnectButton_Click" AutomationProperties.Name="Save Quick Connect as computer" />
                                 </StackPanel>
-                                <TextBlock x:Name="QuickConnectStatusText"
-                                           Foreground="{StaticResource MutedBrush}"
-                                           TextWrapping="Wrap"
-                                           Margin="0,16,0,0" />
+                                <TextBlock x:Name="QuickConnectStatusText" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,16,0,0" AutomationProperties.LiveSetting="Polite" />
                             </StackPanel>
                         </Border>
-
-                        <Border Background="{StaticResource PanelAltBrush}"
-                                BorderBrush="{StaticResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="12"
-                                Padding="20"
-                                Margin="0,18,0,0">
+                        <Border Background="{DynamicResource PanelAltBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="20" Margin="0,18,0,0">
                             <StackPanel>
-                                <TextBlock Text="Route behavior" FontWeight="SemiBold" />
-                                <TextBlock Text="Direct / LAN connects to the target as entered. Private VPN / overlay also connects directly and assumes your private network is already active. RD Gateway writes an explicit Microsoft RD Gateway route into the temporary .rdp file. Ghost RDP does not configure VPNs, router forwarding, or firewall exceptions."
-                                           Foreground="{StaticResource MutedBrush}"
-                                           TextWrapping="Wrap"
-                                           Margin="0,6,0,0" />
+                                <TextBlock Text="Security boundary" FontWeight="SemiBold" />
+                                <TextBlock Text="Private-network mode assumes your VPN/overlay route already exists. RD Gateway writes only validated gateway connection metadata. Microsoft Remote Desktop owns credential prompts."
+                                           Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,6,0,0" />
                             </StackPanel>
                         </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
 
-                        <Border Background="{StaticResource PanelAltBrush}"
-                                BorderBrush="{StaticResource BorderBrush}"
-                                BorderThickness="1"
-                                CornerRadius="12"
-                                Padding="20"
-                                Margin="0,14,0,0">
+            <Grid x:Name="SettingsView" Visibility="Collapsed">
+                <Grid.RowDefinitions><RowDefinition Height="Auto" /><RowDefinition Height="*" /></Grid.RowDefinitions>
+                <StackPanel>
+                    <TextBlock Text="Settings" FontSize="30" FontWeight="SemiBold" />
+                    <TextBlock Text="Local UI preferences only. Connection details and credentials are not stored here."
+                               Foreground="{DynamicResource MutedBrush}" Margin="0,6,0,0" TextWrapping="Wrap" />
+                </StackPanel>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,24,0,0">
+                    <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+                        <Border Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="24">
                             <StackPanel>
-                                <TextBlock Text="Credential boundary" FontWeight="SemiBold" />
-                                <TextBlock Text="Ghost RDP passes only the temporary .rdp file path to mstsc.exe. Password entry for both the remote computer and RD Gateway remains owned by Microsoft Remote Desktop and is never placed in the temporary file or process command line."
-                                           Foreground="{StaticResource MutedBrush}"
-                                           TextWrapping="Wrap"
-                                           Margin="0,6,0,0" />
+                                <TextBlock Text="Startup and computer list" FontSize="18" FontWeight="SemiBold" />
+                                <TextBlock Text="Startup view" Foreground="{DynamicResource MutedBrush}" Margin="0,18,0,6" />
+                                <ComboBox x:Name="StartupViewComboBox" SelectedIndex="0" AutomationProperties.Name="Startup view">
+                                    <ComboBoxItem Content="Home" /><ComboBoxItem Content="Computers" /><ComboBoxItem Content="Quick Connect" />
+                                </ComboBox>
+                                <TextBlock Text="Default computer sort" Foreground="{DynamicResource MutedBrush}" Margin="0,16,0,6" />
+                                <ComboBox x:Name="DefaultSortComboBox" SelectedIndex="0" AutomationProperties.Name="Default saved-computer sort">
+                                    <ComboBoxItem Content="Name" /><ComboBoxItem Content="Host" /><ComboBoxItem Content="Favorites first" />
+                                </ComboBox>
+                                <CheckBox x:Name="RememberLastViewCheckBox" Content="Remember the last open view" Margin="0,18,0,0" AutomationProperties.Name="Remember last open view" />
+                                <StackPanel Orientation="Horizontal" Margin="0,22,0,0">
+                                    <Button Style="{StaticResource PrimaryButtonStyle}" Content="_Save settings" Margin="0,0,10,0" Click="SaveSettingsButton_Click" AutomationProperties.Name="Save settings" />
+                                    <Button Style="{StaticResource SecondaryButtonStyle}" Content="_Reset defaults" Click="ResetSettingsButton_Click" AutomationProperties.Name="Reset settings to defaults" />
+                                </StackPanel>
+                                <TextBlock x:Name="SettingsStatusText" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,14,0,0" AutomationProperties.LiveSetting="Polite" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{DynamicResource PanelAltBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="22" Margin="0,18,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Accessibility" FontSize="18" FontWeight="SemiBold" />
+                                <TextBlock x:Name="AccessibilityStatusText" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                                <TextBlock Text="Keyboard focus is visibly outlined, Alt access keys are available in navigation/actions, and important fields expose automation names for assistive technologies. Windows High Contrast is detected automatically and is not disabled by Ghost RDP."
+                                           Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,10,0,0" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -491,28 +316,29 @@
             </Grid>
 
             <Grid x:Name="AboutView" Visibility="Collapsed">
-                <StackPanel MaxWidth="780" HorizontalAlignment="Left">
-                    <TextBlock Text="About Ghost RDP" FontSize="30" FontWeight="SemiBold" />
-                    <TextBlock x:Name="AboutText"
-                               Foreground="{StaticResource MutedBrush}"
-                               FontSize="15"
-                               TextWrapping="Wrap"
-                               Margin="0,16,0,0" />
-                    <Border Background="{StaticResource PanelBrush}"
-                            BorderBrush="{StaticResource BorderBrush}"
-                            BorderThickness="1"
-                            CornerRadius="12"
-                            Padding="22"
-                            Margin="0,28,0,0">
-                        <StackPanel>
-                            <TextBlock Text="Security model" FontSize="18" FontWeight="SemiBold" />
-                            <TextBlock Text="Ghost RDP keeps Windows security controls intact. Direct/private-network routes never configure the network, while RD Gateway uses explicit Microsoft RDP properties. Credentials remain Windows-owned."
-                                       Foreground="{StaticResource MutedBrush}"
-                                       TextWrapping="Wrap"
-                                       Margin="0,8,0,0" />
-                        </StackPanel>
-                    </Border>
-                </StackPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel MaxWidth="820" HorizontalAlignment="Left">
+                        <TextBlock Text="About Ghost RDP" FontSize="30" FontWeight="SemiBold" />
+                        <TextBlock x:Name="AboutText" Foreground="{DynamicResource MutedBrush}" FontSize="15" TextWrapping="Wrap" Margin="0,10,0,0" />
+                        <Border Background="{DynamicResource PanelBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="22" Margin="0,26,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Runtime and local storage" FontSize="18" FontWeight="SemiBold" />
+                                <TextBlock x:Name="AboutRuntimeText" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,10,0,0" />
+                                <TextBlock Text="Saved computers" FontWeight="SemiBold" Margin="0,14,0,0" />
+                                <TextBlock x:Name="AboutProfilePathText" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                                <TextBlock Text="Settings" FontWeight="SemiBold" Margin="0,14,0,0" />
+                                <TextBlock x:Name="AboutSettingsPathText" Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Border>
+                        <Border Background="{DynamicResource PanelAltBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12" Padding="22" Margin="0,18,0,0">
+                            <StackPanel>
+                                <TextBlock Text="Security and privacy" FontSize="18" FontWeight="SemiBold" />
+                                <TextBlock Text="Ghost RDP has no telemetry or central RDP relay. Passwords are not stored in profiles, settings, process arguments, or temporary .rdp files. Microsoft Remote Desktop/Windows owns credential entry."
+                                           Foreground="{DynamicResource MutedBrush}" TextWrapping="Wrap" Margin="0,8,0,0" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
             </Grid>
         </Grid>
     </Grid>

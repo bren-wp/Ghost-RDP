@@ -1,7 +1,10 @@
+using System.ComponentModel;
+using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using GhostRdp.App.Settings;
 using GhostRdp.Core.Profiles;
 using GhostRdp.Core.Runtime;
 
@@ -9,19 +12,45 @@ namespace GhostRdp.App;
 
 public partial class MainWindow : Window
 {
+    private static readonly string[] PaletteKeys =
+    [
+        "WindowBrush", "PanelBrush", "PanelAltBrush", "BorderBrush", "TextBrush", "MutedBrush",
+        "AccentBrush", "AccentStrongBrush", "SuccessBrush", "WarningBrush", "DangerBrush", "SelectionBrush"
+    ];
+
     private readonly ComputerProfileStore _profileStore;
+    private readonly AppSettingsStore _settingsStore;
+    private readonly Dictionary<string, Color> _standardPalette = new(StringComparer.Ordinal);
     private List<ComputerProfile> _profiles = [];
+    private AppSettings _settings = AppSettings.CreateDefault();
     private bool _profileStoreWritable = true;
+    private bool _settingsAutoPersistEnabled = true;
 
     public MainWindow()
     {
         InitializeComponent();
+        CaptureStandardPalette();
+        SystemParameters.StaticPropertyChanged += SystemParameters_StaticPropertyChanged;
+
+        _settingsStore = new AppSettingsStore(AppSettingsStore.GetDefaultFilePath());
         _profileStore = new ComputerProfileStore(ComputerProfileStore.GetDefaultFilePath());
+
+        LoadSettings();
+        ApplySettingsToControls();
+        ApplyAccessibilityPalette();
+
         MstscLauncher.CleanupStaleTemporaryFiles();
-        AboutText.Text = AppMetadata.BuildAboutText();
         LoadProfiles();
         RefreshRuntimeStatus();
         RefreshProfileViews();
+        RefreshAboutView();
+        ShowInitialView();
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        SystemParameters.StaticPropertyChanged -= SystemParameters_StaticPropertyChanged;
+        base.OnClosed(e);
     }
 
     private void HomeNavButton_Click(object sender, RoutedEventArgs e) => ShowView(HomeView);
@@ -30,19 +59,178 @@ public partial class MainWindow : Window
 
     private void QuickConnectNavButton_Click(object sender, RoutedEventArgs e) => ShowView(QuickConnectView);
 
+    private void SettingsNavButton_Click(object sender, RoutedEventArgs e) => ShowView(SettingsView);
+
     private void AboutNavButton_Click(object sender, RoutedEventArgs e) => ShowView(AboutView);
 
     private void OpenQuickConnectButton_Click(object sender, RoutedEventArgs e) => ShowView(QuickConnectView);
 
     private void RefreshStatusButton_Click(object sender, RoutedEventArgs e) => RefreshRuntimeStatus();
 
-    private void ShowView(FrameworkElement view)
+    private void ShowInitialView()
+    {
+        var initial = _settings.RememberLastView ? _settings.LastView : _settings.StartupView;
+        ShowView(GetView(initial), persistLastView: false);
+    }
+
+    private FrameworkElement GetView(StartupView view) => view switch
+    {
+        StartupView.Computers => ComputersView,
+        StartupView.QuickConnect => QuickConnectView,
+        _ => HomeView
+    };
+
+    private void ShowView(FrameworkElement view, bool persistLastView = true)
     {
         HomeView.Visibility = Visibility.Collapsed;
         ComputersView.Visibility = Visibility.Collapsed;
         QuickConnectView.Visibility = Visibility.Collapsed;
+        SettingsView.Visibility = Visibility.Collapsed;
         AboutView.Visibility = Visibility.Collapsed;
         view.Visibility = Visibility.Visible;
+
+        if (persistLastView && IsLoaded && TryGetPersistableView(view, out var lastView))
+        {
+            PersistLastView(lastView);
+        }
+    }
+
+    private bool TryGetPersistableView(FrameworkElement view, out StartupView lastView)
+    {
+        if (ReferenceEquals(view, ComputersView))
+        {
+            lastView = StartupView.Computers;
+            return true;
+        }
+
+        if (ReferenceEquals(view, QuickConnectView))
+        {
+            lastView = StartupView.QuickConnect;
+            return true;
+        }
+
+        if (ReferenceEquals(view, HomeView))
+        {
+            lastView = StartupView.Home;
+            return true;
+        }
+
+        lastView = StartupView.Home;
+        return false;
+    }
+
+    private void PersistLastView(StartupView lastView)
+    {
+        if (!_settings.RememberLastView || !_settingsAutoPersistEnabled || _settings.LastView == lastView)
+        {
+            return;
+        }
+
+        var candidate = _settings.Clone();
+        candidate.LastView = lastView;
+        try
+        {
+            _settingsStore.Save(candidate);
+            _settings = candidate;
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            _settingsAutoPersistEnabled = false;
+            SetSettingsStatus($"The last view could not be saved automatically: {exception.Message}", true);
+        }
+    }
+
+    private void LoadSettings()
+    {
+        try
+        {
+            _settings = _settingsStore.Load();
+            _settingsAutoPersistEnabled = true;
+            SetSettingsStatus($"Settings are stored locally at {_settingsStore.FilePath}", false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            _settings = AppSettings.CreateDefault();
+            _settingsAutoPersistEnabled = false;
+            SetSettingsStatus($"Settings could not be loaded: {exception.Message} The existing file was not modified. Save or reset settings explicitly to replace it.", true);
+        }
+    }
+
+    private void ApplySettingsToControls()
+    {
+        StartupViewComboBox.SelectedIndex = _settings.StartupView switch
+        {
+            StartupView.Computers => 1,
+            StartupView.QuickConnect => 2,
+            _ => 0
+        };
+        DefaultSortComboBox.SelectedIndex = _settings.DefaultComputerSort switch
+        {
+            ComputerSortPreference.Host => 1,
+            ComputerSortPreference.FavoritesFirst => 2,
+            _ => 0
+        };
+        RememberLastViewCheckBox.IsChecked = _settings.RememberLastView;
+        ComputerSortComboBox.SelectedIndex = DefaultSortComboBox.SelectedIndex;
+    }
+
+    private void SaveSettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var candidate = new AppSettings
+        {
+            StartupView = StartupViewComboBox.SelectedIndex switch
+            {
+                1 => StartupView.Computers,
+                2 => StartupView.QuickConnect,
+                _ => StartupView.Home
+            },
+            DefaultComputerSort = DefaultSortComboBox.SelectedIndex switch
+            {
+                1 => ComputerSortPreference.Host,
+                2 => ComputerSortPreference.FavoritesFirst,
+                _ => ComputerSortPreference.Name
+            },
+            RememberLastView = RememberLastViewCheckBox.IsChecked == true,
+            LastView = _settings.LastView
+        };
+
+        try
+        {
+            _settingsStore.Save(candidate);
+            _settings = candidate;
+            _settingsAutoPersistEnabled = true;
+            ComputerSortComboBox.SelectedIndex = DefaultSortComboBox.SelectedIndex;
+            RefreshProfileViews();
+            SetSettingsStatus("Settings saved. Only local UI preferences were written.", false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            SetSettingsStatus($"Settings were not saved: {exception.Message}", true);
+        }
+    }
+
+    private void ResetSettingsButton_Click(object sender, RoutedEventArgs e)
+    {
+        var defaults = AppSettings.CreateDefault();
+        try
+        {
+            _settingsStore.Save(defaults);
+            _settings = defaults;
+            _settingsAutoPersistEnabled = true;
+            ApplySettingsToControls();
+            RefreshProfileViews();
+            SetSettingsStatus("Settings reset to safe defaults.", false);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            SetSettingsStatus($"Settings could not be reset: {exception.Message}", true);
+        }
+    }
+
+    private void SetSettingsStatus(string message, bool isError)
+    {
+        SettingsStatusText.Text = message;
+        SettingsStatusText.Foreground = GetBrush(isError ? "DangerBrush" : "MutedBrush");
     }
 
     private void LoadProfiles()
@@ -71,6 +259,16 @@ public partial class MainWindow : Window
             : status.Message;
         ConnectSelectedComputerButton.IsEnabled = status.IsAvailable;
         QuickConnectConnectButton.IsEnabled = status.IsAvailable;
+        AboutRuntimeText.Text = status.IsAvailable && status.ExecutablePath is not null
+            ? $"Microsoft RDP runtime available: {status.ExecutablePath}"
+            : status.Message;
+    }
+
+    private void RefreshAboutView()
+    {
+        AboutText.Text = AppMetadata.BuildAboutText();
+        AboutProfilePathText.Text = _profileStore.FilePath;
+        AboutSettingsPathText.Text = _settingsStore.FilePath;
     }
 
     private void RefreshProfileViews()
@@ -105,8 +303,8 @@ public partial class MainWindow : Window
 
         ProfileListBox.ItemsSource = filtered.ToList();
         ComputerSummaryText.Text = $"{_profiles.Count} saved computer{(_profiles.Count == 1 ? string.Empty : "s")}";
-        SavedComputerCountText.Text = _profiles.Count.ToString(System.Globalization.CultureInfo.InvariantCulture);
-        FavoriteCountText.Text = _profiles.Count(profile => profile.Favorite).ToString(System.Globalization.CultureInfo.InvariantCulture);
+        SavedComputerCountText.Text = _profiles.Count.ToString(CultureInfo.InvariantCulture);
+        FavoriteCountText.Text = _profiles.Count(profile => profile.Favorite).ToString(CultureInfo.InvariantCulture);
     }
 
     private void ComputerSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -410,6 +608,65 @@ public partial class MainWindow : Window
     {
         QuickConnectStatusText.Text = message;
         QuickConnectStatusText.Foreground = GetBrush(isError ? "DangerBrush" : "SuccessBrush");
+    }
+
+    private void CaptureStandardPalette()
+    {
+        foreach (var key in PaletteKeys)
+        {
+            if (Application.Current.Resources[key] is SolidColorBrush brush)
+            {
+                _standardPalette[key] = brush.Color;
+            }
+        }
+    }
+
+    private void ApplyAccessibilityPalette()
+    {
+        if (SystemParameters.HighContrast)
+        {
+            SetBrushResource("WindowBrush", SystemColors.WindowColor);
+            SetBrushResource("PanelBrush", SystemColors.WindowColor);
+            SetBrushResource("PanelAltBrush", SystemColors.ControlColor);
+            SetBrushResource("BorderBrush", SystemColors.WindowTextColor);
+            SetBrushResource("TextBrush", SystemColors.WindowTextColor);
+            SetBrushResource("MutedBrush", SystemColors.GrayTextColor);
+            SetBrushResource("AccentBrush", SystemColors.HighlightColor);
+            SetBrushResource("AccentStrongBrush", SystemColors.HighlightColor);
+            SetBrushResource("SuccessBrush", SystemColors.WindowTextColor);
+            SetBrushResource("WarningBrush", SystemColors.WindowTextColor);
+            SetBrushResource("DangerBrush", SystemColors.WindowTextColor);
+            SetBrushResource("SelectionBrush", SystemColors.ControlColor);
+            AccessibilityStatusText.Text = "Windows High Contrast is active. Ghost RDP is using system colors while preserving text labels and visible keyboard focus.";
+            return;
+        }
+
+        foreach (var pair in _standardPalette)
+        {
+            SetBrushResource(pair.Key, pair.Value);
+        }
+
+        AccessibilityStatusText.Text = "Standard Ghost RDP palette is active. Windows High Contrast is detected automatically when enabled.";
+    }
+
+    private static void SetBrushResource(string key, Color color) =>
+        Application.Current.Resources[key] = new SolidColorBrush(color);
+
+    private void SystemParameters_StaticPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (!string.Equals(e.PropertyName, nameof(SystemParameters.HighContrast), StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (Dispatcher.CheckAccess())
+        {
+            ApplyAccessibilityPalette();
+        }
+        else
+        {
+            Dispatcher.Invoke(ApplyAccessibilityPalette);
+        }
     }
 
     private Brush GetBrush(string key) => (Brush)FindResource(key);

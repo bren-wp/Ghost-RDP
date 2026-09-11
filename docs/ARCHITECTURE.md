@@ -7,10 +7,10 @@ Ghost RDP is a Windows-first remote desktop management product. The architecture
 ## Solution boundaries
 
 - `GhostRdp.Core` contains product metadata, validation, profile models/storage, security helpers, Microsoft RDP launch primitives, remote-access route models, Host readiness domain models/evaluation, runtime detection abstractions, and host-neutral helpers.
-- `GhostRdp.App` is the user-facing Windows WPF application.
+- `GhostRdp.App` is the user-facing Windows WPF application and owns non-sensitive UI preference persistence.
 - `GhostRdp.Host` is a separate, visible Windows application for read-only host-side readiness diagnostics.
 - `GhostRdp.Core.Tests` covers shared validation, profile persistence/migration, RDP file generation/process launch planning, Host readiness evaluation, and security behavior.
-- `GhostRdp.App.Tests` covers application-facing metadata and behavior that can be tested without UI automation.
+- `GhostRdp.App.Tests` covers application metadata and UI-settings persistence behavior that can be tested without UI automation.
 
 ## Saved computer persistence
 
@@ -21,6 +21,12 @@ Schema v2 adds `RemoteAccessMode` and an optional RD Gateway hostname. Schema-v1
 Writes are validated before serialization and use a random temporary file followed by replacement in the same directory. Invalid JSON, unsupported future schema versions, invalid profiles, and duplicate IDs are rejected. A corrupted store is not silently replaced by the app.
 
 Quick Connect is modeled separately from a saved profile. Validation does not persist anything. Conversion to a saved computer happens only through the explicit `Save as computer` action.
+
+## UI settings persistence
+
+`GhostRdp.App.Settings` stores a separate schema-versioned `settings.json` under the current user's local application-data directory. It contains only UI preferences: startup view, default computer sort, remember-last-view state, and the last eligible view.
+
+The settings store does not contain connection endpoints, usernames, domains, gateway addresses, passwords, tokens, or credential material. Writes use the same temporary-file-then-replace pattern as profiles. Missing settings return defaults in memory. Invalid JSON, invalid enum values, and unsupported future schemas are rejected without rewriting the source on load. After a failed settings load, automatic last-view persistence stays disabled until an explicit Save or Reset succeeds.
 
 ## Remote-access routes
 
@@ -41,6 +47,12 @@ A Connect action converts validated profile or Quick Connect metadata into an `R
 `mstsc.exe` is resolved by `RdpRuntimeDetector` and is launched directly with `UseShellExecute = false`. The `.rdp` path is supplied as one `ProcessStartInfo.ArgumentList` item; user-controlled connection values are never concatenated into a shell command.
 
 Microsoft Remote Desktop/Windows owns credential entry for both the target and any configured RD Gateway. Ghost RDP cleans the temporary session directory after the RDP process exits and performs stale cleanup for files left after an abnormal application termination.
+
+## Accessibility architecture
+
+WPF controls use visible keyboard focus visuals, access keys, and UI Automation names for important navigation and actions. Status areas use textual state and polite live announcements where appropriate so state is not communicated by color alone.
+
+Windows High Contrast is observed through `SystemParameters.HighContrast`. When active, Ghost RDP swaps semantic brush resources to Windows system colors; when disabled, the captured standard palette is restored. This presentation layer does not change RDP, credential, firewall, NLA, gateway, or host-diagnostic behavior.
 
 ## Host readiness architecture
 
