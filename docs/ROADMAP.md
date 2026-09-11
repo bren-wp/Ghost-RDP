@@ -16,25 +16,29 @@ Status terminology: **implemented** means code exists and has passed repository 
 | PR 10 | Deterministic dark theme, control templates, vector icons, list virtualization, and UI/UX documentation for 0.9.1 | implemented |
 | PR 11 | Saved-computer filtering/sorting performance, debounce, selection preservation, and query tests | implemented |
 | PR 12 | Documentation synchronization and enforced no-third-party-runtime-dependency policy | implemented |
-| PR 13 | 0.9.1 release metadata finalization and automated release-preflight validation | development |
+| PR 13 | 0.9.1 release metadata finalization and automated release-preflight validation | implemented |
 
-## Production release
+## Current production release
 
-Version 0.9.0 remains the latest published production release until the exact `release/v0.9.1` workflow completes successfully and creates or updates the GitHub Release. It provides self-contained x86, x64, and ARM64 App/Host/Setup binaries, canonical `setup.exe` and `portable.exe` compatibility downloads, native ARM64 smoke testing, PE architecture validation, SHA-256 integrity checks, and Windows Installed Apps uninstall without a separate persistent uninstall executable.
+**Ghost RDP 0.9.1** is the current published production release. The `v0.9.1` GitHub Release was published from exact commit `c0ec01cf286ac422c0f2c41db1b456a2b0e62ca3` after Publish Release workflow run `34659493897` completed successfully.
 
-## 0.9.1 release preparation
+The release provides self-contained x86, x64, and ARM64 App/Host/Setup binaries, canonical `setup.exe` and `portable.exe` compatibility downloads, architecture-specific Portable ZIPs, native ARM64 execution validation, PE architecture validation, SHA-256 integrity data, and Windows Installed Apps uninstall without a separate persistent uninstall executable.
 
-The 0.9.1 maintenance line focuses on visual correctness, accessibility, responsiveness, dependency discipline, and release-metadata integrity without changing the RDP credential/security boundary.
+All three architecture jobs passed release metadata/branch preflight, security/runtime-dependency checks, package validation, runtime self-tests, and real Setup install/uninstall smoke tests. The final publish job assembled and validated the combined release before publication.
+
+## 0.9.1 maintenance line
+
+The 0.9.1 maintenance release focuses on visual correctness, accessibility, responsiveness, dependency discipline, and release-metadata integrity without changing the RDP credential/security boundary.
 
 Implemented work includes deterministic WPF dark theming, project-owned text-field/dropdown templates, vector UI assets, saved-computer list recycling/virtualization, a short search debounce, deterministic query tests, selection preservation, cached favorite counts, and an enforced no-third-party-runtime-dependency policy.
 
-Release preparation adds a repository-owned `release-preflight.ps1` gate. It verifies App/Host/Setup version alignment on normal CI and, for release publication, additionally verifies finalized CHANGELOG/RELEASE-NOTES metadata plus the exact `release/v<version>` branch name.
-
-The release is not considered published merely because the source version is 0.9.1 or because release notes are finalized. Publication status changes only after the exact release workflow succeeds and the GitHub Release exists.
+The repository-owned `release-preflight.ps1` gate verifies App/Host/Setup version alignment on normal CI and, for release publication, additionally verifies finalized CHANGELOG/RELEASE-NOTES metadata plus the exact `release/v<version>` branch name.
 
 ## Documentation policy
 
-The maintained documentation set has a central index in `docs/README.md`. Functional changes are reviewed against README, CHANGELOG, ROADMAP, and every affected technical document in the same pull-request cycle. Release preparation additionally checks Build, Packaging, Release, Release Notes, Security, Privacy, and Dependencies for consistency.
+The maintained documentation set has a central index in `docs/README.md`. Functional changes are reviewed against README, CHANGELOG, ROADMAP, and every affected technical document in the same pull-request cycle. Release work additionally checks Build, Packaging, Release, Release Notes, Security, Privacy, and Dependencies for consistency.
+
+The complete documentation set was reviewed after publication of v0.9.1. Status-bearing documents were updated to the published state; technical documents whose runtime behavior did not change were left unchanged rather than receiving artificial edits.
 
 Authentic Windows screenshots remain a documentation follow-up and are never replaced with generated mockups presented as runtime evidence. Repository-owned branding and technical diagrams may be used while authentic runtime captures are not yet committed.
 

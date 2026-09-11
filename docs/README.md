@@ -2,7 +2,7 @@
 
 This directory is the maintained technical documentation set for Ghost RDP. Documentation is versioned with the source code and must be updated in the same pull request whenever behavior, packaging, security boundaries, dependencies, release behavior, UI/UX, privacy, accessibility, or supported Windows behavior changes.
 
-Current documentation baseline: **0.9.1 release preparation**. Latest published production release remains **0.9.0** until the exact `release/v0.9.1` workflow succeeds and the GitHub Release exists.
+Current documentation baseline: **Ghost RDP 0.9.1 production**. The published GitHub Release is `v0.9.1`, built from source commit `c0ec01cf286ac422c0f2c41db1b456a2b0e62ca3` after the guarded multi-architecture release workflow completed successfully.
 
 ## Documentation map
 
@@ -17,8 +17,8 @@ Current documentation baseline: **0.9.1 release preparation**. Latest published 
 - [Remote access](REMOTE-ACCESS.md) — Direct/LAN, private-network and RD Gateway routing model.
 - [Build](BUILD.md) — SDK requirements and repository build commands.
 - [Packaging](PACKAGING.md) — Setup, Portable, architecture and uninstall contracts.
-- [Release validation](RELEASE.md) — exact release gates, preflight requirements and release-branch rules.
-- [Release notes](RELEASE-NOTES.md) — finalized 0.9.1 release notes used by automated publication.
+- [Release validation](RELEASE.md) — exact release gates, preflight requirements, current verified release, and release-branch rules.
+- [Release notes](RELEASE-NOTES.md) — Ghost RDP 0.9.1 release notes used by automated publication.
 - [Roadmap](ROADMAP.md) — implemented, development and planned milestones.
 
 The root [README](../README.md) and [CHANGELOG](../CHANGELOG.md) are part of the same synchronized documentation set.
@@ -29,11 +29,17 @@ A pull request is not considered complete if its user-visible or architectural b
 
 For every functional change, review at minimum the root README, CHANGELOG, ROADMAP, and the domain documents affected by the change. Release work must additionally review BUILD, PACKAGING, RELEASE, RELEASE-NOTES, SECURITY, PRIVACY and DEPENDENCIES.
 
-## Release-documentation state
+## Current release state
 
-Release preparation is intentionally separated from publication state. A finalized CHANGELOG date and release-note body do not by themselves mean that a version is published. README and ROADMAP must continue to identify the actual latest GitHub Release until the release workflow succeeds.
+Ghost RDP `v0.9.1` is published as a production GitHub Release, not a draft or prerelease. Publish Release run `34659493897` passed x86, x64, and native ARM64 branch/metadata preflight, dependency/security checks, package validation, runtime self-tests, and real Setup install/uninstall smoke tests before the final combined release was assembled and validated.
 
-The repository-owned `scripts/release-preflight.ps1` enforces version alignment in normal CI and finalized release metadata plus branch/version alignment in the release workflow.
+The release contains canonical `setup.exe` and `portable.exe`, architecture-specific Setup/Portable/Host binaries, Portable ZIPs, `LICENSE.txt`, `RELEASE-MANIFEST.json`, and `SHA256SUMS.txt`. Current packages remain unsigned; no Authenticode claim is made.
+
+The repository-owned `scripts/release-preflight.ps1` continues to enforce version alignment in normal CI and finalized release metadata plus branch/version alignment in the publication workflow.
+
+## Post-release documentation review
+
+After v0.9.1 publication, the complete maintained documentation set was reviewed for stale release-preparation wording and contradictions. README, CHANGELOG, ROADMAP, this index, and Release validation carry the publication status. Architecture, Build, Packaging, Security, Privacy, Dependencies, Accessibility, UI/UX, Windows, Host, and Remote Access continue to describe the same validated 0.9.1 runtime behavior and therefore do not require artificial status-only edits.
 
 ## Evidence policy
 

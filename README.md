@@ -6,11 +6,11 @@
 
 **Private remote desktop management for computers you control.**
 
-[Windows 10/11](docs/WINDOWS.md) · [.NET 8](docs/BUILD.md) · [CI](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml) · [Latest production release v0.9.0](https://github.com/bren-wp/Ghost-RDP/releases/tag/v0.9.0) · [Privacy: no telemetry](docs/PRIVACY.md)
+[Windows 10/11](docs/WINDOWS.md) · [.NET 8](docs/BUILD.md) · [CI](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml) · [Latest production release v0.9.1](https://github.com/bren-wp/Ghost-RDP/releases/tag/v0.9.1) · [Privacy: no telemetry](docs/PRIVACY.md)
 
 Ghost RDP is a Windows-first desktop application for managing Microsoft Remote Desktop connections to computers the user controls. It is built around explicit user actions, Windows security boundaries, local persistence, accessibility, low background activity, and a no-telemetry privacy baseline.
 
-Latest production release: **0.9.0**. Current release-preparation version: **0.9.1**. The repository does not claim 0.9.1 as published until the exact `release/v0.9.1` workflow finishes successfully and the GitHub Release exists.
+Latest production release: **0.9.1**, published from exact source commit `c0ec01cf286ac422c0f2c41db1b456a2b0e62ca3` after the guarded x86/x64/ARM64 release workflow completed successfully.
 
 <p align="center">
   <img src="assets/ghost-rdp-ui-overview.svg" alt="Ghost RDP interface and runtime overview" width="1000" />
@@ -32,11 +32,19 @@ Latest production release: **0.9.0**. Current release-preparation version: **0.9
 - SHA-256 manifests, PE-architecture validation, runtime self-tests, package validation, and real install/uninstall smoke tests.
 - Native ARM64 CI validation on a Windows ARM64 runner.
 - Automated GitHub Release publishing only after all architecture jobs pass for the exact release commit.
-- Repository-owned release preflight that validates production-project version alignment and finalized release metadata before publication.
+- Repository-owned release preflight that validates production-project version alignment, finalized release metadata, and the exact `release/v<version>` branch before publication.
+
+## 0.9.1 release verification
+
+The `v0.9.1` GitHub Release was produced from commit `c0ec01cf286ac422c0f2c41db1b456a2b0e62ca3` by Publish Release workflow run `34659493897`. The release is neither a draft nor a prerelease.
+
+Before publication, x86, x64, and native ARM64 jobs each passed release metadata/branch preflight, security/runtime-dependency checks, package build/validation, runtime self-tests, and real Setup install/uninstall smoke tests. The final publish job then assembled and validated the combined release before creating the GitHub Release.
+
+Published assets include canonical `setup.exe` and `portable.exe`, architecture-specific Setup/Portable/Host executables, x86/x64/ARM64 Portable ZIPs, `LICENSE.txt`, `RELEASE-MANIFEST.json`, and `SHA256SUMS.txt`. GitHub also records SHA-256 digests for uploaded release assets.
 
 ## UI and UX
 
-The 0.9.1 maintenance line standardizes the App, Host, and Setup visual system around the same dark palette and Windows-native interaction model. Concrete WPF windows receive the intended application background and foreground deterministically, ordinary text has an explicit readable foreground, text fields and dropdowns use matching dark templates, and the sidebar uses lightweight vector navigation icons.
+The 0.9.1 maintenance release standardizes the App, Host, and Setup visual system around the same dark palette and Windows-native interaction model. Concrete WPF windows receive the intended application background and foreground deterministically, ordinary text has an explicit readable foreground, text fields and dropdowns use matching dark templates, and the sidebar uses lightweight vector navigation icons.
 
 The UI uses vector geometry rather than bitmap-heavy decoration, layout rounding/device-pixel snapping, practical hit targets, visible keyboard focus, and system High Contrast handling. See [UI and UX](docs/UI-UX.md) and [Accessibility](docs/ACCESSIBILITY.md).
 
@@ -66,13 +74,13 @@ There is no telemetry, analytics, advertising, fingerprinting, or central Ghost 
 
 ## Downloads
 
-Production releases provide:
+The current production release is [Ghost RDP v0.9.1](https://github.com/bren-wp/Ghost-RDP/releases/tag/v0.9.1). It provides:
 
 - `setup.exe` — x86/32-bit compatibility Setup;
 - `portable.exe` — x86/32-bit compatibility Portable client;
 - native x64 and ARM64 Setup/Portable executables;
 - architecture-specific Portable ZIP packages and Host diagnostics binaries;
-- `SHA256SUMS.txt` and `RELEASE-MANIFEST.json`.
+- `SHA256SUMS.txt`, `RELEASE-MANIFEST.json`, and `LICENSE.txt`.
 
 The x86 compatibility executables also run on x64 Windows through Windows' x86 compatibility layer. Native x64 and ARM64 builds are provided for architecture-matched execution.
 
@@ -118,7 +126,7 @@ Runtime screenshots are accepted only when captured from a real validated Ghost 
 
 ## Signing
 
-Current packages are unsigned. Authenticode signing will be added only when an authorized signing certificate or signing service is configured. The project never claims signing that has not been produced and verified.
+Current 0.9.1 packages are unsigned. Authenticode signing will be added only when an authorized signing certificate or signing service is configured. The project never claims signing that has not been produced and verified.
 
 ## License
 

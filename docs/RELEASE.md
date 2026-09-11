@@ -2,6 +2,14 @@
 
 This document defines the gates required before a Ghost RDP commit can be published as a production Windows release.
 
+## Current verified production release
+
+Ghost RDP **v0.9.1** is the current verified production release. It was published from exact source commit `c0ec01cf286ac422c0f2c41db1b456a2b0e62ca3` by Publish Release workflow run `34659493897`.
+
+The release workflow completed successfully for x86, x64, and native ARM64. Each architecture passed release metadata/branch preflight, restore, security/runtime-dependency checks, package build/validation, runtime self-tests, and real Setup install/uninstall smoke testing. The publish job then downloaded all architecture packages, assembled the combined release, validated it again, read version 0.9.1, and successfully created the GitHub Release.
+
+The published release is neither a draft nor a prerelease. It contains canonical `setup.exe` and `portable.exe`, architecture-specific Setup/Portable/Host executables, x86/x64/ARM64 Portable ZIPs, `LICENSE.txt`, `RELEASE-MANIFEST.json`, and `SHA256SUMS.txt`. GitHub records SHA-256 digests for uploaded assets. Current binaries remain unsigned.
+
 ## Required CI gates
 
 The exact release commit must pass:
@@ -74,9 +82,9 @@ Saved computers and settings remain user-owned data and are preserved by default
 
 Before release, review the complete [documentation index](README.md). README, CHANGELOG, ROADMAP, BUILD, PACKAGING, RELEASE, RELEASE-NOTES, SECURITY, PRIVACY and DEPENDENCIES must agree on the version, architecture matrix, dependency policy, signing status, uninstall behavior, and known limitations.
 
-Unchanged documents do not need artificial edits, but contradictions must be resolved before the release branch is created.
+Unchanged documents do not need artificial edits, but contradictions must be resolved before the release branch is created. After publication, status-bearing documents must be updated so they identify the actual current production release rather than a release-preparation state.
 
-Finalizing release notes does not mean the release is already published. README and ROADMAP must continue to report the actual latest GitHub Release until the publication workflow succeeds.
+The complete documentation set was reviewed after v0.9.1 publication. README, CHANGELOG, ROADMAP, the documentation index, and this release document were updated for the published state. Architecture, Build, Packaging, Security, Privacy, Dependencies, Accessibility, UI/UX, Windows, Host, Remote Access and the finalized Release Notes continue to describe the same validated 0.9.1 behavior and therefore require no artificial status-only change.
 
 ## Authentic screenshots
 
@@ -84,4 +92,4 @@ Runtime screenshots are documentation evidence, not a substitute for CI or packa
 
 ## Known release limitation
 
-Current packages are unsigned. Authenticode signing remains deferred until an authorized certificate or signing service is available. The release process must never claim a signature that was not actually produced and verified.
+Current 0.9.1 packages are unsigned. Authenticode signing remains deferred until an authorized certificate or signing service is available. The release process must never claim a signature that was not actually produced and verified.
