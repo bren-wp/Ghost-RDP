@@ -12,15 +12,20 @@ Status terminology: **implemented** means code exists and has passed repository 
 | PR 6 | Settings, About expansion, accessibility and UI polish | implemented |
 | PR 7 | Initial Windows Setup and Portable packaging | implemented |
 | PR 8 | Release-candidate documentation and integrity checks | implemented |
-| PR 9 | Production stability hardening, x86/x64/ARM64 packaging, integrated Setup/uninstall, and automated GitHub Releases | development |
+| PR 9 | Production stability hardening, x86/x64/ARM64 packaging, integrated Setup/uninstall, and automated GitHub Releases | implemented |
+| PR 10 | Deterministic dark theme, control templates, vector icons, list virtualization, and UI/UX documentation for 0.9.1 | development |
 
-## Production release target
+## Production release
 
-Version 0.9.0 replaces the previous x64-only third-party installer path with the repository-owned Ghost RDP Setup project. The release target includes self-contained x86, x64, and ARM64 App/Host/Setup binaries, canonical `setup.exe` and `portable.exe` compatibility downloads, native ARM64 smoke testing, PE architecture validation, SHA-256 integrity checks, and Windows Installed Apps uninstall without a separate persistent uninstall executable.
+Version 0.9.0 is the current published production release. It replaces the previous x64-only third-party installer path with the repository-owned Ghost RDP Setup project and provides self-contained x86, x64, and ARM64 App/Host/Setup binaries, canonical `setup.exe` and `portable.exe` compatibility downloads, native ARM64 smoke testing, PE architecture validation, SHA-256 integrity checks, and Windows Installed Apps uninstall without a separate persistent uninstall executable.
+
+## 0.9.1 development target
+
+The next maintenance milestone focuses on visual correctness and efficiency: ensuring concrete WPF window classes always receive the Ghost RDP palette, preventing Windows default black text/white controls from leaking into dark views, using project-owned text-field/dropdown templates, adding scalable vector UI icons, and recycling saved-computer list containers. No security boundary changes are introduced by this UI pass.
 
 ## Documentation follow-up
 
-Authentic Windows screenshots remain a documentation-only follow-up and are never replaced with generated mockups presented as runtime evidence. They do not weaken or bypass automated package/runtime release gates.
+Authentic Windows screenshots remain a documentation follow-up and are never replaced with generated mockups presented as runtime evidence. The README may use project branding and technical diagrams while runtime screenshot evidence still requires a real validated Windows build.
 
 ## Later work
 
