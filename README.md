@@ -18,15 +18,17 @@ Ghost RDP is a Windows-first desktop application for managing Remote Desktop con
 - .NET 8 solution with separate Core, App, Host, and test projects;
 - native WPF Windows UI using the Ghost RDP dark visual system;
 - saved computers with add, edit, delete, duplicate, favorite, search, favorites filter, and sorting;
-- schema-versioned local JSON profile storage with stable UUIDs and atomic replacement writes;
+- schema-versioned local JSON profile storage with stable UUIDs, atomic replacement writes, and in-memory migration from v1 to v2;
 - Quick Connect validation with an explicit `Save as computer` action and no hidden profile creation;
-- profile metadata for host/IP, RDP port, username, domain, notes, favorite state, and tags;
+- profile metadata for host/IP, RDP port, username, domain, remote-access route, optional RD Gateway host, notes, favorite state, and tags;
+- Direct/LAN, existing private VPN/overlay, and explicit RD Gateway connection routes;
+- RD Gateway `.rdp` integration using documented Microsoft gateway properties while leaving gateway and target credential entry to Windows;
 - actual Microsoft `mstsc.exe` detection and Connect actions that remain disabled when the runtime is unavailable;
 - safe `mstsc.exe` launch integration using `ProcessStartInfo.ArgumentList` with `UseShellExecute = false`;
-- random temporary `.rdp` session files containing connection metadata but no password field;
+- random temporary `.rdp` session files containing validated connection metadata but no password field;
 - strict server authentication requirement and CredSSP enabled in generated `.rdp` files;
 - temporary `.rdp` cleanup after Microsoft RDP exits plus stale-session cleanup after abnormal termination;
-- Windows-owned credential entry: Ghost RDP does not pass passwords to `mstsc.exe`, process arguments, or `.rdp` files;
+- Windows-owned credential entry: Ghost RDP does not pass passwords to `mstsc.exe`, process arguments, profiles, or `.rdp` files;
 - separate, visible Ghost RDP Host application with read-only readiness diagnostics;
 - Host checks for Windows edition, RDP enabled state, `TermService`, RDP port, NLA, firewall/profile state, inbound RDP rule availability, LAN addresses, and VPN/private-overlay adapter indicators;
 - conservative Host readiness evaluation: unknown values never become a green ready state;
@@ -36,9 +38,9 @@ Ghost RDP is a Windows-first desktop application for managing Remote Desktop con
 
 ## Security baseline
 
-Passwords are not part of the saved computer or Quick Connect persistence schema. The Microsoft RDP launch flow deliberately does not accept or transport a password: Windows/Microsoft Remote Desktop owns credential entry when a session starts. Secrets must not be serialized to profiles, written to logs, included in `.rdp` files, or passed on a process command line. A corrupted or unsupported profile store is not silently overwritten by the app. See [SECURITY.md](docs/SECURITY.md).
+Passwords are not part of the saved computer or Quick Connect persistence schema. The Microsoft RDP launch flow deliberately does not accept or transport a password: Windows/Microsoft Remote Desktop owns credential entry when a session starts, including RD Gateway credential prompts. Secrets must not be serialized to profiles, written to logs, included in `.rdp` files, or passed on a process command line. A corrupted or unsupported profile store is not silently overwritten by the app. See [SECURITY.md](docs/SECURITY.md).
 
-Ghost RDP does not silently expose Remote Desktop to the Internet or weaken Windows security controls. Ghost RDP Host is diagnostic-only: it does not enable RDP, start services, alter firewall rules, change NLA, or modify network exposure.
+Ghost RDP does not silently expose Remote Desktop to the Internet or weaken Windows security controls. Private-network mode does not install or configure a VPN/overlay. Ghost RDP Host is diagnostic-only: it does not enable RDP, start services, alter firewall rules, change NLA, or modify network exposure.
 
 ## Privacy baseline
 
@@ -46,7 +48,7 @@ The current architecture has no telemetry, analytics, ads, fingerprinting, or ce
 
 ## Planned next
 
-VPN/private-overlay and RD Gateway-aware remote access UX is the next milestone. Session history, settings and accessibility polish, Setup/Portable packaging, and authentic screenshots remain planned.
+Settings, About expansion, accessibility and UI polish are the next milestone. Session history, Setup/Portable packaging, and authentic screenshots remain planned.
 
 ## Build
 

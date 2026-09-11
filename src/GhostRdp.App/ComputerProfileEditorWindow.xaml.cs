@@ -25,6 +25,14 @@ public partial class ComputerProfileEditorWindow : Window
         PortTextBox.Text = _workingProfile.Port.ToString(System.Globalization.CultureInfo.InvariantCulture);
         UsernameTextBox.Text = _workingProfile.Username;
         DomainTextBox.Text = _workingProfile.Domain;
+        RemoteAccessModeComboBox.SelectedIndex = _workingProfile.RemoteAccessMode switch
+        {
+            RemoteAccessMode.Direct => 0,
+            RemoteAccessMode.PrivateNetwork => 1,
+            RemoteAccessMode.RdGateway => 2,
+            _ => 0
+        };
+        GatewayHostTextBox.Text = _workingProfile.GatewayHost;
         TagsTextBox.Text = string.Join(", ", _workingProfile.Tags);
         NotesTextBox.Text = _workingProfile.Notes;
         FavoriteCheckBox.IsChecked = _workingProfile.Favorite;
@@ -38,11 +46,23 @@ public partial class ComputerProfileEditorWindow : Window
             return;
         }
 
+        var remoteAccessMode = RemoteAccessModeComboBox.SelectedIndex switch
+        {
+            1 => RemoteAccessMode.PrivateNetwork,
+            2 => RemoteAccessMode.RdGateway,
+            _ => RemoteAccessMode.Direct
+        };
+
+        _workingProfile.SchemaVersion = ComputerProfile.CurrentSchemaVersion;
         _workingProfile.DisplayName = DisplayNameTextBox.Text.Trim();
         _workingProfile.Host = HostTextBox.Text.Trim();
         _workingProfile.Port = port;
         _workingProfile.Username = UsernameTextBox.Text.Trim();
         _workingProfile.Domain = DomainTextBox.Text.Trim();
+        _workingProfile.RemoteAccessMode = remoteAccessMode;
+        _workingProfile.GatewayHost = remoteAccessMode == RemoteAccessMode.RdGateway
+            ? GatewayHostTextBox.Text.Trim()
+            : string.Empty;
         _workingProfile.Tags = TagsTextBox.Text
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .Distinct(StringComparer.OrdinalIgnoreCase)

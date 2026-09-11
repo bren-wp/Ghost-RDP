@@ -5,7 +5,13 @@ using GhostRdp.Core.Validation;
 
 namespace GhostRdp.Core.Runtime;
 
-public sealed record RdpConnectionRequest(string Host, int Port, string Username, string Domain)
+public sealed record RdpConnectionRequest(
+    string Host,
+    int Port,
+    string Username,
+    string Domain,
+    RemoteAccessMode RemoteAccessMode = RemoteAccessMode.Direct,
+    string GatewayHost = "")
 {
     public ValidationResult Validate()
     {
@@ -27,7 +33,31 @@ public sealed record RdpConnectionRequest(string Host, int Port, string Username
             return username;
         }
 
-        return ConnectionInputValidator.ValidateDomain(Domain);
+        var domain = ConnectionInputValidator.ValidateDomain(Domain);
+        if (!domain.IsValid)
+        {
+            return domain;
+        }
+
+        if (!Enum.IsDefined(RemoteAccessMode))
+        {
+            return ValidationResult.Failure("Remote access mode is invalid.");
+        }
+
+        if (RemoteAccessMode == RemoteAccessMode.RdGateway)
+        {
+            var gateway = ConnectionInputValidator.ValidateHost(GatewayHost);
+            if (!gateway.IsValid)
+            {
+                return ValidationResult.Failure($"RD Gateway: {gateway.Error}");
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(GatewayHost))
+        {
+            return ValidationResult.Failure("RD Gateway host must be empty unless RD Gateway mode is selected.");
+        }
+
+        return ValidationResult.Success();
     }
 
     public string GetFullAddress()
@@ -60,12 +90,24 @@ public sealed record RdpConnectionRequest(string Host, int Port, string Username
     public static RdpConnectionRequest FromProfile(ComputerProfile profile)
     {
         ArgumentNullException.ThrowIfNull(profile);
-        return new RdpConnectionRequest(profile.Host, profile.Port, profile.Username, profile.Domain);
+        return new RdpConnectionRequest(
+            profile.Host,
+            profile.Port,
+            profile.Username,
+            profile.Domain,
+            profile.RemoteAccessMode,
+            profile.GatewayHost);
     }
 
     public static RdpConnectionRequest FromQuickConnect(QuickConnectDraft draft)
     {
         ArgumentNullException.ThrowIfNull(draft);
-        return new RdpConnectionRequest(draft.Host, draft.Port, draft.Username, draft.Domain);
+        return new RdpConnectionRequest(
+            draft.Host,
+            draft.Port,
+            draft.Username,
+            draft.Domain,
+            draft.RemoteAccessMode,
+            draft.GatewayHost);
     }
 }

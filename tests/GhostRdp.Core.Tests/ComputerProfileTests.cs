@@ -10,7 +10,9 @@ public sealed class ComputerProfileTests
     {
         var source = CreateProfile();
         source.Favorite = true;
-        source.Tags = ["office", "vpn"];
+        source.Tags = ["office", "gateway"];
+        source.RemoteAccessMode = RemoteAccessMode.RdGateway;
+        source.GatewayHost = "gateway.example.test";
 
         var duplicate = source.CloneWithNewIdentity();
 
@@ -18,6 +20,8 @@ public sealed class ComputerProfileTests
         Assert.AreEqual("Office PC Copy", duplicate.DisplayName);
         Assert.AreEqual(source.Host, duplicate.Host);
         Assert.AreEqual(source.Favorite, duplicate.Favorite);
+        Assert.AreEqual(RemoteAccessMode.RdGateway, duplicate.RemoteAccessMode);
+        Assert.AreEqual(source.GatewayHost, duplicate.GatewayHost);
         CollectionAssert.AreEqual(source.Tags, duplicate.Tags);
     }
 
@@ -44,6 +48,18 @@ public sealed class ComputerProfileTests
 
         Assert.IsFalse(validation.IsValid);
         StringAssert.Contains(validation.Error ?? string.Empty, "schema version");
+    }
+
+    [TestMethod]
+    public void Validate_RdGatewayRequiresValidGatewayHost()
+    {
+        var profile = CreateProfile();
+        profile.RemoteAccessMode = RemoteAccessMode.RdGateway;
+
+        var validation = ComputerProfileValidator.Validate(profile);
+
+        Assert.IsFalse(validation.IsValid);
+        StringAssert.Contains(validation.Error ?? string.Empty, "RD Gateway");
     }
 
     private static ComputerProfile CreateProfile() => new()

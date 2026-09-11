@@ -1,3 +1,4 @@
+using GhostRdp.Core.Profiles;
 using GhostRdp.Core.Runtime;
 
 namespace GhostRdp.Core.Tests;
@@ -19,6 +20,59 @@ public sealed class RdpFileSerializerTests
         StringAssert.Contains(content, "enablecredsspsupport:i:1\r\n");
         Assert.IsFalse(content.Contains("authentication level:i:0", StringComparison.OrdinalIgnoreCase));
         Assert.IsFalse(content.Contains("password", StringComparison.OrdinalIgnoreCase));
+        Assert.IsFalse(content.Contains("gatewayhostname", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [TestMethod]
+    public void Serialize_RdGateway_WritesExplicitGatewayWithoutPasswordOrCredentialMaterial()
+    {
+        var request = new RdpConnectionRequest(
+            "office.internal",
+            3389,
+            "alice",
+            "CORP",
+            RemoteAccessMode.RdGateway,
+            "gateway.example.test");
+
+        var content = RdpFileSerializer.Serialize(request);
+
+        StringAssert.Contains(content, "gatewayhostname:s:gateway.example.test\r\n");
+        StringAssert.Contains(content, "gatewayusagemethod:i:1\r\n");
+        StringAssert.Contains(content, "gatewayprofileusagemethod:i:1\r\n");
+        StringAssert.Contains(content, "gatewaycredentialssource:i:4\r\n");
+        StringAssert.Contains(content, "promptcredentialonce:i:0\r\n");
+        Assert.IsFalse(content.Contains("password", StringComparison.OrdinalIgnoreCase));
+        Assert.IsFalse(content.Contains("gatewayaccesstoken", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [TestMethod]
+    public void Serialize_PrivateNetwork_DoesNotInventGatewaySettings()
+    {
+        var request = new RdpConnectionRequest(
+            "100.90.80.70",
+            3389,
+            string.Empty,
+            string.Empty,
+            RemoteAccessMode.PrivateNetwork);
+
+        var content = RdpFileSerializer.Serialize(request);
+
+        StringAssert.Contains(content, "full address:s:100.90.80.70:3389\r\n");
+        Assert.IsFalse(content.Contains("gateway", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [TestMethod]
+    public void Serialize_RdGateway_RejectsInvalidGatewayHost()
+    {
+        var request = new RdpConnectionRequest(
+            "office.internal",
+            3389,
+            string.Empty,
+            string.Empty,
+            RemoteAccessMode.RdGateway,
+            "gateway.example & calc.exe");
+
+        Assert.ThrowsException<ArgumentException>(() => RdpFileSerializer.Serialize(request));
     }
 
     [TestMethod]

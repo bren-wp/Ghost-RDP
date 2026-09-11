@@ -14,7 +14,8 @@ public sealed class QuickConnectDraftTests
         {
             Host = "192.168.10.20",
             Port = 3389,
-            Username = "user"
+            Username = "user",
+            RemoteAccessMode = RemoteAccessMode.PrivateNetwork
         };
 
         var validation = draft.Validate();
@@ -25,14 +26,16 @@ public sealed class QuickConnectDraftTests
     }
 
     [TestMethod]
-    public void CreateProfile_IsExplicitAndUsesNewIdentity()
+    public void CreateProfile_IsExplicitAndCopiesRemoteAccessRoute()
     {
         var draft = new QuickConnectDraft
         {
             Host = "server.example.test",
             Port = 3390,
             Username = "marko",
-            Domain = "WORK"
+            Domain = "WORK",
+            RemoteAccessMode = RemoteAccessMode.RdGateway,
+            GatewayHost = "gateway.example.test"
         };
 
         var profile = draft.CreateProfile("Server");
@@ -41,5 +44,22 @@ public sealed class QuickConnectDraftTests
         Assert.AreEqual("Server", profile.DisplayName);
         Assert.AreEqual(draft.Host, profile.Host);
         Assert.AreEqual(draft.Port, profile.Port);
+        Assert.AreEqual(RemoteAccessMode.RdGateway, profile.RemoteAccessMode);
+        Assert.AreEqual("gateway.example.test", profile.GatewayHost);
+    }
+
+    [TestMethod]
+    public void Validate_RdGatewayWithoutGatewayHost_IsRejected()
+    {
+        var draft = new QuickConnectDraft
+        {
+            Host = "server.example.test",
+            RemoteAccessMode = RemoteAccessMode.RdGateway
+        };
+
+        var validation = draft.Validate();
+
+        Assert.IsFalse(validation.IsValid);
+        StringAssert.Contains(validation.Error ?? string.Empty, "RD Gateway");
     }
 }

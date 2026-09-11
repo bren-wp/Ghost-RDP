@@ -51,6 +51,24 @@ public static class ComputerProfileValidator
             return domain;
         }
 
+        if (!Enum.IsDefined(profile.RemoteAccessMode))
+        {
+            return ValidationResult.Failure("Remote access mode is invalid.");
+        }
+
+        if (profile.RemoteAccessMode == RemoteAccessMode.RdGateway)
+        {
+            var gateway = ConnectionInputValidator.ValidateHost(profile.GatewayHost);
+            if (!gateway.IsValid)
+            {
+                return ValidationResult.Failure($"RD Gateway: {gateway.Error}");
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(profile.GatewayHost))
+        {
+            return ValidationResult.Failure("RD Gateway host must be empty unless RD Gateway mode is selected.");
+        }
+
         if (profile.Notes is null || profile.Notes.Length > 4000)
         {
             return ValidationResult.Failure("Notes must be 4000 characters or fewer.");

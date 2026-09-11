@@ -12,6 +12,10 @@ public sealed class QuickConnectDraft
 
     public string Domain { get; set; } = string.Empty;
 
+    public RemoteAccessMode RemoteAccessMode { get; set; } = RemoteAccessMode.Direct;
+
+    public string GatewayHost { get; set; } = string.Empty;
+
     public ValidationResult Validate()
     {
         var host = ConnectionInputValidator.ValidateHost(Host);
@@ -32,7 +36,31 @@ public sealed class QuickConnectDraft
             return username;
         }
 
-        return ConnectionInputValidator.ValidateDomain(Domain);
+        var domain = ConnectionInputValidator.ValidateDomain(Domain);
+        if (!domain.IsValid)
+        {
+            return domain;
+        }
+
+        if (!Enum.IsDefined(RemoteAccessMode))
+        {
+            return ValidationResult.Failure("Remote access mode is invalid.");
+        }
+
+        if (RemoteAccessMode == RemoteAccessMode.RdGateway)
+        {
+            var gateway = ConnectionInputValidator.ValidateHost(GatewayHost);
+            if (!gateway.IsValid)
+            {
+                return ValidationResult.Failure($"RD Gateway: {gateway.Error}");
+            }
+        }
+        else if (!string.IsNullOrWhiteSpace(GatewayHost))
+        {
+            return ValidationResult.Failure("RD Gateway host must be empty unless RD Gateway mode is selected.");
+        }
+
+        return ValidationResult.Success();
     }
 
     public ComputerProfile CreateProfile(string displayName)
@@ -55,7 +83,9 @@ public sealed class QuickConnectDraft
             Host = Host.Trim(),
             Port = Port,
             Username = Username.Trim(),
-            Domain = Domain.Trim()
+            Domain = Domain.Trim(),
+            RemoteAccessMode = RemoteAccessMode,
+            GatewayHost = RemoteAccessMode == RemoteAccessMode.RdGateway ? GatewayHost.Trim() : string.Empty
         };
     }
 }
