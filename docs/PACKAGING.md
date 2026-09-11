@@ -1,6 +1,6 @@
 # Windows Packaging
 
-Ghost RDP produces self-contained Windows packages for x86 (32-bit), x64, and ARM64 from the same source revision.
+Ghost RDP produces self-contained Windows packages for x86 (32-bit), x64, and ARM64 from the same source revision. Packaging is repository-owned and does not require a third-party installer compiler.
 
 ## Release artifacts
 
@@ -14,11 +14,17 @@ A complete release contains:
 - `RELEASE-MANIFEST.json`;
 - `SHA256SUMS.txt`.
 
-The x86 compatibility executables are intentionally also exposed under the simple `setup.exe` and `portable.exe` names. Native x64 and ARM64 builds are available for users who want architecture-matched binaries.
+The x86 compatibility executables are intentionally also exposed under the simple `setup.exe` and `portable.exe` names. Native x64 and ARM64 builds are available for architecture-matched execution.
+
+## Runtime dependency baseline
+
+App, Host, and Setup production projects use the repository's .NET/WPF/Windows stack and Ghost RDP project references only. No third-party runtime NuGet package or external file-based runtime assembly is part of the production source projects.
+
+Release binaries are self-contained, so end users do not need to install a separate .NET runtime. See [DEPENDENCIES.md](DEPENDENCIES.md).
 
 ## Setup behavior
 
-Ghost RDP Setup is a project in the repository, not a third-party generated uninstaller model. It installs per-user under `%LOCALAPPDATA%\Programs\Ghost RDP` by default and therefore does not require elevation for the normal path.
+Ghost RDP Setup is a project in this repository, not a third-party generated installer/uninstaller model. It installs per-user under `%LOCALAPPDATA%\Programs\Ghost RDP` by default and therefore does not require elevation for the normal path.
 
 Setup installs:
 
@@ -49,19 +55,25 @@ Setup and Portable packaging do not:
 - install a background service;
 - create a scheduled task or stealth persistence;
 - configure VPN software, UPnP, or router port forwarding;
-- store RDP or RD Gateway passwords.
+- store RDP or RD Gateway passwords;
+- install a third-party runtime component.
 
 ## Build and validation
 
 ```powershell
+./scripts/security-regression.ps1
 ./scripts/build-release-packages.ps1 -Architecture all -OutputDirectory ./artifacts/release
 ./scripts/validate-release-package.ps1 -ReleaseDirectory ./artifacts/release -Architecture all
 ./scripts/smoke-test-portable.ps1 -AppPath ./artifacts/release/GhostRDP-Portable-x64.exe -HostPath ./artifacts/release/GhostRDP-Host-x64.exe -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
 ./scripts/test-installer.ps1 -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
 ```
 
-Validation checks expected files, minimum artifact sizes, SHA-256 hashes, Portable ZIP contents, PE machine architecture, absence of static `.rdp` files, and absence of separate uninstall executables. CI additionally runs the ARM64 package on a native Windows ARM64 runner.
+Validation checks expected files, minimum artifact sizes, SHA-256 hashes, Portable ZIP contents, PE machine architecture, absence of static `.rdp` files, absence of separate uninstall executables, and the no-third-party-runtime-dependency source policy. CI additionally runs the ARM64 package on a native Windows ARM64 runner.
 
 ## Signing
 
 Current packages are unsigned. Authenticode signing must be added only when an authorized signing certificate or signing service exists. The release process must not fabricate a signing-success claim.
+
+## Documentation synchronization
+
+Packaging changes must update README, CHANGELOG, ROADMAP, Build, Release, Release Notes, Security, Privacy, Dependencies, Windows, and this document when affected. See [Documentation index](README.md).

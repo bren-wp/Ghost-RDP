@@ -1,29 +1,39 @@
 # Changelog
 
-All notable user-facing changes to Ghost RDP are recorded here.
+All notable user-facing changes to Ghost RDP are recorded here. Documentation is reviewed and synchronized with every functional change.
 
 ## 0.9.1 - development
 
-UI/UX consistency, accessibility hardening, and lower visual-tree overhead after the first production multi-architecture release.
+UI/UX consistency, accessibility hardening, saved-computer responsiveness, stricter dependency policy, and documentation synchronization after the first production multi-architecture release.
 
 ### Changed
 
-- App, Host, and Setup now apply the Ghost RDP window theme directly to their concrete WPF window classes instead of depending on an implicit base `Window` style.
+- App, Host, and Setup apply the Ghost RDP window theme directly to their concrete WPF window classes instead of depending on an implicit base `Window` style.
 - Standard text receives an explicit readable foreground so dark cards cannot inherit black Windows default text.
 - Text fields use a rounded Ghost RDP dark template with explicit focus and disabled states.
 - Combo boxes use a project-owned dark template and popup instead of falling back to a white Windows theme surface.
-- Sidebar navigation now includes lightweight vector icons.
+- Sidebar navigation includes lightweight vector icons.
 - Saved-computer lists explicitly enable WPF virtualization and recycling to reduce visual-container overhead for larger profile collections.
-- Saved-computer text search now debounces intermediate keystrokes before filtering/sorting, while sort and favorites changes remain immediate.
+- Saved-computer text search debounces intermediate keystrokes before filtering/sorting, while sort and favorites changes remain immediate.
 - Saved-computer refresh preserves the current selection when the selected profile remains visible and reuses a cached favorites total instead of recounting the full collection on every refresh.
-- Saved-computer filtering and sorting are isolated in a deterministic App query component with dedicated tests and no new runtime dependencies.
-- WPF title/taskbar windows use a vector Ghost RDP application mark.
-- README now includes the project logo, release/status badges, a technical UI/runtime overview, and explicit UI/performance documentation.
+- Saved-computer filtering and sorting are isolated in a deterministic App query component with dedicated tests.
+- WPF title/taskbar windows use the Ghost RDP vector application mark.
+- Runtime projects under `src/` now have an explicit no-third-party-runtime-dependency policy enforced by the security/dependency regression script.
+- README status presentation no longer relies on external badge-rendering services; product imagery remains repository-owned.
 
 ### Documentation
 
 - Added `docs/UI-UX.md` covering visual hierarchy, control behavior, memory/performance decisions, accessibility, and screenshot policy.
+- Added `docs/DEPENDENCIES.md` documenting the .NET/WPF/Windows-only runtime dependency surface and CI enforcement.
+- Added `docs/README.md` as the documentation index and synchronization policy.
+- Updated Architecture, Build, Security, Privacy, Accessibility, Windows, Host, Remote Access, Packaging, Release, Release Notes, Roadmap, UI/UX, README, and Changelog for the 0.9.1 behavior and dependency baseline.
 - Runtime screenshots remain restricted to authentic validated Windows builds; no generated mockups are presented as application screenshots.
+
+### Security and supply chain
+
+- Production `src/` projects must not introduce third-party `PackageReference` or external file `HintPath` dependencies.
+- Existing development-only Microsoft test tooling remains outside the shipped runtime dependency surface.
+- Security regression checks continue to reject credential leakage, unsafe shell launch patterns, Host mutation paths, prohibited installer/network changes, and now runtime dependency-policy violations.
 
 ## 0.9.0 - 2026-09-11
 
@@ -41,7 +51,7 @@ Production packaging, stability hardening, and multi-architecture Windows suppor
 
 ### Changed
 
-- App and Host production crash handling now closes safely on unexpected UI exceptions instead of leaving an unstable process running.
+- App and Host production crash handling closes safely on unexpected UI exceptions instead of leaving an unstable process running.
 - WPF rendering uses layout rounding and device-pixel snapping for crisper UI rendering.
 - Disabled production buttons use a non-interactive cursor and clearer visual state.
 - Release packaging no longer depends on Inno Setup.

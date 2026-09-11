@@ -45,6 +45,10 @@ jobs:
       - name: Restore
         run: dotnet restore GhostRdp.sln
 
+      - name: Security and runtime dependency regression checks
+        shell: pwsh
+        run: ./scripts/security-regression.ps1
+
       - name: Build release package
         shell: pwsh
         run: ./scripts/build-release-packages.ps1 -Architecture ${{ matrix.architecture }} -OutputDirectory ./artifacts/release-${{ matrix.architecture }}

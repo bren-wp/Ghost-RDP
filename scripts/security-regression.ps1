@@ -14,7 +14,7 @@ function Get-ProjectSourceFiles {
         }
 }
 
-$sourceFiles = Get-ProjectSourceFiles -Path "$PSScriptRoot/../src" -Include @('*.cs', '*.xaml', '*.json', '*.config', '*.props', '*.csproj')
+$sourceFiles = Get-ProjectSourceFiles -Path "$PSScriptRoot/../src" -Include @('*.cs', '*.xaml', '*.json', '*.config', '*.props', '*.targets', '*.csproj')
 $forbiddenPatterns = @(
     '(?i)/p:\s*',
     '(?i)--password(?:=|\s)',
@@ -27,6 +27,20 @@ $forbiddenPatterns = @(
 
 $violations = foreach ($pattern in $forbiddenPatterns) {
     $sourceFiles | Select-String -Pattern $pattern
+}
+
+# Runtime projects intentionally use only the repository's .NET/WPF/Windows stack.
+# Tests may keep their existing Microsoft test-tooling packages, but src/ must not
+# acquire third-party PackageReference or file HintPath dependencies.
+$runtimeProjectFiles = Get-ProjectSourceFiles -Path "$PSScriptRoot/../src" -Include @('*.csproj', '*.props', '*.targets')
+$forbiddenRuntimeDependencyPatterns = @(
+    '(?i)<PackageReference\b',
+    '(?i)<Reference\b[^>]*>\s*<HintPath\b',
+    '(?i)<Reference\b[^>]*/>\s*<!--\s*external'
+)
+
+$runtimeDependencyViolations = foreach ($pattern in $forbiddenRuntimeDependencyPatterns) {
+    $runtimeProjectFiles | Select-String -Pattern $pattern
 }
 
 $hostSourceFiles = Get-ProjectSourceFiles -Path "$PSScriptRoot/../src/GhostRdp.Host" -Include @('*.cs')
@@ -69,15 +83,17 @@ $packagingViolations = foreach ($pattern in $forbiddenPackagingPatterns) {
     $packagingFiles | Select-String -Pattern $pattern
 }
 
-if ($violations -or $hostViolations -or $packagingViolations) {
-    Write-Host 'Security regression check failed:' -ForegroundColor Red
-    @($violations) + @($hostViolations) + @($packagingViolations) | ForEach-Object {
+if ($violations -or $runtimeDependencyViolations -or $hostViolations -or $packagingViolations) {
+    Write-Host 'Security/dependency regression check failed:' -ForegroundColor Red
+    @($violations) + @($runtimeDependencyViolations) + @($hostViolations) + @($packagingViolations) | ForEach-Object {
         Write-Host "$($_.Path):$($_.LineNumber): $($_.Line.Trim())"
     }
     exit 1
 }
 
 $requiredDocs = @(
+    'README.md',
+    'DEPENDENCIES.md',
     'ARCHITECTURE.md',
     'SECURITY.md',
     'PRIVACY.md',
@@ -86,6 +102,8 @@ $requiredDocs = @(
     'HOST.md',
     'REMOTE-ACCESS.md',
     'PACKAGING.md',
+    'RELEASE.md',
+    'RELEASE-NOTES.md',
     'ROADMAP.md',
     'BUILD.md',
     'UI-UX.md'
@@ -98,4 +116,4 @@ foreach ($document in $requiredDocs) {
     }
 }
 
-Write-Host 'Security regression checks passed.' -ForegroundColor Green
+Write-Host 'Security and runtime dependency regression checks passed.' -ForegroundColor Green

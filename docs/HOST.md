@@ -25,7 +25,7 @@ The VPN/private-overlay result is deliberately described as an **adapter indicat
 
 ## Runtime sources
 
-Ghost RDP Host uses Windows-owned sources rather than simulated status values:
+Ghost RDP Host uses Windows-owned sources rather than simulated status values or a third-party diagnostic framework:
 
 | Diagnostic | Runtime source |
 | --- | --- |
@@ -71,3 +71,15 @@ Ghost RDP Host does **not**:
 - expose TCP 3389 to the Internet.
 
 Configuration changes remain explicit Windows/admin actions outside the Host diagnostic flow.
+
+## Dependency policy
+
+The Host uses .NET/WPF and Windows APIs already available to the project. It does not require a third-party service-control, firewall, VPN, network-discovery, UI, or diagnostic package. The same `src/` dependency guard applies to Host as to App/Core/Setup. See [DEPENDENCIES.md](DEPENDENCIES.md).
+
+## Packaging and runtime
+
+Production Host executables are self-contained for x86, x64, and ARM64. CI executes the ARM64 Host self-test on a native Windows ARM64 runner and includes Host in release integrity validation.
+
+## Documentation synchronization
+
+Host behavior changes must be reviewed against README, CHANGELOG, ROADMAP, Architecture, Security, Privacy, Windows, Packaging, Release, and this document in the same pull-request cycle. See [Documentation index](README.md).
