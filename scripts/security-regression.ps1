@@ -14,9 +14,29 @@ $violations = foreach ($pattern in $forbiddenPatterns) {
     $sourceFiles | Select-String -Pattern $pattern
 }
 
-if ($violations) {
+$hostSourceFiles = Get-ChildItem -Path "$PSScriptRoot/../src/GhostRdp.Host" -Recurse -File -Include *.cs
+$forbiddenHostMutationPatterns = @(
+    '(?i)\.SetValue\s*\(',
+    '(?i)\.DeleteValue\s*\(',
+    '(?i)\.CreateSubKey\s*\(',
+    '(?i)StartService(?:W|A)?\s*\(',
+    '(?i)ControlService\s*\(',
+    '(?i)NetFwRule',
+    '(?i)netsh\b',
+    '(?i)Set-NetFirewall',
+    '(?i)Enable-NetFirewall',
+    '(?i)Disable-NetFirewall'
+)
+
+$hostViolations = foreach ($pattern in $forbiddenHostMutationPatterns) {
+    $hostSourceFiles | Select-String -Pattern $pattern
+}
+
+if ($violations -or $hostViolations) {
     Write-Host 'Security regression check failed:' -ForegroundColor Red
-    $violations | ForEach-Object { Write-Host "$($_.Path):$($_.LineNumber): $($_.Line.Trim())" }
+    @($violations) + @($hostViolations) | ForEach-Object {
+        Write-Host "$($_.Path):$($_.LineNumber): $($_.Line.Trim())"
+    }
     exit 1
 }
 

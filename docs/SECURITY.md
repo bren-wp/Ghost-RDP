@@ -21,10 +21,28 @@ A user-initiated connection creates a unique session directory below the current
 The generated file:
 
 - contains no password or equivalent secret;
+- requires server authentication rather than permitting a failed server-authentication result to continue;
+- keeps CredSSP enabled;
 - requests Windows-owned credential prompting;
-- keeps RDP authentication and CredSSP support enabled;
 - is deleted after the Microsoft RDP process exits;
 - is eligible for stale-session cleanup after 24 hours if Ghost RDP terminates before normal cleanup.
+
+## Ghost RDP Host diagnostic boundary
+
+Ghost RDP Host is a visible, read-only diagnostic application. It reads local Windows state from the registry, Service Control Manager, Windows Firewall policy, DNS, and network-interface APIs.
+
+The Host does not request a configuration change and does not:
+
+- enable or disable Remote Desktop;
+- start or stop `TermService`;
+- create, delete, enable, or disable firewall rules;
+- change the Windows Firewall profile state;
+- change NLA;
+- change the RDP listening port;
+- change network profiles;
+- configure VPN software, port forwarding, or UPnP.
+
+Readiness is deliberately conservative. Unknown or unavailable diagnostics are shown as unknown and cannot produce a green `Ready for Remote Desktop` result. VPN/private-overlay adapter detection is an indicator only and is not treated as proof that a secure route exists.
 
 ## Remote exposure policy
 
@@ -49,4 +67,4 @@ Security-sensitive values must be redacted before logging. The shared `SecretSan
 
 ## Security regression checks
 
-CI rejects obvious command-line password patterns, RDP password-field patterns, shell-launch patterns, and missing security documentation. Tests cover input validation, profile persistence, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, and the absence of password data from generated `.rdp` content.
+CI rejects obvious command-line password patterns, RDP password-field patterns, shell-launch patterns, and missing security documentation. Tests cover input validation, profile persistence, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, the absence of password data from generated `.rdp` content, Host readiness evaluation, and firewall-port matching.

@@ -2,7 +2,7 @@
 
 ## Baseline
 
-The initial client and host target .NET 8 on Windows with WPF. Windows 10 and Windows 11 are the intended desktop environments for the first milestone.
+The initial client and host target .NET 8 on Windows with WPF. Windows 10 and Windows 11 are the intended desktop environments for the first release line.
 
 ## Microsoft Remote Desktop runtime
 
@@ -18,6 +18,23 @@ The `.rdp` file contains no password. Microsoft Remote Desktop/Windows owns cred
 
 Temporary session directories are cleaned when the Microsoft RDP process exits. Directories left after an abnormal Ghost RDP termination are eligible for stale cleanup after 24 hours.
 
-## Incoming RDP support
+## Incoming RDP host editions
 
-Windows edition, Remote Desktop Services configuration, firewall rules, NLA state, and policy settings determine whether a computer can accept incoming RDP. The current Host foundation does not yet claim these states. Full readiness diagnostics are the next milestone.
+Ghost RDP Host treats Windows Professional, Enterprise, Education, and Windows Server families as supported incoming RDP host families when the local edition can be identified reliably. Windows Home/Core editions are reported as unsupported hosts. Unknown editions stay unknown rather than being assumed supported.
+
+## Host readiness diagnostics
+
+Ghost RDP Host reads the following Windows-owned state without modifying it:
+
+- `fDenyTSConnections` for incoming Remote Desktop configuration;
+- `RDP-Tcp\PortNumber` for the configured listening port;
+- `RDP-Tcp\UserAuthentication` for NLA;
+- Service Control Manager status for `TermService`;
+- `HNetCfg.FwPolicy2` for active firewall profiles, firewall enabled state, block-all-inbound state, and firewall rules;
+- DNS/network-interface APIs for hostname, LAN addresses, and tunnel/private-network adapter indicators.
+
+The Host checks firewall rules by properties such as enabled state, inbound direction, allow action, TCP protocol, profile coverage, service name, and local port. It does not rely on a localized display name for the built-in Remote Desktop rule.
+
+Multiple firewall profiles can be active at the same time. The readiness evaluator requires coverage for all active profiles before reporting the firewall rule as available.
+
+The Host is read-only. It does not enable RDP, start services, alter firewall policy, change NLA, change the listening port, or configure external network exposure.

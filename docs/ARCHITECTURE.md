@@ -6,10 +6,10 @@ Ghost RDP is a Windows-first remote desktop management product. The architecture
 
 ## Solution boundaries
 
-- `GhostRdp.Core` contains product metadata, validation, profile models/storage, security helpers, Microsoft RDP launch primitives, runtime detection abstractions, and host-neutral models.
+- `GhostRdp.Core` contains product metadata, validation, profile models/storage, security helpers, Microsoft RDP launch primitives, Host readiness domain models/evaluation, runtime detection abstractions, and host-neutral helpers.
 - `GhostRdp.App` is the user-facing Windows WPF application.
-- `GhostRdp.Host` is a separate, visible Windows application for host-side readiness and diagnostics.
-- `GhostRdp.Core.Tests` covers shared validation, profile persistence, RDP file generation/process launch planning, and security behavior.
+- `GhostRdp.Host` is a separate, visible Windows application for read-only host-side readiness diagnostics.
+- `GhostRdp.Core.Tests` covers shared validation, profile persistence, RDP file generation/process launch planning, Host readiness evaluation, and security behavior.
 - `GhostRdp.App.Tests` covers application-facing metadata and behavior that can be tested without UI automation.
 
 ## Saved computer persistence
@@ -28,16 +28,33 @@ A Connect action converts validated profile or Quick Connect metadata into an `R
 
 Microsoft Remote Desktop/Windows owns credential entry. Ghost RDP cleans the temporary session directory after the RDP process exits and performs stale cleanup for files left after an abnormal application termination.
 
+## Host readiness architecture
+
+`GhostRdp.Core.Host` defines a host-neutral readiness snapshot and a conservative evaluator. It does not query Windows itself. This makes the decision rules testable without fabricating OS state.
+
+`GhostRdp.Host.Diagnostics` owns Windows-specific probes:
+
+- Windows registry: edition/build, RDP enabled state, port, and NLA;
+- Service Control Manager: `TermService` runtime state;
+- Windows Firewall COM policy: active profiles, firewall enabled state, block-all-inbound state, and inbound allow-rule coverage;
+- DNS/network interfaces: hostname, LAN addresses, and private-network/VPN adapter indicators.
+
+Each probe can return unavailable/unknown data independently. The evaluator refuses to emit a green ready state when a required value is unknown. The Host has no configuration-changing code path.
+
 ## Trust boundaries
 
 The local Windows account and Windows credential facilities are trusted platform boundaries. Remote hosts, DNS results, network input, profile files, imported settings, and future pairing data are untrusted inputs and must be validated before use.
 
-The initial architecture has no Ghost RDP relay server and no backend dependency for carrying RDP traffic.
+Host diagnostics are local observations, not remote authorization. A detected VPN/tunnel adapter does not prove that a remote route is secure or reachable.
+
+The current architecture has no Ghost RDP relay server and no backend dependency for carrying RDP traffic.
 
 ## Runtime truthfulness
 
 The UI must not claim a connection, host readiness state, VPN state, firewall state, NLA state, or session state unless a reliable runtime owner provides that information. Connect controls are enabled only when Microsoft `mstsc.exe` is actually available. Launch success means the Microsoft RDP process was started; it does not claim that authentication or the remote session succeeded.
 
+Ghost RDP Host reports `Ready for Remote Desktop` only when its required local Windows diagnostics are known and pass. Unknown states stay visible as unknown.
+
 ## Dependency policy
 
-Prefer the .NET runtime and Windows platform APIs. New third-party runtime dependencies require a concrete feature justification and security review. Test-only packages are kept to Microsoft test tooling in the initial milestones.
+Prefer the .NET runtime and Windows platform APIs. New third-party runtime dependencies require a concrete feature justification and security review. Host readiness uses Windows registry, Service Control Manager, Firewall COM, and .NET networking APIs rather than adding a diagnostic framework dependency.
