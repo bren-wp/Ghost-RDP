@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.IO;
 using System.Security;
 using Microsoft.Win32;
 
@@ -43,7 +44,7 @@ internal static class WindowsRegistryDiagnostics
 
             using var terminalServerKey = localMachine.OpenSubKey(TerminalServerPath, false);
             var denyConnections = GetInteger(terminalServerKey, "fDenyTSConnections");
-            var rdpEnabled = denyConnections switch
+            bool? rdpEnabled = denyConnections switch
             {
                 0 => true,
                 1 => false,
@@ -54,7 +55,7 @@ internal static class WindowsRegistryDiagnostics
             var portNumber = GetInteger(rdpTcpKey, "PortNumber");
             int? rdpPort = portNumber is >= 1 and <= 65535 ? portNumber : null;
             var userAuthentication = GetInteger(rdpTcpKey, "UserAuthentication");
-            var nlaEnabled = userAuthentication switch
+            bool? nlaEnabled = userAuthentication switch
             {
                 1 => true,
                 0 => false,
