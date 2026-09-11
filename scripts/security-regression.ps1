@@ -1,6 +1,20 @@
 $ErrorActionPreference = 'Stop'
 
-$sourceFiles = Get-ChildItem -Path "$PSScriptRoot/../src" -Recurse -File -Include *.cs,*.xaml,*.json,*.config,*.props,*.csproj
+function Get-ProjectSourceFiles {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Path,
+        [Parameter(Mandatory = $true)]
+        [string[]]$Include
+    )
+
+    Get-ChildItem -Path $Path -Recurse -File -Include $Include |
+        Where-Object {
+            $_.FullName -notmatch '[\\/](?:bin|obj)[\\/]'
+        }
+}
+
+$sourceFiles = Get-ProjectSourceFiles -Path "$PSScriptRoot/../src" -Include @('*.cs', '*.xaml', '*.json', '*.config', '*.props', '*.csproj')
 $forbiddenPatterns = @(
     '(?i)/p:\s*',
     '(?i)--password(?:=|\s)',
@@ -15,7 +29,7 @@ $violations = foreach ($pattern in $forbiddenPatterns) {
     $sourceFiles | Select-String -Pattern $pattern
 }
 
-$hostSourceFiles = Get-ChildItem -Path "$PSScriptRoot/../src/GhostRdp.Host" -Recurse -File -Include *.cs
+$hostSourceFiles = Get-ProjectSourceFiles -Path "$PSScriptRoot/../src/GhostRdp.Host" -Include @('*.cs')
 $forbiddenHostMutationPatterns = @(
     '(?i)\.SetValue\s*\(',
     '(?i)\.DeleteValue\s*\(',
@@ -73,7 +87,8 @@ $requiredDocs = @(
     'REMOTE-ACCESS.md',
     'PACKAGING.md',
     'ROADMAP.md',
-    'BUILD.md'
+    'BUILD.md',
+    'UI-UX.md'
 )
 
 foreach ($document in $requiredDocs) {
