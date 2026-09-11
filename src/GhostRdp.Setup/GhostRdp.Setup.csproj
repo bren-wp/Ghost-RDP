@@ -4,6 +4,8 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
     <AssemblyName>GhostRdp.Setup</AssemblyName>
     <RootNamespace>GhostRdp.Setup</RootNamespace>
     <Product>Ghost RDP Setup</Product>
