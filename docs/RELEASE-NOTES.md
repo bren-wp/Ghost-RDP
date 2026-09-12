@@ -1,3 +1,46 @@
+# Ghost RDP 0.9.2
+
+Ghost RDP 0.9.2 is a patch release focused on local data preservation, installer target ownership, and cleanup safety without changing the established RDP credential, network, privacy, dependency, or packaging boundaries.
+
+## Data preservation and recovery
+
+- Saved-computer writes validate the current primary `computers.json` before replacement.
+- A successful replacement retains the previous validated primary generation as `computers.json.bak`.
+- Normal profile saves refuse to overwrite a corrupt, unsupported, or otherwise unreadable current primary store.
+- If the primary store cannot be safely loaded and the backup validates, the App offers an explicit recovery choice after startup.
+- Recovery validates the backup before use, preserves the unreadable primary under a unique `computers.preserved-*.json` name, restores a loadable primary, and retains the backup.
+- Declining or failing recovery leaves saved-computer changes read-only instead of silently replacing user data.
+- A valid current primary store cannot be silently rolled back to an older backup.
+
+## Setup ownership and uninstall safety
+
+- Setup no longer takes ownership of an arbitrary existing `--path`.
+- An existing installation directory is replaceable only when its canonical path matches the current-user Ghost RDP `InstallLocation` in Windows Installed Apps.
+- A second install path is rejected while another Ghost RDP installation is registered.
+- The normal uninstall bootstrap and temporary uninstall helper independently revalidate the registered canonical target before recursive deletion.
+- Installer smoke tests verify rejected foreign install/uninstall/helper targets leave sentinel data untouched, same-path reinstall/update succeeds, and the normal uninstall lifecycle still completes.
+
+## Temporary RDP cleanup
+
+- Stale temporary `.rdp` cleanup now considers only Ghost RDP-owned GUID session directories.
+- Unrelated directories under the Ghost RDP temporary root are left untouched.
+
+## Validation and packaging
+
+- App, Host, and Setup are aligned at version 0.9.2.
+- Automated tests cover profile backup rotation, corrupt-primary write blocking, explicit recovery, preserved-source behavior, corrupt-backup rejection, and valid-primary rollback prevention.
+- Release validation continues to build and execute self-contained x86, x64, and native ARM64 packages.
+- PE architecture, release integrity, runtime self-tests, and real Setup install/update/uninstall smoke tests remain required before publication.
+- Production projects remain limited to the existing .NET 8/WPF/Windows platform stack and Ghost RDP project references, with no third-party runtime dependency added.
+
+## Security and privacy baseline
+
+Ghost RDP 0.9.2 still does not store or pass RDP/RD Gateway passwords, add telemetry or analytics, carry RDP traffic through a Ghost RDP relay, configure a VPN, expose TCP 3389, modify firewall/NLA/service state, or install a hidden service. Microsoft Remote Desktop/Windows continues to own credential entry.
+
+Saved computers, backup/recovery copies, and UI settings remain local to the current Windows user's application-data directory. Current release packages remain unsigned until an authorized Authenticode certificate or signing service is configured; this release does not claim a signature that was not produced and verified.
+
+---
+
 # Ghost RDP 0.9.1
 
 Ghost RDP 0.9.1 is a maintenance release focused on UI correctness, accessibility, saved-computer responsiveness, runtime dependency discipline, release-metadata integrity, and documentation consistency without changing the RDP credential/security boundary.
