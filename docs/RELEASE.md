@@ -16,7 +16,7 @@ The exact release commit must pass:
 
 1. restore and format verification;
 2. Release build for the complete solution;
-3. automated tests;
+3. automated tests, including saved-computer persistence/backup/recovery regressions;
 4. security and runtime-dependency regression checks;
 5. release-preflight version alignment;
 6. framework-dependent App/Host package validation;
@@ -69,12 +69,16 @@ A fresh installation may create a new target directory. Setup must not replace a
 
 The normal uninstall bootstrap and the temporary uninstall helper must independently verify that the requested canonical target matches the registered Ghost RDP `InstallLocation` before recursive deletion. A missing registered program directory may be treated as stale installation metadata and cleaned without deleting an unrelated directory. A mismatched or unregistered target must not be removed.
 
-Saved computers and settings remain user-owned data and are preserved by default. Interactive uninstall may remove them only after explicit user selection.
+Saved computers, their local backup/recovery copies, and settings remain user-owned data and are preserved by default. Interactive uninstall may remove the complete local-data directory only after explicit user selection.
 
 ## Runtime behavior validation
 
 - App and Host start their production self-test path without crash.
-- Saved-computer and Quick Connect persistence boundaries remain unchanged.
+- Saved-computer and Quick Connect persistence boundaries remain credential-free.
+- A second successful saved-computer write preserves the exact previous validated primary generation as `computers.json.bak`.
+- A normal saved-computer Save must reject an unreadable/unsupported current primary without modifying that primary or the existing backup.
+- A corrupt/invalid backup must not be treated as recoverable, and recovery must be rejected while the current primary is valid so an older backup cannot silently roll data back.
+- Explicit recovery must validate the backup, preserve an unreadable primary under a unique local recovery filename, restore a loadable primary, and retain the backup; the App must remain read-only if recovery is declined or fails.
 - Saved-computer filtering/sorting remains deterministic and search debounce does not create a service/background worker.
 - Direct, private-network, and RD Gateway routes continue to serialize only validated connection metadata.
 - `mstsc.exe` remains the Windows-owned RDP runtime and credential prompt owner.
@@ -84,11 +88,11 @@ Saved computers and settings remain user-owned data and are preserved by default
 - Setup must reject an existing unregistered target directory without changing its sentinel data, while same-path reinstall/update for the registered installation remains supported.
 - Setup must reject a different second install path while another Ghost RDP installation is registered.
 - Both the normal uninstall path and direct temporary-helper path must reject a mismatched target and leave unrelated sentinel data plus the registered installation intact.
-- The normal Windows uninstall lifecycle must still remove the registered program directory and Installed Apps entry while preserving unrelated directories.
+- The normal Windows uninstall lifecycle must still remove the registered program directory and Installed Apps entry while preserving unrelated directories and, by default, the complete Ghost RDP local-data directory.
 
 ## Documentation release gate
 
-Before release, review the complete [documentation index](README.md). README, CHANGELOG, ROADMAP, BUILD, PACKAGING, RELEASE, RELEASE-NOTES, SECURITY, PRIVACY and DEPENDENCIES must agree on the version, architecture matrix, dependency policy, signing status, uninstall behavior, and known limitations.
+Before release, review the complete [documentation index](README.md). README, CHANGELOG, ROADMAP, BUILD, PACKAGING, RELEASE, RELEASE-NOTES, SECURITY, PRIVACY and DEPENDENCIES must agree on the version, architecture matrix, dependency policy, signing status, uninstall behavior, persistence/recovery behavior, and known limitations.
 
 Unchanged documents do not need artificial edits, but contradictions must be resolved before the release branch is created. After publication, status-bearing documents must be updated so they identify the actual current production release rather than a release-preparation state.
 
