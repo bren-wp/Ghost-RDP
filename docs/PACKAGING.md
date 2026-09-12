@@ -41,11 +41,15 @@ Setup installs:
 - Start menu shortcuts for the client and Host tool;
 - a Windows Installed Apps entry under the current user.
 
-Installation uses a staging directory. An existing installation is moved to a temporary backup only after the new payload is extracted and validated. If finalization fails, Setup attempts to restore the previous installation instead of leaving a half-written directory.
+A fresh install creates a new target directory. Setup does not take over an arbitrary pre-existing directory: if the requested target already exists, its canonical path must match the `InstallLocation` in the current user's Ghost RDP Windows Installed Apps registration. If an installation is already registered at another path, Setup rejects a second path instead of orphaning the existing installation.
+
+Installation uses a staging directory. A recognized existing installation is moved to a temporary backup only after the new payload is extracted and validated. If finalization fails, Setup attempts to restore the previous installation instead of leaving a half-written directory. Reinstall/update on the same registered path remains supported.
 
 ## Uninstall behavior
 
 Windows Installed Apps invokes the installed `GhostRDP-Setup.exe --uninstall` entry. There is no separate persistent `uninstall.exe`, `unins*.exe`, or standalone uninstaller binary in either Setup or Portable packages.
+
+Before removal, the normal uninstall bootstrap requires the canonical requested target to match the current-user Ghost RDP `InstallLocation`. The temporary helper repeats the same check immediately before recursive deletion. An unregistered or mismatched directory is rejected even if supplied through `--path` or by direct helper invocation. If the registered program directory has already disappeared, uninstall may still remove stale shortcuts and the Windows Installed Apps registration without attempting to delete an unrelated path.
 
 During removal, Setup copies the same Setup executable to a temporary location so Windows can delete the installed copy and application directory after the original process exits. The temporary helper schedules its own cleanup and is not an installed product component.
 
@@ -64,6 +68,8 @@ Setup and Portable packaging do not:
 - store RDP or RD Gateway passwords;
 - install a third-party runtime component.
 
+Setup also does not recursively replace or remove an arbitrary existing `--path`; ownership is bound to the canonical path recorded for Ghost RDP in Windows Installed Apps.
+
 ## Build and validation
 
 ```powershell
@@ -75,7 +81,7 @@ Setup and Portable packaging do not:
 ./scripts/test-installer.ps1 -SetupPath ./artifacts/release/GhostRDP-Setup-x64.exe
 ```
 
-Validation checks expected files, minimum artifact sizes, SHA-256 hashes, Portable ZIP contents, PE machine architecture, absence of static `.rdp` files, absence of separate uninstall executables, and the no-third-party-runtime-dependency source policy. CI additionally runs the ARM64 package on a native Windows ARM64 runner.
+Validation checks expected files, minimum artifact sizes, SHA-256 hashes, Portable ZIP contents, PE machine architecture, absence of static `.rdp` files, absence of separate uninstall executables, and the no-third-party-runtime-dependency source policy. The installer smoke test additionally uses an existing foreign directory with a sentinel file to verify that rejected install, uninstall, and direct-helper targets leave unrelated data untouched; verifies same-path reinstall/update; rejects a second install path while Ghost RDP is registered elsewhere; then completes the normal uninstall lifecycle. CI additionally runs the ARM64 package and the same installer lifecycle on a native Windows ARM64 runner.
 
 ## Signing
 
