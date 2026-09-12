@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO.Compression;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security;
 using Microsoft.Win32;
 
 namespace GhostRdp.Setup;
@@ -47,6 +48,7 @@ public static class SetupEngine
     public static void Install(string installDirectory)
     {
         var targetDirectory = NormalizeInstallDirectory(installDirectory);
+        EnsureInstallTargetCanBeReplaced(targetDirectory);
         EnsureProductProcessesAreClosed();
 
         var parentDirectory = Directory.GetParent(targetDirectory)?.FullName
@@ -116,6 +118,7 @@ public static class SetupEngine
     public static void BeginUninstall(string installDirectory, bool removeLocalData, bool quiet)
     {
         var targetDirectory = NormalizeInstallDirectory(installDirectory);
+        EnsureRegisteredUninstallTarget(targetDirectory);
         EnsureProductProcessesAreClosed();
 
         var currentExecutable = Environment.ProcessPath;
@@ -168,8 +171,9 @@ public static class SetupEngine
             EnsureProductProcessesAreClosed();
 
             var targetDirectory = NormalizeInstallDirectory(installDirectory);
+            EnsureRegisteredUninstallTarget(targetDirectory);
             RemoveStartMenuShortcuts();
-            DeleteDirectoryWithRetry(targetDirectory);
+            DeleteDirectoryWithRetry(targetDirectory, ignoreMissing: true);
             RemoveUninstallRegistration();
 
             if (removeLocalData)
@@ -187,28 +191,10 @@ public static class SetupEngine
         }
     }
 
-    public static string ResolveInstalledDirectory()
-    {
-        try
-        {
-            using var key = Registry.CurrentUser.OpenSubKey(UninstallRegistryPath, writable: false);
-            var registeredPath = key?.GetValue("InstallLocation") as string;
-            if (!string.IsNullOrWhiteSpace(registeredPath))
-            {
-                return NormalizeInstallDirectory(registeredPath);
-            }
-        }
-        catch (UnauthorizedAccessException)
-        {
-            // Fall back to the conventional per-user installation directory.
-        }
-        catch (IOException)
-        {
-            // Fall back to the conventional per-user installation directory.
-        }
-
-        return DefaultInstallDirectory;
-    }
+    public static string ResolveInstalledDirectory() =>
+        TryGetRegisteredInstallDirectory(out var registeredDirectory)
+            ? registeredDirectory
+            : DefaultInstallDirectory;
 
     public static void LaunchInstalledApplication(string installDirectory)
     {
@@ -228,6 +214,71 @@ public static class SetupEngine
         var process = Process.Start(startInfo)
             ?? throw new InvalidOperationException("Ghost RDP could not be started.");
         process.Dispose();
+    }
+
+    private static void EnsureInstallTargetCanBeReplaced(string targetDirectory)
+    {
+        var hasRegisteredInstallation = TryGetRegisteredInstallDirectory(out var registeredDirectory);
+        if (hasRegisteredInstallation
+            && !string.Equals(targetDirectory, registeredDirectory, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                "Ghost RDP is already registered in another installation folder. Uninstall it before choosing a different folder.");
+        }
+
+        if (File.Exists(targetDirectory))
+        {
+            throw new InvalidOperationException("The selected installation path points to an existing file.");
+        }
+
+        if (Directory.Exists(targetDirectory) && !hasRegisteredInstallation)
+        {
+            throw new InvalidOperationException(
+                "Ghost RDP will not replace an existing folder unless Windows Installed Apps identifies it as the registered Ghost RDP installation.");
+        }
+    }
+
+    private static void EnsureRegisteredUninstallTarget(string targetDirectory)
+    {
+        if (!TryGetRegisteredInstallDirectory(out var registeredDirectory)
+            || !string.Equals(targetDirectory, registeredDirectory, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException(
+                "Ghost RDP will only uninstall the installation folder registered in Windows Installed Apps.");
+        }
+
+        if (File.Exists(targetDirectory))
+        {
+            throw new InvalidOperationException("The registered Ghost RDP installation path points to a file instead of a folder.");
+        }
+    }
+
+    private static bool TryGetRegisteredInstallDirectory(out string installDirectory)
+    {
+        installDirectory = string.Empty;
+
+        try
+        {
+            using var key = Registry.CurrentUser.OpenSubKey(UninstallRegistryPath, writable: false);
+            var registeredPath = key?.GetValue("InstallLocation") as string;
+            if (string.IsNullOrWhiteSpace(registeredPath))
+            {
+                return false;
+            }
+
+            installDirectory = NormalizeInstallDirectory(registeredPath);
+            return true;
+        }
+        catch (Exception exception) when (exception is UnauthorizedAccessException
+                                          or IOException
+                                          or SecurityException
+                                          or ArgumentException
+                                          or InvalidOperationException
+                                          or NotSupportedException)
+        {
+            installDirectory = string.Empty;
+            return false;
+        }
     }
 
     private static void ExtractPayload(string destinationDirectory)
@@ -319,6 +370,10 @@ public static class SetupEngine
             Registry.CurrentUser.DeleteSubKeyTree(UninstallRegistryPath, throwOnMissingSubKey: false);
         }
         catch (UnauthorizedAccessException)
+        {
+            // Program files are already removed; Windows may clear the stale entry later.
+        }
+        catch (SecurityException)
         {
             // Program files are already removed; Windows may clear the stale entry later.
         }
