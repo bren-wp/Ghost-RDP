@@ -32,9 +32,11 @@ The 0.9.1 maintenance release focuses on visual correctness, accessibility, resp
 
 Implemented work includes deterministic WPF dark theming, project-owned text-field/dropdown templates, vector UI assets, saved-computer list recycling/virtualization, a short search debounce, deterministic query tests, selection preservation, cached favorite counts, and an enforced no-third-party-runtime-dependency policy.
 
-Post-release maintenance on the 0.9.1 line includes scoped stale temporary `.rdp` cleanup plus Setup install/uninstall target-ownership hardening. Temporary cleanup considers only Ghost RDP-owned GUID session directories. Setup only replaces or removes the canonical installation path registered in Windows Installed Apps, rejects a different second install target while an installation is registered, and revalidates ownership inside the temporary uninstall helper before recursive deletion.
+Post-release maintenance on the 0.9.1 line includes scoped stale temporary `.rdp` cleanup, Setup install/uninstall target-ownership hardening, and saved-computer persistence recovery hardening. Temporary cleanup considers only Ghost RDP-owned GUID session directories. Setup only replaces or removes the canonical installation path registered in Windows Installed Apps, rejects a different second install target while an installation is registered, and revalidates ownership inside the temporary uninstall helper before recursive deletion.
 
-Installer smoke coverage exercises an unregistered sentinel directory, accepted same-path reinstall/update, rejected secondary install paths, rejected mismatched uninstall/helper targets, and the normal uninstall lifecycle on the architecture CI matrix.
+Saved-computer persistence retains one previous validated primary generation as `computers.json.bak`, refuses normal writes over a primary store that cannot be safely loaded, and offers explicit recovery only when the backup itself validates. Recovery preserves the unreadable original before restoration and never silently rolls back a currently valid primary store.
+
+Regression coverage exercises installer target ownership as well as profile backup rotation, corrupt-primary write blocking, explicit restore/preservation, invalid-backup rejection, and valid-primary rollback rejection.
 
 The repository-owned `release-preflight.ps1` gate verifies App/Host/Setup version alignment on normal CI and, for release publication, additionally verifies finalized CHANGELOG/RELEASE-NOTES metadata plus the exact `release/v<version>` branch name.
 
