@@ -45,21 +45,26 @@ public sealed class TemporaryRdpFileTests
         var root = Path.Combine(Path.GetTempPath(), "GhostRdp.Tests", Guid.NewGuid().ToString("N"));
         var oldSession = Path.Combine(root, Guid.NewGuid().ToString("N"));
         var recentSession = Path.Combine(root, Guid.NewGuid().ToString("N"));
+        var unrelatedDirectory = Path.Combine(root, "unrelated-cache");
 
         try
         {
             Directory.CreateDirectory(oldSession);
             Directory.CreateDirectory(recentSession);
+            Directory.CreateDirectory(unrelatedDirectory);
             File.WriteAllText(Path.Combine(oldSession, "old.rdp"), "test");
             File.WriteAllText(Path.Combine(recentSession, "recent.rdp"), "test");
+            File.WriteAllText(Path.Combine(unrelatedDirectory, "keep.txt"), "test");
             Directory.SetLastWriteTimeUtc(oldSession, DateTime.UtcNow.AddDays(-2));
             Directory.SetLastWriteTimeUtc(recentSession, DateTime.UtcNow);
+            Directory.SetLastWriteTimeUtc(unrelatedDirectory, DateTime.UtcNow.AddDays(-2));
 
             var deleted = TemporaryRdpFile.CleanupStaleSessions(TimeSpan.FromHours(24), root);
 
             Assert.AreEqual(1, deleted);
             Assert.IsFalse(Directory.Exists(oldSession));
             Assert.IsTrue(Directory.Exists(recentSession));
+            Assert.IsTrue(Directory.Exists(unrelatedDirectory));
         }
         finally
         {
