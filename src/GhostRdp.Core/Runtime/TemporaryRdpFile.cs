@@ -117,7 +117,9 @@ public sealed class TemporaryRdpFile : IDisposable
     private static bool IsOwnedSessionDirectory(string path)
     {
         var directoryName = Path.GetFileName(path);
-        return directoryName.Length == 32 && Guid.TryParseExact(directoryName, "N", out _);
+        return !string.IsNullOrEmpty(directoryName)
+            && directoryName.Length == 32
+            && Guid.TryParseExact(directoryName, "N", out _);
     }
 
     private static string ResolveRootDirectory(string? rootDirectory)
