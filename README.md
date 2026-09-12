@@ -66,6 +66,8 @@ Production releases are self-contained, so end users do not need a separately in
 
 Passwords are not part of saved computers, Quick Connect persistence, UI settings, generated `.rdp` files, or process command lines. Windows/Microsoft Remote Desktop owns target and RD Gateway credential prompts.
 
+Stale temporary `.rdp` cleanup is scoped to Ghost RDP-owned GUID session directories and leaves unrelated directories below the Ghost RDP temp root untouched.
+
 Ghost RDP does not enable Remote Desktop, open firewall ports, configure UPnP or router forwarding, weaken NLA, install a VPN, create a hidden service, or add stealth persistence. Ghost RDP Host is diagnostic-only and does not change Windows RDP/service/firewall/network state. See [Security](docs/SECURITY.md).
 
 ## Privacy baseline
