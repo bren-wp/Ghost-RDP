@@ -20,7 +20,7 @@ A user-initiated Connect action validates the host/IP, port, username, and domai
 
 The `.rdp` file contains no password. Microsoft Remote Desktop/Windows owns credential entry and authentication. Ghost RDP reports only that the Microsoft RDP process was started; it does not claim that login or the remote desktop session succeeded.
 
-Temporary session directories are cleaned when the Microsoft RDP process exits. Directories left after an abnormal Ghost RDP termination are eligible for stale cleanup after 24 hours.
+Temporary session directories are cleaned when the Microsoft RDP process exits. Directories left after an abnormal Ghost RDP termination are eligible for stale cleanup after 24 hours. Stale cleanup considers only Ghost RDP-owned GUID session directories and leaves unrelated directories below the Ghost RDP temp root untouched.
 
 ## UI behavior
 
@@ -55,7 +55,9 @@ Production projects use .NET/WPF and Windows platform capabilities without third
 
 ## Packaging behavior
 
-Setup installs per-user and registers Ghost RDP in Windows Installed Apps. Windows invokes the installed `GhostRDP-Setup.exe --uninstall`; no separate persistent uninstaller executable is installed. See [PACKAGING.md](PACKAGING.md).
+Setup installs per-user and registers Ghost RDP in Windows Installed Apps. A fresh target may be created, but Setup does not replace an existing directory unless its canonical path matches Ghost RDP's registered current-user `InstallLocation`. If an installation is registered at another path, a second install target is rejected.
+
+Windows invokes the installed `GhostRDP-Setup.exe --uninstall`; no separate persistent uninstaller executable is installed. Both the uninstall bootstrap and its temporary helper revalidate the requested target against the registered `InstallLocation` before recursive deletion. A registered path whose program directory is already missing can have its stale Installed Apps entry cleaned without deleting an unrelated directory. See [PACKAGING.md](PACKAGING.md).
 
 ## Documentation synchronization
 
