@@ -53,7 +53,7 @@ Before removal, the normal uninstall bootstrap requires the canonical requested 
 
 During removal, Setup copies the same Setup executable to a temporary location so Windows can delete the installed copy and application directory after the original process exits. The temporary helper schedules its own cleanup and is not an installed product component.
 
-Saved computers and UI settings under `%LOCALAPPDATA%\Ghost RDP` are preserved by default. The interactive uninstall UI has an explicit option to remove that local user data as well.
+The complete `%LOCALAPPDATA%\Ghost RDP` local-data directory is preserved by default. This includes `computers.json`, its `computers.json.bak` previous-valid-store backup, any `computers.preserved-*.json` recovery copies, and `settings.json`. The interactive uninstall UI has an explicit option to remove that local data directory when the user wants complete local-data deletion.
 
 ## Security boundaries
 
@@ -82,6 +82,8 @@ Setup also does not recursively replace or remove an arbitrary existing `--path`
 ```
 
 Validation checks expected files, minimum artifact sizes, SHA-256 hashes, Portable ZIP contents, PE machine architecture, absence of static `.rdp` files, absence of separate uninstall executables, and the no-third-party-runtime-dependency source policy. The installer smoke test additionally uses an existing foreign directory with a sentinel file to verify that rejected install, uninstall, and direct-helper targets leave unrelated data untouched; verifies same-path reinstall/update; rejects a second install path while Ghost RDP is registered elsewhere; then completes the normal uninstall lifecycle. CI additionally runs the ARM64 package and the same installer lifecycle on a native Windows ARM64 runner.
+
+Saved-computer backup/recovery correctness is covered by Core automated tests before packaging, including backup rotation, fail-closed behavior for an unreadable primary, explicit recovery/preservation, corrupt-backup rejection, and valid-primary rollback rejection.
 
 ## Signing
 
