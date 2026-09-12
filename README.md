@@ -28,6 +28,7 @@ Latest production release: **0.9.1**, published from exact source commit `c0ec01
 - Self-contained x86, x64, and ARM64 App, Host, Setup, and Portable packages.
 - Canonical `setup.exe` and `portable.exe` 32-bit/x86 compatibility downloads plus native x64 and ARM64 builds.
 - Per-user Ghost RDP Setup with transactional staging/rollback and Windows Installed Apps registration.
+- Setup replaces or removes an existing program directory only when its canonical path matches the Windows Installed Apps `InstallLocation` registered for Ghost RDP.
 - Windows uninstall through the installed `GhostRDP-Setup.exe --uninstall`; no separate `uninstall.exe` or `unins*.exe` is shipped.
 - SHA-256 manifests, PE-architecture validation, runtime self-tests, package validation, and real install/uninstall smoke tests.
 - Native ARM64 CI validation on a Windows ARM64 runner.
@@ -67,6 +68,8 @@ Production releases are self-contained, so end users do not need a separately in
 Passwords are not part of saved computers, Quick Connect persistence, UI settings, generated `.rdp` files, or process command lines. Windows/Microsoft Remote Desktop owns target and RD Gateway credential prompts.
 
 Stale temporary `.rdp` cleanup is scoped to Ghost RDP-owned GUID session directories and leaves unrelated directories below the Ghost RDP temp root untouched.
+
+Setup never takes ownership of an arbitrary existing `--path`: an existing target must match the registered Ghost RDP `InstallLocation`, a different second install target is rejected while an installation is registered, and both uninstall entry points independently revalidate the same registered target before recursive deletion.
 
 Ghost RDP does not enable Remote Desktop, open firewall ports, configure UPnP or router forwarding, weaken NLA, install a VPN, create a hidden service, or add stealth persistence. Ghost RDP Host is diagnostic-only and does not change Windows RDP/service/firewall/network state. See [Security](docs/SECURITY.md).
 

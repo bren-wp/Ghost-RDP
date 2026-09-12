@@ -7,6 +7,9 @@ All notable user-facing changes to Ghost RDP are recorded here. Documentation is
 ### Security and stability
 
 - Stale temporary `.rdp` cleanup now considers only Ghost RDP-owned GUID session directories and leaves unrelated directories under the Ghost RDP temp root untouched.
+- Setup now replaces an existing installation directory only when Windows Installed Apps identifies that exact canonical path as the registered Ghost RDP installation; an existing unregistered directory is never taken over.
+- Setup refuses a second install path while another Ghost RDP installation is registered, and both normal uninstall and the temporary uninstall helper independently reject targets that do not match the registered `InstallLocation`.
+- Installer smoke tests now preserve a foreign sentinel directory while exercising rejected install/uninstall/helper targets, accepted same-path reinstall/update, and the normal Windows uninstall lifecycle.
 
 ## 0.9.1 - 2026-09-12
 
