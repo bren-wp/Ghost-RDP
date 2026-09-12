@@ -25,8 +25,8 @@ The exact release commit must pass:
 9. SHA-256 manifest validation;
 10. Portable ZIP content validation;
 11. App, Host, and Setup runtime self-tests;
-12. real Setup install/uninstall smoke testing on x86 and x64-compatible Windows;
-13. real ARM64 runtime and Setup smoke testing on a native Windows ARM64 runner;
+12. real Setup install/update/uninstall smoke testing on x86 and x64-compatible Windows, including installation-target ownership regression checks;
+13. real ARM64 runtime and Setup smoke testing on a native Windows ARM64 runner, including the same installation-target ownership checks;
 14. documentation synchronization review for README, CHANGELOG, ROADMAP and all affected domain documents.
 
 A release branch must be named exactly `release/v<project-version>`. The release workflow refuses to publish a mismatched branch/version pair.
@@ -65,6 +65,10 @@ Every release must contain `setup.exe` and `portable.exe`, plus native architect
 
 Setup must register Ghost RDP in Windows Installed Apps using the installed `GhostRDP-Setup.exe --uninstall` command. A distinct `uninstall.exe` or `unins*.exe` must not be shipped or installed. CI treats such a file as a release validation failure.
 
+A fresh installation may create a new target directory. Setup must not replace an arbitrary existing directory: an existing target is eligible for replacement only when its canonical path matches the current-user Ghost RDP `InstallLocation` registered in Windows Installed Apps. If Ghost RDP is registered at another path, Setup must reject a second installation target rather than orphaning the registered installation.
+
+The normal uninstall bootstrap and the temporary uninstall helper must independently verify that the requested canonical target matches the registered Ghost RDP `InstallLocation` before recursive deletion. A missing registered program directory may be treated as stale installation metadata and cleaned without deleting an unrelated directory. A mismatched or unregistered target must not be removed.
+
 Saved computers and settings remain user-owned data and are preserved by default. Interactive uninstall may remove them only after explicit user selection.
 
 ## Runtime behavior validation
@@ -76,7 +80,11 @@ Saved computers and settings remain user-owned data and are preserved by default
 - `mstsc.exe` remains the Windows-owned RDP runtime and credential prompt owner.
 - Host diagnostics stay read-only and do not mutate RDP, services, firewall, NLA, VPN, or router state.
 - Setup does not require elevation for its normal per-user installation path.
-- Setup rollback protects an existing install from partial replacement when finalization fails.
+- Setup rollback protects an existing registered install from partial replacement when finalization fails.
+- Setup must reject an existing unregistered target directory without changing its sentinel data, while same-path reinstall/update for the registered installation remains supported.
+- Setup must reject a different second install path while another Ghost RDP installation is registered.
+- Both the normal uninstall path and direct temporary-helper path must reject a mismatched target and leave unrelated sentinel data plus the registered installation intact.
+- The normal Windows uninstall lifecycle must still remove the registered program directory and Installed Apps entry while preserving unrelated directories.
 
 ## Documentation release gate
 
@@ -85,6 +93,8 @@ Before release, review the complete [documentation index](README.md). README, CH
 Unchanged documents do not need artificial edits, but contradictions must be resolved before the release branch is created. After publication, status-bearing documents must be updated so they identify the actual current production release rather than a release-preparation state.
 
 The complete documentation set was reviewed after v0.9.1 publication. README, CHANGELOG, ROADMAP, the documentation index, and this release document were updated for the published state. Architecture, Build, Packaging, Security, Privacy, Dependencies, Accessibility, UI/UX, Windows, Host, Remote Access and the finalized Release Notes continue to describe the same validated 0.9.1 behavior and therefore require no artificial status-only change.
+
+Post-release hardening can strengthen future release gates without changing the identity of the current verified production release. Such work remains unreleased until a later exact release commit passes every required architecture, integrity, runtime, installer, metadata, and publication gate above.
 
 ## Authentic screenshots
 
