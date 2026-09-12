@@ -10,7 +10,7 @@ Ghost RDP is a Windows-first remote desktop management product. The architecture
 - `GhostRdp.App` is the user-facing Windows WPF application and owns non-sensitive UI preference persistence and saved-computer presentation/query behavior.
 - `GhostRdp.Host` is a separate, visible Windows application for read-only host-side readiness diagnostics.
 - `GhostRdp.Setup` is the repository-owned per-user Windows installer/uninstaller application.
-- `GhostRdp.Core.Tests` covers shared validation, profile persistence/migration, RDP file generation/process launch planning, Host readiness evaluation, and security behavior.
+- `GhostRdp.Core.Tests` covers shared validation, profile persistence/migration/recovery, RDP file generation/process launch planning, Host readiness evaluation, and security behavior.
 - `GhostRdp.App.Tests` covers application metadata, settings persistence, and deterministic saved-computer filtering/sorting behavior that can be tested without UI automation.
 
 ## Saved computer persistence
@@ -19,7 +19,13 @@ Saved computers use a schema-versioned JSON document under the current user's lo
 
 Schema v2 adds `RemoteAccessMode` and an optional RD Gateway hostname. Schema-v1 stores and profiles are accepted as a known legacy format and migrated in memory to v2 with the Direct route. Load does not rewrite the source file. A current-schema document is written only after a later explicit profile change.
 
-Writes are validated before serialization and use a random temporary file followed by replacement in the same directory. Invalid JSON, unsupported future schema versions, invalid profiles, and duplicate IDs are rejected. A corrupted store is not silently replaced by the app.
+Writes are validated before serialization and use a random temporary file followed by replacement in the same directory. Before replacing an existing primary store, Ghost RDP reads and validates that exact current file. If the existing primary cannot be parsed, migrated, and validated, the normal Save path fails before writing either a replacement primary or a new backup.
+
+When a valid primary already exists, its exact previous contents are first written and revalidated through a temporary file, then retained as `computers.json.bak`. The new primary is independently serialized and validated before replacement. This provides one previous validated store generation without silently treating an unreadable current file as disposable.
+
+Backup recovery is explicit rather than automatic. `ComputerProfileStore.RestoreBackup()` validates the backup before any primary-file mutation. If the current primary is already valid, recovery is rejected to prevent accidental rollback. When recovery is appropriate, the unreadable primary is moved to a uniquely named `preserved-*` file in the same local-data directory, the validated backup is restored through a temporary file, and a failed finalization attempts to put the preserved original back at the primary path.
+
+The WPF App stays read-only after a profile-load failure. After the main window is rendered, it offers recovery only when `computers.json.bak` itself validates. The user must explicitly approve recovery; declining leaves both files unchanged and keeps saved-computer changes disabled for that process. Invalid JSON, unsupported future schema versions, invalid profiles, and duplicate IDs therefore remain fail-closed rather than triggering automatic data rollback.
 
 Quick Connect is modeled separately from a saved profile. Validation does not persist anything. Conversion to a saved computer happens only through the explicit `Save as computer` action.
 
@@ -76,7 +82,7 @@ Each probe can return unavailable/unknown data independently. The evaluator refu
 
 ## Trust boundaries
 
-The local Windows account and Windows credential facilities are trusted platform boundaries. Remote hosts, RD Gateway hostnames, DNS results, network input, profile files, imported settings, and future pairing data are untrusted inputs and must be validated before use.
+The local Windows account and Windows credential facilities are trusted platform boundaries. Remote hosts, RD Gateway hostnames, DNS results, network input, profile files, profile backups/recovery copies, imported settings, and future pairing data are untrusted inputs and must be validated before use.
 
 Host diagnostics are local observations, not remote authorization. A detected VPN/tunnel adapter does not prove that a remote route is secure or reachable. Selecting Private Network similarly records connection intent rather than claiming a tunnel exists.
 
@@ -84,9 +90,9 @@ The current architecture has no Ghost RDP relay server and no backend dependency
 
 ## Runtime truthfulness
 
-The UI must not claim a connection, host readiness state, VPN state, firewall state, NLA state, gateway authentication state, or session state unless a reliable runtime owner provides that information. Connect controls are enabled only when Microsoft `mstsc.exe` is actually available. Launch success means the Microsoft RDP process was started; it does not claim that authentication or the remote session succeeded.
+The UI must not claim a connection, host readiness state, VPN state, firewall state, NLA state, gateway authentication state, session state, or profile recovery state unless a reliable runtime owner provides that information. Connect controls are enabled only when Microsoft `mstsc.exe` is actually available. Launch success means the Microsoft RDP process was started; it does not claim that authentication or the remote session succeeded.
 
-Ghost RDP Host reports `Ready for Remote Desktop` only when its required local Windows diagnostics are known and pass. Unknown states stay visible as unknown.
+Ghost RDP Host reports `Ready for Remote Desktop` only when its required local Windows diagnostics are known and pass. Unknown states stay visible as unknown. Saved-computer recovery is reported as successful only after the backup was validated and the recovered primary can be loaded.
 
 ## Dependency policy
 
