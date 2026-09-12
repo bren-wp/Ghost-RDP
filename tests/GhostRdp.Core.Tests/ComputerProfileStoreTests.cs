@@ -51,6 +51,113 @@ public sealed class ComputerProfileStoreTests
         Assert.AreEqual("gateway.example.test", loaded[0].GatewayHost);
         Assert.IsFalse(json.Contains("password", StringComparison.OrdinalIgnoreCase));
         Assert.IsFalse(json.Contains("credential", StringComparison.OrdinalIgnoreCase));
+        Assert.IsFalse(File.Exists(store.BackupFilePath));
+    }
+
+    [TestMethod]
+    public void Save_SecondWrite_PreservesPreviousValidatedStoreAsBackup()
+    {
+        var store = new ComputerProfileStore(_filePath);
+        var first = new ComputerProfile { DisplayName = "First", Host = "first.internal" };
+        var second = new ComputerProfile { DisplayName = "Second", Host = "second.internal" };
+
+        store.Save([first]);
+        var firstJson = File.ReadAllText(_filePath);
+        store.Save([second]);
+
+        Assert.IsTrue(File.Exists(store.BackupFilePath));
+        Assert.AreEqual(firstJson, File.ReadAllText(store.BackupFilePath));
+        Assert.IsTrue(store.HasRecoverableBackup());
+
+        var backupStore = new ComputerProfileStore(store.BackupFilePath);
+        var backupProfiles = backupStore.Load();
+        Assert.AreEqual(1, backupProfiles.Count);
+        Assert.AreEqual(first.Id, backupProfiles[0].Id);
+        Assert.AreEqual("First", backupProfiles[0].DisplayName);
+    }
+
+    [TestMethod]
+    public void Save_CorruptedPrimary_ThrowsAndPreservesPrimaryAndBackup()
+    {
+        var store = new ComputerProfileStore(_filePath);
+        var first = new ComputerProfile { DisplayName = "First", Host = "first.internal" };
+        var second = new ComputerProfile { DisplayName = "Second", Host = "second.internal" };
+        var third = new ComputerProfile { DisplayName = "Third", Host = "third.internal" };
+
+        store.Save([first]);
+        store.Save([second]);
+        var backupBefore = File.ReadAllText(store.BackupFilePath);
+        const string corrupted = "{ not valid json";
+        File.WriteAllText(_filePath, corrupted);
+
+        Assert.ThrowsException<InvalidDataException>(() => store.Save([third]));
+        Assert.AreEqual(corrupted, File.ReadAllText(_filePath));
+        Assert.AreEqual(backupBefore, File.ReadAllText(store.BackupFilePath));
+    }
+
+    [TestMethod]
+    public void RestoreBackup_CorruptedPrimary_PreservesOriginalAndRestoresValidatedBackup()
+    {
+        var store = new ComputerProfileStore(_filePath);
+        var first = new ComputerProfile { DisplayName = "First", Host = "first.internal" };
+        var second = new ComputerProfile { DisplayName = "Second", Host = "second.internal" };
+
+        store.Save([first]);
+        store.Save([second]);
+        const string corrupted = "{ broken current store";
+        File.WriteAllText(_filePath, corrupted);
+
+        Assert.IsTrue(store.HasRecoverableBackup());
+        var recovery = store.RestoreBackup();
+
+        Assert.AreEqual(store.BackupFilePath, recovery.BackupFilePath);
+        Assert.IsNotNull(recovery.PreservedOriginalFilePath);
+        Assert.IsTrue(File.Exists(recovery.PreservedOriginalFilePath));
+        Assert.AreEqual(corrupted, File.ReadAllText(recovery.PreservedOriginalFilePath));
+        Assert.AreEqual(1, recovery.Profiles.Count);
+        Assert.AreEqual(first.Id, recovery.Profiles[0].Id);
+
+        var restored = store.Load();
+        Assert.AreEqual(1, restored.Count);
+        Assert.AreEqual(first.Id, restored[0].Id);
+        Assert.IsTrue(store.HasRecoverableBackup());
+    }
+
+    [TestMethod]
+    public void RestoreBackup_CorruptedBackup_IsRejectedWithoutModifyingPrimary()
+    {
+        var store = new ComputerProfileStore(_filePath);
+        var first = new ComputerProfile { DisplayName = "First", Host = "first.internal" };
+        var second = new ComputerProfile { DisplayName = "Second", Host = "second.internal" };
+
+        store.Save([first]);
+        store.Save([second]);
+        const string corruptedPrimary = "{ broken primary";
+        const string corruptedBackup = "{ broken backup";
+        File.WriteAllText(_filePath, corruptedPrimary);
+        File.WriteAllText(store.BackupFilePath, corruptedBackup);
+
+        Assert.IsFalse(store.HasRecoverableBackup());
+        Assert.ThrowsException<InvalidDataException>(() => store.RestoreBackup());
+        Assert.AreEqual(corruptedPrimary, File.ReadAllText(_filePath));
+        Assert.AreEqual(corruptedBackup, File.ReadAllText(store.BackupFilePath));
+    }
+
+    [TestMethod]
+    public void RestoreBackup_ValidPrimary_IsRejectedWithoutRollingBackData()
+    {
+        var store = new ComputerProfileStore(_filePath);
+        var first = new ComputerProfile { DisplayName = "First", Host = "first.internal" };
+        var second = new ComputerProfile { DisplayName = "Second", Host = "second.internal" };
+
+        store.Save([first]);
+        store.Save([second]);
+        var currentJson = File.ReadAllText(_filePath);
+
+        Assert.ThrowsException<InvalidOperationException>(() => store.RestoreBackup());
+        Assert.AreEqual(currentJson, File.ReadAllText(_filePath));
+        var loaded = store.Load();
+        Assert.AreEqual(second.Id, loaded.Single().Id);
     }
 
     [TestMethod]
