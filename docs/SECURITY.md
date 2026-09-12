@@ -16,6 +16,16 @@ CI scans `src/` project/props/targets files and fails if a runtime `PackageRefer
 
 Adding any third-party runtime component in the future requires an explicit policy change and a separate security, privacy, licensing, maintenance, and supply-chain review. See [DEPENDENCIES.md](DEPENDENCIES.md).
 
+## Saved-computer persistence and recovery
+
+`computers.json` is schema-versioned local connection metadata and intentionally contains no password/token field. A normal profile Save validates both the candidate collection and any existing primary store before replacement. An unreadable, invalid, duplicate-ID, or unsupported-schema current store therefore blocks normal profile writes instead of being treated as disposable data.
+
+When the current primary is valid, its exact previous contents are copied through a temporary file, revalidated, and retained as `computers.json.bak` before the new primary replaces it. The backup is a local previous-generation profile store, not a credential cache, cloud copy, or synchronization mechanism.
+
+Recovery is fail-closed and user-driven. A backup is considered recoverable only after the same parser, schema checks, migration rules, and collection validation used for the primary store succeed. Recovery is rejected while the primary store is valid so an old backup cannot be used as an accidental rollback path. When recovery is explicitly approved for an unreadable primary, that primary is moved to a unique `computers.preserved-*.json` path before the validated backup becomes the new primary. If finalization fails, Ghost RDP attempts to move the preserved original back into place.
+
+The App does not auto-recover at startup. A failed primary load keeps saved-computer mutations disabled; after the window is displayed, recovery is offered only when the backup validates, and the user can decline without changing either file.
+
 ## Local UI settings
 
 `settings.json` is a schema-versioned local preference file. It stores startup view, default saved-computer sort, optional last-view memory, and the last eligible view. It does not store hosts, usernames, domains, gateway hosts, passwords, tokens, or credential material.
@@ -64,11 +74,11 @@ Ghost RDP must not automatically forward TCP 3389 on a router, use UPnP to expos
 
 ## Accessibility and stability boundary
 
-Accessibility features may change presentation and navigation behavior but never weaken authentication, firewall, NLA, process-launch, or credential boundaries. Windows High Contrast is read as a system setting and only changes application brush resources.
+Accessibility features may change presentation and navigation behavior but never weaken authentication, firewall, NLA, process-launch, credential, or profile-recovery boundaries. Windows High Contrast is read as a system setting and only changes application brush resources.
 
 Production App and Host builds catch unexpected WPF dispatcher failures at the application boundary, show a generic user-safe error, and terminate rather than continuing in an unknown UI state. Unobserved background-task exceptions are marked observed; secrets are not included in these user-visible failure messages.
 
-Saved-computer search debounce is UI-only. It does not create a background service, network worker, or credential cache and is stopped/detached when the main window closes.
+Saved-computer search debounce is UI-only. It does not create a background service, network worker, or credential cache and is stopped/detached when the main window closes. The saved-computer recovery prompt is also local/UI-only and performs no network operation.
 
 ## Packaging boundary
 
@@ -80,7 +90,7 @@ Windows Installed Apps invokes the installed `GhostRDP-Setup.exe --uninstall` en
 
 Packaging must not create or start a Windows service, create scheduled persistence, change Windows Firewall, expose an RDP port, change NLA, configure a VPN, or change host-readiness state. CI validates PE architecture, hashes, archive content, the absence of static `.rdp` files and separate uninstall executables, runtime self-tests, and real install/uninstall behavior. Installer smoke coverage additionally verifies that an existing unregistered sentinel directory survives rejected install, uninstall, and helper targets; a registered same-path reinstall/update succeeds; and a different second install path is rejected. ARM64 packages are additionally executed on a native Windows ARM64 CI runner.
 
-Current release artifacts are unsigned. Ghost RDP must not claim Authenticode signing until an authorized certificate or signing service actually signs and verifies the binaries. Uninstall preserves the current user's saved computers and UI settings by default; removing that local data requires an explicit interactive choice.
+Current release artifacts are unsigned. Ghost RDP must not claim Authenticode signing until an authorized certificate or signing service actually signs and verifies the binaries. Uninstall preserves the current user's saved computers, profile backup/recovery files, and UI settings by default; removing that local data requires an explicit interactive choice.
 
 ## Release publication integrity
 
@@ -100,7 +110,7 @@ Security-sensitive values must be redacted before logging. The shared `SecretSan
 
 CI rejects obvious command-line password patterns, RDP password-field patterns, gateway access-token fields, shell-launch patterns, Host mutation patterns, prohibited installer/service/firewall/elevation patterns, third-party runtime `PackageReference`/external assembly references, missing required documentation, and release-version drift before packaging.
 
-Tests and packaging checks cover input validation, profile/schema persistence, settings corruption handling, saved-computer query behavior, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data, RD Gateway serialization, Host readiness evaluation, firewall-port matching, architecture validation, runtime startup self-tests, release artifact integrity, Setup target ownership, and Setup install/uninstall behavior.
+Tests and packaging checks cover input validation, profile/schema persistence and backup recovery, settings corruption handling, saved-computer query behavior, temporary `.rdp` cleanup, structured process arguments, command-injection-shaped input, absence of password/token data, RD Gateway serialization, Host readiness evaluation, firewall-port matching, architecture validation, runtime startup self-tests, release artifact integrity, Setup target ownership, and Setup install/uninstall behavior.
 
 ## Documentation synchronization
 
