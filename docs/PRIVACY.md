@@ -18,7 +18,11 @@ Saved computers are stored locally for the current Windows user under the user's
 
 Profile/store schema v2 adds route and gateway-host metadata. Known schema-v1 data is migrated in memory when read and is not rewritten merely because the application loaded it.
 
-Saved-computer text search, filtering, sorting, favorite counts, and selection restoration operate locally in memory. The 0.9.1 debounce does not send search terms, profile metadata, or usage data anywhere.
+When an existing saved-computer store is valid and a later profile change is saved, Ghost RDP retains the exact previous validated store contents as `computers.json.bak` before replacing the primary file. The backup contains the same classes of non-secret connection metadata as `computers.json`; it does not add password, token, or credential fields.
+
+If the primary store later becomes unreadable or unsupported while the backup still validates, the App may offer explicit recovery. Accepting recovery preserves the current primary file under a uniquely named `computers.preserved-*.json` file before restoring the validated backup. Declining recovery leaves the files unchanged and keeps saved-computer changes read-only for that process. These backup and preserved-recovery files stay in the same current-user local application-data directory and are not uploaded.
+
+Saved-computer text search, filtering, sorting, favorite counts, selection restoration, and recovery validation operate locally. The 0.9.1 debounce and recovery flow do not send search terms, profile metadata, backup contents, or usage data anywhere.
 
 ## Local UI settings
 
@@ -44,7 +48,7 @@ Ghost RDP Host reads readiness information locally from Windows registry, servic
 
 Setup and Portable packaging do not add telemetry or a Ghost RDP network service. Setup installs program files and Start menu shortcuts and registers Ghost RDP in Windows Installed Apps for the current user.
 
-Normal uninstall preserves `%LOCALAPPDATA%\Ghost RDP\computers.json` and `settings.json` so removing the application does not silently destroy user-owned connection metadata or UI preferences. The interactive uninstall UI offers a separate, explicit option to remove that local Ghost RDP data when the user wants complete local-data deletion.
+Normal uninstall preserves `%LOCALAPPDATA%\Ghost RDP\computers.json`, any `computers.json.bak`/`computers.preserved-*.json` recovery files, and `settings.json` so removing the application does not silently destroy user-owned connection metadata, recovery evidence, or UI preferences. The interactive uninstall UI offers a separate, explicit option to remove that local Ghost RDP data when the user wants complete local-data deletion.
 
 ## Dependency privacy boundary
 
@@ -54,7 +58,7 @@ Existing Microsoft test tooling is used only for repository development/testing 
 
 ## Release tooling privacy
 
-The repository-owned release preflight reads local project files, CHANGELOG, release notes, README, and the GitHub-provided branch name. It does not read Ghost RDP saved-computer data, UI settings, Windows credentials, host diagnostics, network interfaces, or RDP session data.
+The repository-owned release preflight reads local project files, CHANGELOG, release notes, README, and the GitHub-provided branch name. It does not read Ghost RDP saved-computer data, profile recovery files, UI settings, Windows credentials, host diagnostics, network interfaces, or RDP session data.
 
 Release publication runs in GitHub Actions using repository artifacts and GitHub Release infrastructure. It does not introduce a Ghost RDP telemetry endpoint, account service, runtime analytics SDK, or central RDP relay.
 
