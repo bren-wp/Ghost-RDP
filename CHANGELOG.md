@@ -2,7 +2,9 @@
 
 All notable user-facing changes to Ghost RDP are recorded here. Documentation is reviewed and synchronized with every functional change.
 
-## Unreleased
+## 0.9.2 - 2026-09-12
+
+Security, data-preservation, and installer-ownership hardening for the current multi-architecture Windows release line.
 
 ### Security and stability
 

@@ -35,6 +35,10 @@ Latest production release: **0.9.1**, published from exact source commit `c0ec01
 - Automated GitHub Release publishing only after all architecture jobs pass for the exact release commit.
 - Repository-owned release preflight that validates production-project version alignment, finalized release metadata, and the exact `release/v<version>` branch before publication.
 
+## 0.9.2 release preparation
+
+Ghost RDP **0.9.2** is the next patch release being prepared from the validated post-0.9.1 hardening line. It packages scoped temporary `.rdp` cleanup ownership, Setup installation/uninstall target ownership, and saved-computer backup/recovery protection. It is not considered the current published production release until the exact `release/v0.9.2` branch passes every x86/x64/ARM64 publication gate and GitHub Release `v0.9.2` is verified.
+
 ## 0.9.1 release verification
 
 The `v0.9.1` GitHub Release was produced from commit `c0ec01cf286ac422c0f2c41db1b456a2b0e62ca3` by Publish Release workflow run `34659493897`. The release is neither a draft nor a prerelease.
