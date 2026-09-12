@@ -4,11 +4,11 @@ This document defines the gates required before a Ghost RDP commit can be publis
 
 ## Current verified production release
 
-Ghost RDP **v0.9.1** is the current verified production release. It was published from exact source commit `c0ec01cf286ac422c0f2c41db1b456a2b0e62ca3` by Publish Release workflow run `34659493897`.
+Ghost RDP **v0.9.2** is the current verified production release. It was published from exact source commit `96936fce056db87b1fc43f07e9500111a8e3b851` by Publish Release workflow run `34664726865`. Tag `v0.9.2` resolves to that exact commit; the GitHub Release is neither a draft nor a prerelease.
 
-The release workflow completed successfully for x86, x64, and native ARM64. Each architecture passed release metadata/branch preflight, restore, security/runtime-dependency checks, package build/validation, runtime self-tests, and real Setup install/uninstall smoke testing. The publish job then downloaded all architecture packages, assembled the combined release, validated it again, read version 0.9.1, and successfully created the GitHub Release.
+x86 and x64 completed release metadata/branch preflight, restore, security/runtime-dependency checks, package build/validation, runtime self-tests, and real Setup install/uninstall smoke testing on the initial release attempt. The initial native ARM64 job encountered a hosted-runner `.NET` bootstrap `Internal CLR error` before Ghost RDP release preflight or code execution. The ARM64 job was rerun on the same release SHA and then passed the complete release chain. The publish job downloaded all three architecture packages, assembled the combined release, validated it again, read version 0.9.2, and successfully created the GitHub Release.
 
-The published release is neither a draft nor a prerelease. It contains canonical `setup.exe` and `portable.exe`, architecture-specific Setup/Portable/Host executables, x86/x64/ARM64 Portable ZIPs, `LICENSE.txt`, `RELEASE-MANIFEST.json`, and `SHA256SUMS.txt`. GitHub records SHA-256 digests for uploaded assets. Current binaries remain unsigned.
+The published release contains canonical `setup.exe` and `portable.exe`, architecture-specific Setup/Portable/Host executables, x86/x64/ARM64 Portable ZIPs, `LICENSE.txt`, `RELEASE-MANIFEST.json`, and `SHA256SUMS.txt`. GitHub records SHA-256 digests for uploaded assets. Current binaries remain unsigned.
 
 ## Required CI gates
 
@@ -96,7 +96,7 @@ Before release, review the complete [documentation index](README.md). README, CH
 
 Unchanged documents do not need artificial edits, but contradictions must be resolved before the release branch is created. After publication, status-bearing documents must be updated so they identify the actual current production release rather than a release-preparation state.
 
-The complete documentation set was reviewed after v0.9.1 publication. README, CHANGELOG, ROADMAP, the documentation index, and this release document were updated for the published state. Architecture, Build, Packaging, Security, Privacy, Dependencies, Accessibility, UI/UX, Windows, Host, Remote Access and the finalized Release Notes continue to describe the same validated 0.9.1 behavior and therefore require no artificial status-only change.
+After v0.9.2 publication, README, CHANGELOG, ROADMAP, the documentation index, and this release document are reviewed for the published state. Architecture, Build, Packaging, Security, Privacy, Dependencies, Accessibility, UI/UX, Windows, Host, Remote Access and the finalized Release Notes already describe the validated 0.9.2 runtime behavior and do not require artificial status-only changes.
 
 Post-release hardening can strengthen future release gates without changing the identity of the current verified production release. Such work remains unreleased until a later exact release commit passes every required architecture, integrity, runtime, installer, metadata, and publication gate above.
 
@@ -106,4 +106,4 @@ Runtime screenshots are documentation evidence, not a substitute for CI or packa
 
 ## Known release limitation
 
-Current 0.9.1 packages are unsigned. Authenticode signing remains deferred until an authorized certificate or signing service is available. The release process must never claim a signature that was not actually produced and verified.
+Current 0.9.2 packages are unsigned. Authenticode signing remains deferred until an authorized certificate or signing service is available. The release process must never claim a signature that was not actually produced and verified.
