@@ -28,6 +28,8 @@ The 0.9.1 development line uses project-owned WPF styles/templates and vector as
 
 Saved-computer lists use WPF virtualization/recycling. Search filtering is debounced briefly on the WPF dispatcher; explicit sort/favorite changes remain immediate.
 
+A saved-computer load failure keeps profile mutations disabled instead of presenting an empty writable store. If `%LOCALAPPDATA%\Ghost RDP\computers.json.bak` validates, the WPF App offers one explicit Windows Yes/No recovery prompt after the main window is rendered. Accepting recovery preserves the unreadable primary under a unique `computers.preserved-*.json` filename before restoring the backup; declining keeps the store read-only and changes no files.
+
 ## Incoming RDP host editions
 
 Ghost RDP Host treats Windows Professional, Enterprise, Education, and Windows Server families as supported incoming RDP host families when the local edition can be identified reliably. Windows Home/Core editions are reported as unsupported hosts. Unknown editions stay unknown rather than being assumed supported.
@@ -57,7 +59,9 @@ Production projects use .NET/WPF and Windows platform capabilities without third
 
 Setup installs per-user and registers Ghost RDP in Windows Installed Apps. A fresh target may be created, but Setup does not replace an existing directory unless its canonical path matches Ghost RDP's registered current-user `InstallLocation`. If an installation is registered at another path, a second install target is rejected.
 
-Windows invokes the installed `GhostRDP-Setup.exe --uninstall`; no separate persistent uninstaller executable is installed. Both the uninstall bootstrap and its temporary helper revalidate the requested target against the registered `InstallLocation` before recursive deletion. A registered path whose program directory is already missing can have its stale Installed Apps entry cleaned without deleting an unrelated directory. See [PACKAGING.md](PACKAGING.md).
+Windows invokes the installed `GhostRDP-Setup.exe --uninstall`; no separate persistent uninstaller executable is installed. Both the uninstall bootstrap and its temporary helper revalidate the requested target against the registered `InstallLocation` before recursive deletion. A registered path whose program directory is already missing can have its stale Installed Apps entry cleaned without deleting an unrelated directory.
+
+Normal uninstall preserves the entire current-user `%LOCALAPPDATA%\Ghost RDP` directory, including saved-computer backup/preserved-recovery files. The optional explicit local-data removal choice removes that directory together. See [PACKAGING.md](PACKAGING.md).
 
 ## Documentation synchronization
 
