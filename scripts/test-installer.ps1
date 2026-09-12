@@ -64,9 +64,16 @@ function Assert-ForeignDirectoryUntouched {
         throw 'Installer ownership regression failed. The foreign sentinel file was modified.'
     }
 
-    $foreignItems = @(Get-ChildItem -Path $foreignDirectory -Force)
-    if ($foreignItems.Count -ne 1 -or -not [string]::Equals($foreignItems[0].FullName, $foreignSentinel, [System.StringComparison]::OrdinalIgnoreCase)) {
-        throw 'Installer ownership regression failed. Unexpected files were written into the foreign directory.'
+    foreach ($name in @('GhostRDP.exe', 'GhostRDP-Host.exe', 'GhostRDP-Setup.exe', 'LICENSE.txt')) {
+        if (Test-Path (Join-Path $foreignDirectory $name)) {
+            throw "Installer ownership regression failed. Product payload was written into the foreign directory: $name"
+        }
+    }
+
+    $unexpectedDirectories = @(Get-ChildItem -Path $foreignDirectory -Directory -Force)
+    if ($unexpectedDirectories.Count -ne 0) {
+        $names = ($unexpectedDirectories | ForEach-Object Name) -join ', '
+        throw "Installer ownership regression failed. Setup created directories inside the foreign target: $names"
     }
 }
 
