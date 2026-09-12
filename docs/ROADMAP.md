@@ -17,22 +17,24 @@ Status terminology: **implemented** means code exists and has passed repository 
 | PR 11 | Saved-computer filtering/sorting performance, debounce, selection preservation, and query tests | implemented |
 | PR 12 | Documentation synchronization and enforced no-third-party-runtime-dependency policy | implemented |
 | PR 13 | 0.9.1 release metadata finalization and automated release-preflight validation | implemented |
+| PR 15 | Temporary RDP cleanup ownership hardening | implemented |
+| PR 16 | Setup target-ownership and uninstall data-loss protection | implemented |
+| PR 17 | Saved-profile backup and explicit recovery hardening | implemented |
+| PR 18 | 0.9.2 release metadata finalization | implemented |
 
 ## Current production release
 
-**Ghost RDP 0.9.1** is the current published production release. The `v0.9.1` GitHub Release was published from exact commit `c0ec01cf286ac422c0f2c41db1b456a2b0e62ca3` after Publish Release workflow run `34659493897` completed successfully.
+**Ghost RDP 0.9.2** is the current published production release. GitHub Release `v0.9.2` was published from exact source commit `96936fce056db87b1fc43f07e9500111a8e3b851` by Publish Release workflow run `34664726865`. The release is neither a draft nor a prerelease, and tag `v0.9.2` resolves to the same commit.
 
 The release provides self-contained x86, x64, and ARM64 App/Host/Setup binaries, canonical `setup.exe` and `portable.exe` compatibility downloads, architecture-specific Portable ZIPs, native ARM64 execution validation, PE architecture validation, SHA-256 integrity data, and Windows Installed Apps uninstall without a separate persistent uninstall executable.
 
-All three architecture jobs passed release metadata/branch preflight, security/runtime-dependency checks, package validation, runtime self-tests, and real Setup install/uninstall smoke tests. The final publish job assembled and validated the combined release before publication.
+x86 and x64 passed the complete release chain on the initial release attempt. Native ARM64 initially encountered a hosted-runner `.NET` bootstrap CLR failure before Ghost RDP preflight or code execution; the retry on the same release SHA passed release metadata/branch preflight, security/runtime-dependency checks, package validation, runtime self-tests, Setup install/uninstall smoke testing, and artifact upload. The final publish job assembled and validated all architecture packages before creating the release.
 
-## 0.9.1 maintenance line
+## 0.9.2 production line
 
-The 0.9.1 maintenance release focuses on visual correctness, accessibility, responsiveness, dependency discipline, and release-metadata integrity without changing the RDP credential/security boundary.
+Ghost RDP 0.9.2 packages the post-0.9.1 security and data-preservation work without changing the RDP credential or networking boundary.
 
-Implemented work includes deterministic WPF dark theming, project-owned text-field/dropdown templates, vector UI assets, saved-computer list recycling/virtualization, a short search debounce, deterministic query tests, selection preservation, cached favorite counts, and an enforced no-third-party-runtime-dependency policy.
-
-Post-release maintenance on the 0.9.1 line includes scoped stale temporary `.rdp` cleanup, Setup install/uninstall target-ownership hardening, and saved-computer persistence recovery hardening. Temporary cleanup considers only Ghost RDP-owned GUID session directories. Setup only replaces or removes the canonical installation path registered in Windows Installed Apps, rejects a different second install target while an installation is registered, and revalidates ownership inside the temporary uninstall helper before recursive deletion.
+The patch release includes scoped stale temporary `.rdp` cleanup, Setup install/uninstall target-ownership hardening, and saved-computer persistence recovery hardening. Temporary cleanup considers only Ghost RDP-owned GUID session directories. Setup only replaces or removes the canonical installation path registered in Windows Installed Apps, rejects a different second install target while an installation is registered, and revalidates ownership inside the temporary uninstall helper before recursive deletion.
 
 Saved-computer persistence retains one previous validated primary generation as `computers.json.bak`, refuses normal writes over a primary store that cannot be safely loaded, and offers explicit recovery only when the backup itself validates. Recovery preserves the unreadable original before restoration and never silently rolls back a currently valid primary store.
 
@@ -44,7 +46,7 @@ The repository-owned `release-preflight.ps1` gate verifies App/Host/Setup versio
 
 The maintained documentation set has a central index in `docs/README.md`. Functional changes are reviewed against README, CHANGELOG, ROADMAP, and every affected technical document in the same pull-request cycle. Release work additionally checks Build, Packaging, Release, Release Notes, Security, Privacy, and Dependencies for consistency.
 
-The complete documentation set was reviewed after publication of v0.9.1. Status-bearing documents were updated to the published state; technical documents whose runtime behavior did not change were left unchanged rather than receiving artificial edits.
+After publication of v0.9.2, status-bearing documents are synchronized to the published state. Technical documents whose runtime behavior did not change are left unchanged rather than receiving artificial edits.
 
 Authentic Windows screenshots remain a documentation follow-up and are never replaced with generated mockups presented as runtime evidence. Repository-owned branding and technical diagrams may be used while authentic runtime captures are not yet committed.
 
