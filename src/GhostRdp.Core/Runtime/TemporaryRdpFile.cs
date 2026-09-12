@@ -79,6 +79,11 @@ public sealed class TemporaryRdpFile : IDisposable
 
         foreach (var directory in directories)
         {
+            if (!IsOwnedSessionDirectory(directory))
+            {
+                continue;
+            }
+
             try
             {
                 var lastWrite = Directory.GetLastWriteTimeUtc(directory);
@@ -107,6 +112,14 @@ public sealed class TemporaryRdpFile : IDisposable
         }
 
         TryDeleteDirectory(SessionDirectory);
+    }
+
+    private static bool IsOwnedSessionDirectory(string path)
+    {
+        var directoryName = Path.GetFileName(path);
+        return !string.IsNullOrEmpty(directoryName)
+            && directoryName.Length == 32
+            && Guid.TryParseExact(directoryName, "N", out _);
     }
 
     private static string ResolveRootDirectory(string? rootDirectory)

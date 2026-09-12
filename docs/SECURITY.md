@@ -41,7 +41,8 @@ The generated file:
 - for RD Gateway, includes only the validated gateway hostname and documented routing/credential-source settings;
 - does not force target and gateway credentials to be shared;
 - is deleted after the Microsoft RDP process exits;
-- is eligible for stale-session cleanup after 24 hours if Ghost RDP terminates before normal cleanup.
+- is eligible for stale-session cleanup after 24 hours if Ghost RDP terminates before normal cleanup;
+- is cleaned up only from Ghost RDP-owned GUID session directories, while unrelated directories below the temp root are left untouched.
 
 ## Remote-access route boundary
 

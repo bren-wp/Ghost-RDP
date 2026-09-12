@@ -32,6 +32,8 @@ The 0.9.1 maintenance release focuses on visual correctness, accessibility, resp
 
 Implemented work includes deterministic WPF dark theming, project-owned text-field/dropdown templates, vector UI assets, saved-computer list recycling/virtualization, a short search debounce, deterministic query tests, selection preservation, cached favorite counts, and an enforced no-third-party-runtime-dependency policy.
 
+Post-release maintenance continues on the 0.9.1 line without a version bump where appropriate. The current hardening work scopes stale temporary `.rdp` cleanup to Ghost RDP-owned GUID session directories so unrelated directories below the temp root are never considered cleanup targets.
+
 The repository-owned `release-preflight.ps1` gate verifies App/Host/Setup version alignment on normal CI and, for release publication, additionally verifies finalized CHANGELOG/RELEASE-NOTES metadata plus the exact `release/v<version>` branch name.
 
 ## Documentation policy

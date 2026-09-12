@@ -2,6 +2,12 @@
 
 All notable user-facing changes to Ghost RDP are recorded here. Documentation is reviewed and synchronized with every functional change.
 
+## Unreleased
+
+### Security and stability
+
+- Stale temporary `.rdp` cleanup now considers only Ghost RDP-owned GUID session directories and leaves unrelated directories under the Ghost RDP temp root untouched.
+
 ## 0.9.1 - 2026-09-12
 
 UI/UX consistency, accessibility hardening, saved-computer responsiveness, stricter dependency policy, release-preflight validation, and documentation synchronization after the first production multi-architecture release.
