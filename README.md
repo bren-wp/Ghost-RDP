@@ -19,7 +19,7 @@ Latest production release: **0.9.1**, published from exact source commit `c0ec01
 ## Production features
 
 - Native WPF Windows client with saved computers, Quick Connect, search, favorites, sorting, Settings, and About views.
-- Schema-versioned local computer profiles with stable UUIDs and atomic replacement writes.
+- Schema-versioned local computer profiles with stable UUIDs, validated atomic replacement writes, a previous-valid-store backup, and explicit recovery when the primary store cannot be safely loaded.
 - Direct/LAN, existing private VPN/overlay, and Microsoft RD Gateway connection routes.
 - Safe `mstsc.exe` integration using validated temporary `.rdp` files, strict server authentication, CredSSP, structured process arguments, and no password field.
 - Windows-owned credential entry; Ghost RDP does not accept or pass the RDP or RD Gateway password.
@@ -47,7 +47,7 @@ Published assets include canonical `setup.exe` and `portable.exe`, architecture-
 
 The 0.9.1 maintenance release standardizes the App, Host, and Setup visual system around the same dark palette and Windows-native interaction model. Concrete WPF windows receive the intended application background and foreground deterministically, ordinary text has an explicit readable foreground, text fields and dropdowns use matching dark templates, and the sidebar uses lightweight vector navigation icons.
 
-The UI uses vector geometry rather than bitmap-heavy decoration, layout rounding/device-pixel snapping, practical hit targets, visible keyboard focus, and system High Contrast handling. See [UI and UX](docs/UI-UX.md) and [Accessibility](docs/ACCESSIBILITY.md).
+The UI uses vector geometry rather than bitmap-heavy decoration, layout rounding/device-pixel snapping, practical hit targets, visible keyboard focus, and system High Contrast handling. If the saved-computer primary store cannot be safely loaded but the previous validated backup is usable, the App offers a one-time explicit recovery choice after the window is shown; declining keeps saved-computer changes read-only. See [UI and UX](docs/UI-UX.md) and [Accessibility](docs/ACCESSIBILITY.md).
 
 ## Performance and memory behavior
 
@@ -67,6 +67,8 @@ Production releases are self-contained, so end users do not need a separately in
 
 Passwords are not part of saved computers, Quick Connect persistence, UI settings, generated `.rdp` files, or process command lines. Windows/Microsoft Remote Desktop owns target and RD Gateway credential prompts.
 
+Saved-computer writes validate the existing primary store before replacing it. The previous valid primary contents are retained locally as `computers.json.bak`; a normal Save refuses to overwrite an unreadable or unsupported current store. Explicit recovery validates the backup before use and preserves the unreadable primary under a unique `preserved-*` filename before restoring data.
+
 Stale temporary `.rdp` cleanup is scoped to Ghost RDP-owned GUID session directories and leaves unrelated directories below the Ghost RDP temp root untouched.
 
 Setup never takes ownership of an arbitrary existing `--path`: an existing target must match the registered Ghost RDP `InstallLocation`, a different second install target is rejected while an installation is registered, and both uninstall entry points independently revalidate the same registered target before recursive deletion.
@@ -75,7 +77,7 @@ Ghost RDP does not enable Remote Desktop, open firewall ports, configure UPnP or
 
 ## Privacy baseline
 
-There is no telemetry, analytics, advertising, fingerprinting, or central Ghost RDP relay carrying RDP traffic. Saved computers and UI preferences remain under the current Windows user's local application-data directory. Host diagnostics are read locally and are not uploaded. No third-party runtime telemetry/network SDK is included. See [Privacy](docs/PRIVACY.md).
+There is no telemetry, analytics, advertising, fingerprinting, or central Ghost RDP relay carrying RDP traffic. Saved computers, their local recovery backup, preserved unreadable recovery copies, and UI preferences remain under the current Windows user's local application-data directory. Host diagnostics are read locally and are not uploaded. No third-party runtime telemetry/network SDK is included. See [Privacy](docs/PRIVACY.md).
 
 ## Downloads
 

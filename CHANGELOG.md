@@ -10,6 +10,9 @@ All notable user-facing changes to Ghost RDP are recorded here. Documentation is
 - Setup now replaces an existing installation directory only when Windows Installed Apps identifies that exact canonical path as the registered Ghost RDP installation; an existing unregistered directory is never taken over.
 - Setup refuses a second install path while another Ghost RDP installation is registered, and both normal uninstall and the temporary uninstall helper independently reject targets that do not match the registered `InstallLocation`.
 - Installer smoke tests now preserve a foreign sentinel directory while exercising rejected install/uninstall/helper targets, accepted same-path reinstall/update, and the normal Windows uninstall lifecycle.
+- Saved-computer writes now validate the current primary store before replacement and retain its previous valid contents as `computers.json.bak`; a corrupt or unsupported current store is never silently overwritten by a normal profile save.
+- When the primary saved-computer store cannot be loaded and the backup validates successfully, Ghost RDP offers an explicit recovery choice after startup. Recovery validates the backup before use, preserves the unreadable primary file under a unique `preserved-*` name, and leaves the app read-only when recovery is declined or unavailable.
+- Core regression tests cover backup rotation, corrupt-primary write blocking, explicit restore, preservation of the unreadable source, corrupt-backup rejection, and rejection of rollback while the primary store is valid.
 
 ## 0.9.1 - 2026-09-12
 

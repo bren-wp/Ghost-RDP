@@ -24,6 +24,16 @@ Layout rounding and device-pixel snapping remain enabled for production windows.
 
 The interface avoids dense decorative chrome. Panels, borders, and spacing are used to communicate grouping and interaction hierarchy.
 
+## Saved-computer recovery UX
+
+A saved-computer load failure is treated as a data-integrity state, not as an empty list. The main App disables profile mutations and reports that the existing store will not be overwritten.
+
+If `computers.json.bak` exists and passes the same schema/profile validation as the primary store, the App offers one explicit Yes/No recovery dialog after the main window is rendered. The prompt identifies the local backup path and states that the unreadable primary will be preserved separately before restoration. Recovery is never started merely because a backup file exists.
+
+Choosing No leaves the current files untouched and the saved-computer store read-only for the running process. Choosing Yes invokes the Core recovery transaction; after a successful restore the in-memory list and favorite count are rebuilt from the validated recovered profiles and editing is re-enabled. The status text identifies the preserved original path when one was created. A recovery failure leaves editing disabled and reports the error without claiming success.
+
+The prompt is shown at most once per application process. This prevents a persistent corrupted store from causing repeated modal interruptions while still making a valid recovery path visible on the next launch.
+
 ## Performance and memory
 
 Ghost RDP does not use continuous UI polling, telemetry workers, an always-on Windows service, or a central network relay. Saved-computer `ListBox` controls enable WPF virtualization and recycling so off-screen rows can reuse item containers rather than keeping a full rendered row tree for every profile.
@@ -32,7 +42,7 @@ Saved-computer text search uses a 180 ms UI-thread debounce before applying filt
 
 The view restores the selected computer after refresh when that UUID remains visible and caches the favorites total instead of recounting the full collection on each view refresh. Filter and sort behavior is isolated in `ComputerProfileViewQuery`, a deterministic component covered by App tests.
 
-Vector icons are preferred to bitmap-heavy decoration. Runtime status and Host diagnostics are refreshed on explicit application actions rather than by an aggressive background timer.
+Vector icons are preferred to bitmap-heavy decoration. Runtime status, Host diagnostics, and saved-computer recovery availability are evaluated on explicit lifecycle/actions rather than by an aggressive background timer.
 
 Actual process memory depends on Windows, .NET, architecture, DPI, graphics state, and profile count. The project therefore validates behavior and avoids unnecessary allocations rather than claiming a fixed RAM number.
 
@@ -40,7 +50,7 @@ Actual process memory depends on Windows, .NET, architecture, DPI, graphics stat
 
 Keyboard focus remains visible, access keys remain available, important controls keep UI Automation names, and status updates use text in addition to color. Windows High Contrast continues to map application semantic brushes to system colors instead of disabling the user's accessibility setting.
 
-Search debounce does not remove focus from the text field. Selection is restored only when the same computer remains visible, avoiding an unexpected selection change.
+Search debounce does not remove focus from the text field. Selection is restored only when the same computer remains visible, avoiding an unexpected selection change. The recovery prompt uses standard Windows dialog semantics and explicit text rather than color-only status.
 
 ## Runtime dependency policy
 
