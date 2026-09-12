@@ -16,6 +16,15 @@ Security, data-preservation, and installer-ownership hardening for the current m
 - When the primary saved-computer store cannot be loaded and the backup validates successfully, Ghost RDP offers an explicit recovery choice after startup. Recovery validates the backup before use, preserves the unreadable primary file under a unique `preserved-*` name, and leaves the app read-only when recovery is declined or unavailable.
 - Core regression tests cover backup rotation, corrupt-primary write blocking, explicit restore, preservation of the unreadable source, corrupt-backup rejection, and rejection of rollback while the primary store is valid.
 
+### Release verification
+
+- GitHub Release `v0.9.2` was published from exact source commit `96936fce056db87b1fc43f07e9500111a8e3b851` by Publish Release workflow run `34664726865`; tag `v0.9.2` resolves to the same commit and the release is neither a draft nor a prerelease.
+- x86 and x64 passed release metadata/branch preflight, security/runtime-dependency checks, package validation, runtime self-tests, real Setup install/uninstall smoke tests, and artifact upload on the initial release attempt.
+- The first native ARM64 attempt encountered a hosted-runner `.NET` bootstrap CLR failure before Ghost RDP preflight or code execution; the ARM64 retry on the same release SHA passed the complete release chain.
+- The final publish job downloaded all three architecture packages, assembled and validated the combined release, read version 0.9.2, and published the GitHub Release.
+- Published assets include canonical `setup.exe` and `portable.exe`, architecture-specific Setup/Portable/Host executables, x86/x64/ARM64 Portable ZIPs, `LICENSE.txt`, `RELEASE-MANIFEST.json`, and `SHA256SUMS.txt`.
+- GitHub records SHA-256 digests for uploaded assets; packages remain unsigned until an authorized Authenticode signing mechanism is configured.
+
 ## 0.9.1 - 2026-09-12
 
 UI/UX consistency, accessibility hardening, saved-computer responsiveness, stricter dependency policy, release-preflight validation, and documentation synchronization after the first production multi-architecture release.

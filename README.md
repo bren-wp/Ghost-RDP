@@ -6,11 +6,11 @@
 
 **Private remote desktop management for computers you control.**
 
-[Windows 10/11](docs/WINDOWS.md) · [.NET 8](docs/BUILD.md) · [CI](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml) · [Latest production release v0.9.1](https://github.com/bren-wp/Ghost-RDP/releases/tag/v0.9.1) · [Privacy: no telemetry](docs/PRIVACY.md)
+[Windows 10/11](docs/WINDOWS.md) · [.NET 8](docs/BUILD.md) · [CI](https://github.com/bren-wp/Ghost-RDP/actions/workflows/ci.yml) · [Latest production release v0.9.2](https://github.com/bren-wp/Ghost-RDP/releases/tag/v0.9.2) · [Privacy: no telemetry](docs/PRIVACY.md)
 
 Ghost RDP is a Windows-first desktop application for managing Microsoft Remote Desktop connections to computers the user controls. It is built around explicit user actions, Windows security boundaries, local persistence, accessibility, low background activity, and a no-telemetry privacy baseline.
 
-Latest production release: **0.9.1**, published from exact source commit `c0ec01cf286ac422c0f2c41db1b456a2b0e62ca3` after the guarded x86/x64/ARM64 release workflow completed successfully.
+Latest production release: **0.9.2**, published from exact source commit `96936fce056db87b1fc43f07e9500111a8e3b851` by Publish Release workflow run `34664726865` after the guarded x86/x64/native ARM64 release workflow completed successfully.
 
 <p align="center">
   <img src="assets/ghost-rdp-ui-overview.svg" alt="Ghost RDP interface and runtime overview" width="1000" />
@@ -35,21 +35,17 @@ Latest production release: **0.9.1**, published from exact source commit `c0ec01
 - Automated GitHub Release publishing only after all architecture jobs pass for the exact release commit.
 - Repository-owned release preflight that validates production-project version alignment, finalized release metadata, and the exact `release/v<version>` branch before publication.
 
-## 0.9.2 release preparation
+## 0.9.2 release verification
 
-Ghost RDP **0.9.2** is the next patch release being prepared from the validated post-0.9.1 hardening line. It packages scoped temporary `.rdp` cleanup ownership, Setup installation/uninstall target ownership, and saved-computer backup/recovery protection. It is not considered the current published production release until the exact `release/v0.9.2` branch passes every x86/x64/ARM64 publication gate and GitHub Release `v0.9.2` is verified.
+The `v0.9.2` GitHub Release was produced from exact commit `96936fce056db87b1fc43f07e9500111a8e3b851` by Publish Release workflow run `34664726865`. The release is neither a draft nor a prerelease, and tag `v0.9.2` resolves to the same source commit.
 
-## 0.9.1 release verification
+x86 and x64 completed release metadata/branch preflight, security/runtime-dependency checks, package validation, runtime self-tests, and real Setup install/uninstall smoke tests on the first release attempt. The first native ARM64 job encountered a hosted-runner `.NET` bootstrap `Internal CLR error` before Ghost RDP preflight or code execution; the job was rerun on the same release SHA and then passed the complete native ARM64 release chain. The final publish job downloaded all three architecture packages, assembled and validated the combined release, read version 0.9.2, and published the GitHub Release.
 
-The `v0.9.1` GitHub Release was produced from commit `c0ec01cf286ac422c0f2c41db1b456a2b0e62ca3` by Publish Release workflow run `34659493897`. The release is neither a draft nor a prerelease.
-
-Before publication, x86, x64, and native ARM64 jobs each passed release metadata/branch preflight, security/runtime-dependency checks, package build/validation, runtime self-tests, and real Setup install/uninstall smoke tests. The final publish job then assembled and validated the combined release before creating the GitHub Release.
-
-Published assets include canonical `setup.exe` and `portable.exe`, architecture-specific Setup/Portable/Host executables, x86/x64/ARM64 Portable ZIPs, `LICENSE.txt`, `RELEASE-MANIFEST.json`, and `SHA256SUMS.txt`. GitHub also records SHA-256 digests for uploaded release assets.
+Published assets include canonical `setup.exe` and `portable.exe`, architecture-specific Setup/Portable/Host executables, x86/x64/ARM64 Portable ZIPs, `LICENSE.txt`, `RELEASE-MANIFEST.json`, and `SHA256SUMS.txt`. GitHub records SHA-256 digests for uploaded release assets.
 
 ## UI and UX
 
-The 0.9.1 maintenance release standardizes the App, Host, and Setup visual system around the same dark palette and Windows-native interaction model. Concrete WPF windows receive the intended application background and foreground deterministically, ordinary text has an explicit readable foreground, text fields and dropdowns use matching dark templates, and the sidebar uses lightweight vector navigation icons.
+The 0.9.1 maintenance release standardized the App, Host, and Setup visual system around the same dark palette and Windows-native interaction model. Concrete WPF windows receive the intended application background and foreground deterministically, ordinary text has an explicit readable foreground, text fields and dropdowns use matching dark templates, and the sidebar uses lightweight vector navigation icons.
 
 The UI uses vector geometry rather than bitmap-heavy decoration, layout rounding/device-pixel snapping, practical hit targets, visible keyboard focus, and system High Contrast handling. If the saved-computer primary store cannot be safely loaded but the previous validated backup is usable, the App offers a one-time explicit recovery choice after the window is shown; declining keeps saved-computer changes read-only. See [UI and UX](docs/UI-UX.md) and [Accessibility](docs/ACCESSIBILITY.md).
 
@@ -85,7 +81,7 @@ There is no telemetry, analytics, advertising, fingerprinting, or central Ghost 
 
 ## Downloads
 
-The current production release is [Ghost RDP v0.9.1](https://github.com/bren-wp/Ghost-RDP/releases/tag/v0.9.1). It provides:
+The current production release is [Ghost RDP v0.9.2](https://github.com/bren-wp/Ghost-RDP/releases/tag/v0.9.2). It provides:
 
 - `setup.exe` — x86/32-bit compatibility Setup;
 - `portable.exe` — x86/32-bit compatibility Portable client;
@@ -137,7 +133,7 @@ Runtime screenshots are accepted only when captured from a real validated Ghost 
 
 ## Signing
 
-Current 0.9.1 packages are unsigned. Authenticode signing will be added only when an authorized signing certificate or signing service is configured. The project never claims signing that has not been produced and verified.
+Current 0.9.2 packages are unsigned. Authenticode signing will be added only when an authorized signing certificate or signing service is configured. The project never claims signing that has not been produced and verified.
 
 ## License
 
